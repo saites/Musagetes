@@ -1,0 +1,40 @@
+﻿<Window x:Class="DatyMaker.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525">
+    <DockPanel> 
+        <DockPanel DockPanel.Dock="Top">
+            <TextBlock Text="SongTitle: "/>
+            <TextBox/>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <TextBlock Text="PrimaryArtist: "/>
+            <TextBox/>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <TextBlock Text="Seconds: "/>
+            <TextBox/>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <TextBlock Text="Location: "/>
+            <TextBox/>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <TextBlock Text="BMP: "/>
+            <TextBox/>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <TextBlock Text="BMPGuess: "/>
+            <TextBox/>
+        </DockPanel>
+        <Button DockPanel.Dock="Top"> 
+            <TextBlock Text="Add"/>
+        </Button>
+        <Button DockPanel.Dock="Top"> 
+            <TextBlock Text="Remove"/>
+        </Button>
+        <DataGrid DockPanel.Dock="Bottom">
+            
+        </DataGrid>
+    </DockPanel>
+</Window>

@@ -1,0 +1,27 @@
+﻿<Window x:Class="Musagetes.CategoryDisplayOptions"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:musagetes="clr-namespace:Musagetes"
+        Title="CategoryDisplayOptions" Height="300" Width="300">
+    <Window.Resources>
+        <musagetes:VisibilityToBooleanConverter x:Key="V2B"/>
+    </Window.Resources>
+    <Grid>
+        <ListBox 
+             ItemsSource ="{Binding Columns, Mode=OneWay}"
+             SelectedItem="{Binding SelectedCategory}"
+             Margin="5">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox IsChecked="{Binding Visibility, Converter={StaticResource V2B}}" Margin="3"/>
+                        <TextBlock Text="{Binding Header}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+            <ListBox.InputBindings>
+                <KeyBinding Key="Enter" Command="{Binding ToggleCmd}"/>
+            </ListBox.InputBindings>
+        </ListBox>
+    </Grid>
+</Window>

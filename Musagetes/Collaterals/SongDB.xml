@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<MusagetesSongDb>
+  <CategoryTags>
+    <Category name="Artist">
+      <Tag id="1" name="Brad Paisley" />
+      <Tag id="2" name="Kenny Chesney" />
+    </Category>
+    <Category name="Genre">
+      <Tag id="3" name="Country" />
+      <Tag id="4" name="Rock" />
+    </Category>
+    <Category name="MusagetesSpecialReserved">
+      <Tag id="5" name="Good" />
+    </Category>
+  </CategoryTags>
+  <Songs>
+    <Song>
+      <SongTitle>Mud on the Tires</SongTitle>
+      <Location>E:\Music\Brad Paisley\Brad Paisley - Mud on The Tires\Brad Paisley - 01 - Mud On The Tires.mp3</Location>
+      <Seconds>140</Seconds>
+      <BPM Guess="False">140</BPM>
+      <Tags>
+        <Tag>1</Tag>
+        <Tag>3</Tag>
+        <Tag>5</Tag>
+      </Tags>
+    </Song>
+    <Song>
+      <SongTitle>Throttleneck</SongTitle>
+      <Location>E:\Music\Brad Paisley\Brad Paisley - 5th Gear\16-brad_paisley-throttleneck.mp3</Location>
+      <Seconds>1</Seconds>
+      <BPM Guess="True">1</BPM>
+      <Tags>
+        <Tag>1</Tag>
+        <Tag>3</Tag>
+      </Tags>
+    </Song>
+    <Song>
+      <SongTitle>When We All Get To Heaven</SongTitle>
+      <Location>E:\Music\Brad Paisley\Brad Paisley - 5th Gear\15-brad_paisley-when_we_all_get_to_heaven.mp3</Location>
+      <Seconds>1</Seconds>
+      <BPM Guess="True">1</BPM>
+      <Tags>
+        <Tag>1</Tag>
+        <Tag>4</Tag>
+        <Tag>2</Tag>
+      </Tags>
+    </Song>
+  </Songs>
+</MusagetesSongDb>
