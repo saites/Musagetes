@@ -40,8 +40,8 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
-                    PlaybackState = PlaybackState == Pcb.Playback.Play 
-                        ? Pcb.Playback.Pause 
+                    PlaybackState = PlaybackState == Pcb.Playback.Play
+                        ? Pcb.Playback.Pause
                         : Pcb.Playback.Play;
                 });
             }
@@ -87,20 +87,14 @@ namespace Musagetes
             lock ((App.SongDb.Songs as ICollection).SyncRoot)
             {
                 DisplayedSongs = new ListCollectionView(App.SongDb.Songs);
-                DisplayedSongs.GroupDescriptions.Add(
-                    new PropertyGroupDescription("Seconds"));
             }
 
-            GroupCategoriesCollectionChanged(null, null);
             lock ((App.SongDb.GroupCategories as ICollection).SyncRoot)
             {
-                foreach (var cat in App.SongDb.GroupCategories)
-                    DisplayedSongs.GroupDescriptions.Add(
-                        new PropertyGroupDescription(
-                        string.Format(Constants.CategoryTagsBinding, 
-                        cat.CategoryName)));
+                AddGroupDescriptions(App.SongDb.GroupCategories);
                 App.SongDb.GroupCategories.CollectionChanged +=
                     GroupCategoriesCollectionChanged;
+                lock (_displayedSongs) DisplayedSongs.Refresh();
             }
 
             lock ((App.SongDb.Columns as ICollection).SyncRoot)
@@ -160,11 +154,44 @@ namespace Musagetes
 
         private void GroupCategoriesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            if (DisplayedSongs == null || DisplayedSongs.GroupDescriptions == null) return;
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems == null) return;
+                    AddGroupDescriptions(e.NewItems.Cast<Category>());
+                    break;
+                case NotifyCollectionChangedAction.Move:
+                    if (e.NewItems == null || e.OldItems == null) return;
+                    lock (_displayedSongs)
+                        DisplayedSongs.GroupDescriptions.
+                            Move(e.OldStartingIndex, e.NewStartingIndex);
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    if (e.NewItems == null || e.OldItems == null) return;
+                    lock (_displayedSongs)
+                    {
+                        foreach (Category cat in e.OldItems)
+                            DisplayedSongs.GroupDescriptions
+                                .Remove(_groupDescriptionDictionary[cat]);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    lock (_displayedSongs)
+                        DisplayedSongs.GroupDescriptions.Clear();
+                    if (e.NewItems == null) return;
+                    AddGroupDescriptions(e.NewItems.Cast<Category>());
+                    break;
+            }
+            lock (_displayedSongs) DisplayedSongs.Refresh();
+        }
+
+        private void AddGroupDescriptions(IEnumerable<Category> categories)
+        {
             lock (_displayedSongs)
             {
                 if (DisplayedSongs == null || DisplayedSongs.GroupDescriptions == null) return;
-                DisplayedSongs.GroupDescriptions.Clear();
-                foreach (var cat in App.SongDb.GroupCategories)
+                foreach (var cat in categories)
                 {
                     var groupDesc = new PropertyGroupDescription(
                         string.Format(Constants.CategoryTagsBinding, cat.CategoryName));
@@ -174,7 +201,6 @@ namespace Musagetes
                         _groupDescriptionDictionary.Add(cat, groupDesc);
                     }
                 }
-                DisplayedSongs.Refresh();
             }
         }
 

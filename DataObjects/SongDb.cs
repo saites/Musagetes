@@ -52,12 +52,14 @@ namespace Musagetes.DataObjects
         private readonly IDbReaderWriter _dataAccess;
         public SongDb(IDbReaderWriter dataAccess)
         {
-            Columns = new ObservableCollection<GridColumn>();
-            Columns.Add(new GridColumn(header: "Title", binding: "SongTitle"));
-            Columns.Add(new GridColumn(header: "Location", binding: "Location"));
-            Columns.Add(new GridColumn(header: "Length", binding: "Length"));
-            Columns.Add(new GridColumn(header: "BPM", columnType: GridColumn.ColumnTypeEnum.Bpm));
-            Columns.Add(new GridColumn(header: "Tags", binding: "SongTags"));
+            Columns = new ObservableCollection<GridColumn>
+            {
+                new GridColumn(header: "Title", binding: "SongTitle"),
+                new GridColumn(header: "Location", binding: "Location"),
+                new GridColumn(header: "Length", binding: "Length"),
+                new GridColumn(header: "BPM", columnType: GridColumn.ColumnTypeEnum.Bpm),
+                new GridColumn(header: "Tags", binding: "SongTags")
+            };
 
             _dataAccess = dataAccess;
             _categories = new ObservableCollection<Category>();
