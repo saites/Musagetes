@@ -8,7 +8,7 @@ namespace Musagetes.DataAccess
 {
     public class SongDbReader
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public string Filename { get; private set; }
         public SongDb SongDb { get; private set; }
 
@@ -24,104 +24,170 @@ namespace Musagetes.DataAccess
             {
                 Async = true,
                 IgnoreComments = true,
-                //IgnoreWhitespace = true
+                IgnoreWhitespace = true
             };
 
             try
             {
-                _logger.Debug("Attempting to create XML read and read file");
+                Logger.Debug("Attempting to create XML reader and read file");
                 using (var reader = XmlReader.Create(Filename, settings))
                 {
-                    await ReadToStringAsync(reader, "MusagetesSongDb");
-                    await ReadToStringAsync(reader, "CategoryTags");
-                    if (!reader.IsEmptyElement) await ReadCategoryTagsAsync(reader);
+                    Logger.Debug("Looking for MusagetesSongDb element");
+                    await reader.ReadAsync();
+                    await reader.ReadAsync();
+                    reader.ConfirmElement("MusagetesSongDb");
+                    await reader.ReadAsync();
+
+                    Logger.Debug("Looking for CategoryTags element");
+                    reader.ConfirmElement("CategoryTags");
+                    if (reader.IsEmptyElement)
+                    {
+                        Logger.Debug("CategoryTags is empty");
+                        await reader.ReadAsync();
+                    }
+                    else
+                    {
+                        reader.ConfirmElement("CategoryTags");
+                        await ReadCategoryTagsAsync(reader);
+                        reader.ReadEndElement();
+                    }
                     SongDb.CategoriesRead.Set();
-                    await ReadToStringAsync(reader, "Songs");
-                    if (!reader.IsEmptyElement) await ReadSongsAsync(reader);
+
+                    Logger.Debug("Looking for Songs element");
+                    reader.ConfirmElement("Songs");
+                    if (reader.IsEmptyElement)
+                        Logger.Debug("Songs is empty");
+                    else
+                        await ReadSongsAsync(reader);
                 }
-                _logger.Debug("Done reading XML");
+                Logger.Debug("Done reading XML");
             }
             catch(Exception e)
             {
-                _logger.Error("Unabled to read XML: {0}", e.Message);
-                _logger.Error("Stack: {0}", e.StackTrace);
+                Logger.Error("Unabled to read XML: {0}", e.Message);
+                Logger.Error("Stack: {0}", e.StackTrace);
             }
         }
 
+        
+
         private async Task ReadSongsAsync(XmlReader reader)
         {
-            await ReadToStringAsync(reader, "Song");
-            do
+            await reader.ReadAsync();
+            while (reader.LocalName.Equals("Song"))
             {
-                _logger.Debug("Reading a song");
-                await ReadToStringAsync(reader, "SongTitle");
-                var title = await reader.ReadElementContentAsStringAsync();
-                await ReadToStringAsync(reader, "Location");
-                var location = await reader.ReadElementContentAsStringAsync();
-                await ReadToStringAsync(reader, "Seconds");
-                var seconds = (Int32)await reader.ReadElementContentAsAsync(typeof(Int32), null);
-                await ReadToStringAsync(reader, "BPM");
+                Logger.Debug("Reading a song");
+                if (reader.IsEmptyElement)
+                {
+                    Logger.Debug("Song element is empty");
+                    await reader.ReadAsync();
+                    continue;
+                }
+
+                await reader.ReadAsync();
+                if (reader.IsEndElement("Song"))
+                {
+                    Logger.Debug("Song element is followed by end element");
+                    reader.ReadEndElement();
+                    continue;
+                }
+
+                reader.ConfirmElement("SongTitle");
+                var title = await reader.TryGetContentAsync();
+
+                reader.ConfirmElement("Location");
+                var location = await reader.TryGetContentAsync();
+
+                reader.ConfirmElement("Seconds");
+                long seconds;
+                if(!long.TryParse(await reader.TryGetContentAsync(), out seconds))
+                    Logger.Error("Song {0} has a missing or unreadable timespan", title);
+
+                reader.ConfirmElement("BPM");
                 var guess = Convert.ToBoolean(reader.GetAttribute("Guess"));
-                var bpmValue = (Int32)await reader.ReadElementContentAsAsync(typeof(Int32), null);
+                Int32 bpmValue;
+                if(!Int32.TryParse(await reader.TryGetContentAsync(), out bpmValue)); 
+                    Logger.Error("Song {0} has a missing or unreadable BPM value", title);
 
                 var song = new Song(title, location, seconds, new BPM(bpmValue, guess), SongDb);
                 SongDb.AddSong(song);
 
-                await ReadToStringAsync(reader, "Tags");
-                if (!reader.IsEmptyElement) await ReadSongTagsAsync(reader, song);
+                reader.ConfirmElement("Tags");
+                if (reader.IsEmptyElement)
+                {
+                    await reader.ReadAsync();
+                }
+                else
+                {
+                    await ReadSongTagsAsync(reader, song);
+                    reader.ReadEndElement();
+                }
 
-                await reader.ReadAsync();
-                await reader.ReadAsync();
-                await reader.ReadAsync();
-                await reader.ReadAsync();
-            } while (reader.LocalName.Equals("Song"));
+                reader.ReadEndElement();
+            } 
         }
 
         private async Task ReadSongTagsAsync(XmlReader reader, Song song)
         {
-            await ReadToStringAsync(reader, "Tag");
-            do
+            await reader.ReadAsync();
+            while (reader.LocalName.Equals("Tag"))
             {
-                var id = (Int32)await reader.ReadElementContentAsAsync(typeof(Int32), null);
-                song.TagSong(SongDb.TagIds[id]);
-                await reader.ReadAsync();
-            } while (reader.LocalName.Equals("Tag"));
+                Int32 id;
+                if (!Int32.TryParse(await reader.TryGetContentAsync(), out id))
+                {
+                    Logger.Error("Song {0} has empty or unreadable tag id", song.SongTitle);
+                    continue;
+                }
+                if (SongDb.TagIds.ContainsKey(id))
+                    song.TagSong(SongDb.TagIds[id]);
+                else
+                    Logger.Error("Song {0} trying to add missing tag id {1}", song.SongTitle, id);
+            } 
         }
 
         private async Task ReadCategoryTagsAsync(XmlReader reader)
         {
-            await ReadToStringAsync(reader, "Category");
-            do
+            await reader.ReadAsync();
+            while (reader.LocalName.Equals("Category"))
             {
                 var cat = new Category(reader.GetAttribute("name"));
-                await reader.ReadAsync();
-                if (!reader.IsEmptyElement)
+                Logger.Debug("Reading category {0}", cat.CategoryName);
+                if (reader.IsEmptyElement)
+                {
+                    Logger.Debug("Category element is empty");
                     await ReadTagsAsync(reader, cat);
+                    continue;
+                }
+
+                await ReadTagsAsync(reader, cat);
                 SongDb.AddCategory(cat);
-                await reader.ReadAsync();
-                await reader.ReadAsync();
-            } while (reader.LocalName.Equals("Category"));
+                reader.ReadEndElement();
+            } 
         }
 
         private async Task ReadTagsAsync(XmlReader reader, Category cat)
         {
-            await ReadToStringAsync(reader, "Tag");
-            do
+            await reader.ReadAsync();
+            while (reader.LocalName.Equals("Tag"))
             {
-                var id = Convert.ToInt32(reader.GetAttribute("id"));
+                Logger.Debug("Reading tag");
+
+                Int32 id;
+                if (!Int32.TryParse(reader.GetAttribute("id"), out id))
+                {
+                    Logger.Debug("Could not read tag id");
+                    await reader.ReadAsync();
+                    continue;
+                }
+
                 var name = reader.GetAttribute("name");
                 var t = new Tag(name, cat, id);
                 SongDb.AddTag(t);
-                await reader.ReadAsync();
-                await reader.ReadAsync();
-            } while (reader.LocalName.Equals("Tag"));
-        }
 
-        private async Task ReadToStringAsync(XmlReader reader, string s)
-        {
-            while (reader.LocalName != s)
-                if (!(await reader.ReadAsync()))
-                    throw new FormatException("Invalid XML Format");
+                if (!reader.IsEmptyElement)
+                    await reader.ReadAsync();
+                await reader.ReadAsync();
+            } 
         }
     }
 }
