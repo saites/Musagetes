@@ -2,13 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 
 namespace Musagetes.DataObjects
 {
@@ -20,7 +17,7 @@ namespace Musagetes.DataObjects
         public ReadOnlyObservableCollection<Song> Songs { get { return _songsReadOnly; } }
         public ReadOnlyDictionary<string, Category> CategoryDictionary { get { return _categoryDictionaryReadOnly; } }
         public ReadOnlyDictionary<int, Tag> TagIds { get { return _tagIdsReadOnly; } }
-        public AutoResetEvent CategoriesRead { get; private set; }
+        public ManualResetEvent CategoriesRead { get; private set; }
 
         private readonly ObservableCollection<Song> _songs;
         private readonly ReadOnlyObservableCollection<Song> _songsReadOnly;
@@ -61,6 +58,7 @@ namespace Musagetes.DataObjects
                 new GridColumn(header: "Tags", binding: "SongTags")
             };
 
+
             _dataAccess = dataAccess;
             _categories = new ObservableCollection<Category>();
             _categoriesReadOnly = new ReadOnlyObservableCollection<Category>(_categories);
@@ -71,9 +69,10 @@ namespace Musagetes.DataObjects
                 new ReadOnlyDictionary<string, Category>(_categoryDictionary);
             _tagIds = new Dictionary<int, Tag>();
             _tagIdsReadOnly = new ReadOnlyDictionary<int, Tag>(_tagIds);
-
             _groupCategories = new OrderedObservableCollection<Category>();
-            CategoriesRead = new AutoResetEvent(false);
+
+            CategoriesRead = new ManualResetEvent(false);
+            AddDefaultCategories();
         }
 
         public bool AddSong(Song s)
@@ -139,7 +138,7 @@ namespace Musagetes.DataObjects
         {
             AddCategory(new Category(Constants.Artist));
             AddCategory(new Category(Constants.Album));
-            //AddCategory(new Category(Constants.Genre));
+            AddCategory(new Category(Constants.Genre));
             AddCategory(new Category(Constants.Uncategorized));
         }
 
@@ -156,6 +155,7 @@ namespace Musagetes.DataObjects
 
         public void InsertFromFile(string filename)
         {
+            CategoriesRead.WaitOne();
             try
             {
                 if (!File.Exists(filename)) return;
@@ -163,7 +163,7 @@ namespace Musagetes.DataObjects
                 using (var file = TagLib.File.Create(filename))
                 {
                     Song song = new Song(file.Tag.Title, filename,
-                        1, new BPM(0, false), this);
+                        (long)file.Properties.Duration.TotalMilliseconds, new BPM(0, false), this);
                     AddBaseTags(song, ArtistCategory, file.Tag.AlbumArtists);
                     AddBaseTags(song, GenreCategory, file.Tag.Genres);
                     if (file.Tag.Album != null)
@@ -193,6 +193,13 @@ namespace Musagetes.DataObjects
             {
                 song.TagSong(tag);
             }
+        }
+
+        public bool IsFiletypeSupported(string filename)
+        {
+            return Constants.SupportedFileTypes
+                .Any(ext => filename.EndsWith(ext, 
+                    StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }

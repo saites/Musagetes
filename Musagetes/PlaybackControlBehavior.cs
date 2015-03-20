@@ -6,6 +6,30 @@ namespace Musagetes
 {
     public class PlaybackControlBehavior
     {
+        public static readonly DependencyProperty MillisecondsProperty =
+            DependencyProperty.RegisterAttached("Milliseconds",
+                typeof(int), typeof(PlaybackControlBehavior),
+                new UIPropertyMetadata(0, MillisecondsPropertyChanged));
+
+        private static void MillisecondsPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var media = d as MediaElement;
+            if (media == null) return;
+            if (!(e.NewValue is int)) return;
+            var milliseconds = (int)e.NewValue;
+            media.Position = new TimeSpan(0, 0, 0, 0, milliseconds);
+        }
+
+        public static void SetMilliseconds(DependencyObject d, int value)
+        {
+            d.SetValue(MillisecondsProperty, value);
+        }
+
+        public static int GetMilliseconds(DependencyObject d)
+        {
+            return (int)d.GetValue(MillisecondsProperty);
+        }
+
         public enum Playback
         {
             Play,

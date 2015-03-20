@@ -16,6 +16,7 @@
                 <MenuItem x:Name="AddDirMenuItem" Header="Add Directory" Command="{Binding AddDirCmd}"/>
                 <MenuItem x:Name="SaveMenuItem" Header="Save Database" Command="{Binding SaveCmd}"/>
                 <MenuItem x:Name="QuitMenuItem" Header="Quit" Command="{Binding QuitCmd}"/>
+                <MenuItem x:Name="UpdateMenutItem" Header="Update" Command="{Binding UpdateCmd}"/>
             </MenuItem>
             <MenuItem x:Name="TagMenu" Header="Tags">
                 <MenuItem Header="Edit Tags..." Command="{Binding EditTagsCmd}"/>
@@ -23,7 +24,7 @@
                 <MenuItem Header="Change Category Display..." Command="{Binding ChangeGroupingCmd}"/>
             </MenuItem>
         </Menu>
-        <Grid DockPanel.Dock="Bottom">
+        <Grid x:Name="PlaybackControls"  DockPanel.Dock="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -32,9 +33,13 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" Content="Play/Pause" Command="{Binding PlayCmd}"/>
-            <Slider Grid.Column="1" Value="{Binding Volumn}"></Slider>
+            <Slider x:Name="VolumeSlider" Grid.Column="1" 
+                    Maximum="1" Minimum="0" Value=".5" SmallChange="0.01" LargeChange=".1" />
             <Button Grid.Column="2" Content="Prev" Command="{Binding StopCmd}"/>
-            <Slider Grid.Column="3" Value="{Binding Position}"></Slider>
+            <Slider x:Name="PositionSlider"  Grid.Column="3" 
+                    Maximum="{Binding SelectedSong.Milliseconds}" Minimum="0" 
+
+                    Value="{Binding ElementName=Media, Path=Position.TotalMilliseconds, Mode=OneWay}"/>
             <Button Grid.Column="4" Content="Next" Command="{Binding StopCmd}"/>
         </Grid>
         <Grid DockPanel.Dock="Right" Width="141" Margin="5">
@@ -92,6 +97,8 @@
                       Source="{Binding SelectedSong.Location}"
                       LoadedBehavior="Manual"
                       local:PlaybackControlBehavior.PlaybackState="{Binding PlaybackState}"
+                      Volume="{Binding ElementName=VolumeSlider, Path=Value}"
+                      local:PlaybackControlBehavior.Milliseconds="{Binding CurrentTime, Mode=TwoWay}"
                       />
         <local:WpfDataGrid DockPanel.Dock="Right" 
                   ItemsSource="{Binding DisplayedSongs, IsAsync=True}" 

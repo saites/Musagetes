@@ -21,12 +21,23 @@ namespace Musagetes
 {
     class MainWindowVm : INotifyPropertyChanged
     {
+        private long _currentTime;
+
+        public long CurrentTime
+        {
+            get { return _currentTime; }
+            set
+            {
+                _currentTime = value;
+                OnPropertyChanged();
+            }
+        }
         ObservableCollection<Song> _songQueue;
         ListCollectionView _displayedSongs;
         private Song _currentSong;
         public Song CurrentSong
         {
-            get { return SelectedSong; }
+            get { return _currentSong; }
             set
             {
                 _currentSong = value;
@@ -293,12 +304,7 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
-                    //OnPropertyChanged("DisplayedSongs");
-                    /*
-                    var w = _mainWindow.SongList.Columns[0].Width;
-                    _mainWindow.SongList.Columns[0].Width = 0;
-                    _mainWindow.SongList.Columns[0].Width = w;
-                    */
+                    App.SongDb.GroupCategories.Add(App.SongDb.CategoryDictionary["Artist"]);
                 });
             }
         }
@@ -361,12 +367,11 @@ namespace Musagetes
         private async Task AddDirAndFiles(string dir)
         {
             Console.WriteLine(dir);
-            foreach (var filename in
-                Directory.GetFiles(dir).Where(filename => filename.EndsWith(Constants.Mp3Ext)))
+            foreach (var filename in Directory.GetFiles(dir)
+                .Where(filename => App.SongDb.IsFiletypeSupported(filename)))
             {
                 Console.WriteLine(filename);
                 App.SongDb.InsertFromFile(filename);
-                //DatabaseContext.InsertFromFile(fileName);
             }
 
             foreach (var subdir in Directory.EnumerateDirectories(dir))
@@ -376,7 +381,6 @@ namespace Musagetes
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

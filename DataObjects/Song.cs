@@ -10,7 +10,13 @@ namespace Musagetes.DataObjects
     public class Song : INotifyPropertyChanged
     {
         public string SongTitle { get; set; }
-        public int Seconds { get; set; }
+
+        public long Seconds
+        {
+            get { return Milliseconds/1000;}
+            set { Milliseconds = value*1000; }
+        }
+        public long Milliseconds { get; set; }
         public string Location { get; set; }
         public BPM Bpm { get; set; }
         public CategoryTag CategoryTags { get; set; }
@@ -18,14 +24,6 @@ namespace Musagetes.DataObjects
         public IEnumerable<Tag> Tags
         {
             get { return _categoryToTag.Values.SelectMany(tagSet => tagSet); }
-        }
-
-        public Uri Uri
-        {
-            get
-            {
-                return new Uri(@"C:\Users\ajsaites\Documents\Mine\Musagetes\Musagetes\Collaterals\Big Giant Circles - Extreme Road Trip 2 Soundtrack - 04 Extreme Road Trip - In the Zone (alternate unused version).mp3");
-            }
         }
 
         public override string ToString()
@@ -85,11 +83,11 @@ namespace Musagetes.DataObjects
             }
         }
 
-        public Song(string title, string location, int seconds, BPM bpm, SongDb songDb)
+        public Song(string title, string location, long milliseconds, BPM bpm, SongDb songDb)
         {
             SongTitle = title;
             Location = location;
-            Seconds = seconds;
+            Milliseconds = milliseconds;
             Bpm = bpm;
             SongDb = songDb;
             CategoryTags = new CategoryTag(this);

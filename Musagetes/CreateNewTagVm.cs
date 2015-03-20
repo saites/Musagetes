@@ -26,8 +26,7 @@ namespace Musagetes
 
         public CreateNewTagVm(string tagName, string catName)
         {
-            CategoryList = App.SongDb.Categories.Where(c => c !=
-                App.SongDb.CategoryDictionary[Constants.SpecialReserved]);
+            CategoryList = App.SongDb.Categories;
             CanCreateNewTag = false;
             CategoryName = catName.Trim();
             TagName = tagName.Trim();
