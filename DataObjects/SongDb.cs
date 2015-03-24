@@ -49,15 +49,7 @@ namespace Musagetes.DataObjects
         private readonly IDbReaderWriter _dataAccess;
         public SongDb(IDbReaderWriter dataAccess)
         {
-            Columns = new ObservableCollection<GridColumn>
-            {
-                new GridColumn(header: "Title", binding: "SongTitle"),
-                new GridColumn(header: "Location", binding: "Location"),
-                new GridColumn(header: "Length", binding: "Length"),
-                new GridColumn(header: "BPM", columnType: GridColumn.ColumnTypeEnum.Bpm),
-                new GridColumn(header: "Tags", binding: "SongTags")
-            };
-
+            Columns = new ObservableCollection<GridColumn>();
 
             _dataAccess = dataAccess;
             _categories = new ObservableCollection<Category>();
@@ -72,7 +64,7 @@ namespace Musagetes.DataObjects
             _groupCategories = new OrderedObservableCollection<Category>();
 
             CategoriesRead = new ManualResetEvent(false);
-            AddDefaultCategories();
+            new Task(AddDefaultCategories).Start();
         }
 
         public bool AddSong(Song s)
@@ -98,7 +90,7 @@ namespace Musagetes.DataObjects
                 _categoryDictionary.Add(cat.CategoryName, cat);
             }
             Columns.Add(new GridColumn(
-                GridColumn.ColumnTypeEnum.Category, cat));
+                GridColumn.ColumnTypeEnum.Category, cat, isVisible: false));
             return true;
         }
 
@@ -136,6 +128,7 @@ namespace Musagetes.DataObjects
 
         public void AddDefaultCategories()
         {
+            CategoriesRead.WaitOne();
             AddCategory(new Category(Constants.Artist));
             AddCategory(new Category(Constants.Album));
             AddCategory(new Category(Constants.Genre));

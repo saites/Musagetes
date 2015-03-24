@@ -1,16 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <MusagetesSongDb>
+  <Columns>
+    <Column header="Title" type="BasicText" display="True" order="1" binding="SongTitle"/>
+	<Column header="Location" type="BasicText" display="False" order="3" binding="Location" />
+	<Column header="Length" type="BasicText" display="True" order="2" binding="Length" />
+	<Column header="BPM" type="Bpm" display="True" order="4" />
+	<Column header="Tags" type="BasicText" display="False" order="6" binding="SongTags" />
+  </Columns>
   <CategoryTags>
-    <Category name="Artist">
+    <Category name="Artist" display="True" order="0">
       <Tag id="1" name="Brad Paisley" />
       <Tag id="2" name="Kenny Chesney" />
     </Category>
-    <Category name="Genre">
+    <Category name="Genre" display="True" order="5">
       <Tag id="3" name="Country" />
       <Tag id="4" name="Rock" />
-    </Category>
-    <Category name="MusagetesSpecialReserved">
-      <Tag id="5" name="Good" />
     </Category>
   </CategoryTags>
   <Songs>
@@ -22,7 +26,6 @@
       <Tags>
         <Tag>1</Tag>
         <Tag>3</Tag>
-        <Tag>5</Tag>
       </Tags>
     </Song>
     <Song>

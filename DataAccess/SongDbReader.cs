@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
 using Musagetes.DataObjects;
@@ -11,6 +12,8 @@ namespace Musagetes.DataAccess
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public string Filename { get; private set; }
         public SongDb SongDb { get; private set; }
+        private readonly SortedList<int, GridColumn> _columns 
+            = new SortedList<int, GridColumn>(); 
 
         public SongDbReader(string filename, SongDb songDb)
         {
@@ -38,6 +41,20 @@ namespace Musagetes.DataAccess
                     reader.ConfirmElement("MusagetesSongDb");
                     await reader.ReadAsync();
 
+
+                    Logger.Debug("Looking for Columns element");
+                    reader.ConfirmElement("Columns");
+                    if (reader.IsEmptyElement)
+                    {
+                        Logger.Debug("Columns element is empty");
+                        await reader.ReadAsync();
+                    }
+                    else
+                    {
+                        await ReadColumnsAsync(reader);
+                        reader.ReadEndElement();
+                    }
+
                     Logger.Debug("Looking for CategoryTags element");
                     reader.ConfirmElement("CategoryTags");
                     if (reader.IsEmptyElement)
@@ -47,10 +64,10 @@ namespace Musagetes.DataAccess
                     }
                     else
                     {
-                        reader.ConfirmElement("CategoryTags");
                         await ReadCategoryTagsAsync(reader);
                         reader.ReadEndElement();
                     }
+                    AddColumns();
                     SongDb.CategoriesRead.Set();
 
                     Logger.Debug("Looking for Songs element");
@@ -64,12 +81,81 @@ namespace Musagetes.DataAccess
             }
             catch(Exception e)
             {
-                Logger.Error("Unabled to read XML: {0}", e.Message);
+                Logger.Error("Unable to read XML: {0}", e.Message);
                 Logger.Error("Stack: {0}", e.StackTrace);
             }
         }
 
-        
+        private void AddColumns()
+        {
+            foreach(var col in _columns.Values)
+                SongDb.Columns.Add(col);
+        }
+
+        private async Task ReadColumnsAsync(XmlReader reader)
+        {
+            await reader.ReadAsync();
+            while (reader.LocalName.Equals("Column"))
+            {
+                Logger.Debug("Reading a column");
+                var header = reader.GetAttribute("header");
+
+                var type = reader.GetAttribute("type");
+                GridColumn.ColumnTypeEnum cType;
+                if (!Enum.TryParse(type, out cType))
+                {
+                    Logger.Error("Unable to read column type for {0}", header);
+                    await reader.ReadAsync();
+                    continue;
+                }
+
+                var displayStr = reader.GetAttribute("display");
+                bool display;
+                if (!bool.TryParse(displayStr, out display))
+                {
+                    Logger.Error("Unable to read display for {0}", header);
+                    await reader.ReadAsync();
+                    continue;
+                }
+
+                var orderStr = reader.GetAttribute("order");
+                int order;
+                if (!int.TryParse(orderStr, out order))
+                {
+                    Logger.Error("Unable to read order for {0}", header);
+                    await reader.ReadAsync();
+                    continue;
+                }
+
+                Logger.Debug("Adding {0} column {1} at {2}",
+                    type, header, orderStr);
+
+                if (_columns.ContainsKey(order))
+                {
+                    Logger.Error("Column {0} and {1} both have order {2}",
+                        header, _columns[order].Header, order);
+                    await reader.ReadAsync();
+                    continue;
+                }
+
+                switch (cType)
+                {
+                    case GridColumn.ColumnTypeEnum.BasicText:
+                        var binding = reader.GetAttribute("binding");
+                        _columns.Add(order,
+                            new GridColumn(header: header, binding: binding,
+                                isVisible: display));
+                        break;
+                    case GridColumn.ColumnTypeEnum.Bpm:
+                        _columns.Add(order,
+                            new GridColumn(GridColumn.ColumnTypeEnum.Bpm, header: header,
+                                isVisible: display));
+                        break;
+                }
+
+                await reader.ReadAsync();
+            }
+        }
 
         private async Task ReadSongsAsync(XmlReader reader)
         {
@@ -106,7 +192,7 @@ namespace Musagetes.DataAccess
                 reader.ConfirmElement("BPM");
                 var guess = Convert.ToBoolean(reader.GetAttribute("Guess"));
                 Int32 bpmValue;
-                if(!Int32.TryParse(await reader.TryGetContentAsync(), out bpmValue)); 
+                if(!Int32.TryParse(await reader.TryGetContentAsync(), out bpmValue))
                     Logger.Error("Song {0} has a missing or unreadable BPM value", title);
 
                 var song = new Song(title, location, seconds, new BPM(bpmValue, guess), SongDb);
@@ -158,6 +244,28 @@ namespace Musagetes.DataAccess
                     await ReadTagsAsync(reader, cat);
                     continue;
                 }
+
+                var displayStr = reader.GetAttribute("display");
+                bool display;
+                if (!bool.TryParse(displayStr, out display))
+                {
+                    Logger.Error("Unable to read display for {0}", cat.CategoryName);
+                    await reader.ReadAsync();
+                    continue;
+                }
+
+                var orderStr = reader.GetAttribute("order");
+                int order;
+                if (!int.TryParse(orderStr, out order))
+                {
+                    Logger.Error("Unable to read order for {0}", cat.CategoryName);
+                    await reader.ReadAsync();
+                    continue;
+                }
+
+                _columns.Add(order,
+                        new GridColumn(GridColumn.ColumnTypeEnum.Category,
+                            isVisible: display, cateogry: cat));
 
                 await ReadTagsAsync(reader, cat);
                 SongDb.AddCategory(cat);

@@ -111,7 +111,7 @@ namespace Musagetes
             lock ((App.SongDb.Columns as ICollection).SyncRoot)
             {
                 ((App.SongDb.Columns) as INotifyCollectionChanged).CollectionChanged
-                    += OnCategoryChange;
+                    += OnColumnsChange;
                 foreach (var col in App.SongDb.Columns) AddColumn(col);
             }
         }
@@ -136,7 +136,7 @@ namespace Musagetes
             }
         }
 
-        public void OnCategoryChange(object sender, NotifyCollectionChangedEventArgs e)
+        public void OnColumnsChange(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
