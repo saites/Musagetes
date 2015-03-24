@@ -38,12 +38,12 @@ namespace Musagetes.DataAccess
                     Logger.Debug("Looking for MusagetesSongDb element");
                     await reader.ReadAsync();
                     await reader.ReadAsync();
-                    reader.ConfirmElement("MusagetesSongDb");
+                    reader.ConfirmElement(Constants.Db.MusagetesSongDb);
                     await reader.ReadAsync();
 
 
                     Logger.Debug("Looking for Columns element");
-                    reader.ConfirmElement("Columns");
+                    reader.ConfirmElement(Constants.Db.Columns);
                     if (reader.IsEmptyElement)
                     {
                         Logger.Debug("Columns element is empty");
@@ -56,7 +56,7 @@ namespace Musagetes.DataAccess
                     }
 
                     Logger.Debug("Looking for CategoryTags element");
-                    reader.ConfirmElement("CategoryTags");
+                    reader.ConfirmElement(Constants.Db.CategoryTags);
                     if (reader.IsEmptyElement)
                     {
                         Logger.Debug("CategoryTags is empty");
@@ -71,7 +71,7 @@ namespace Musagetes.DataAccess
                     SongDb.CategoriesRead.Set();
 
                     Logger.Debug("Looking for Songs element");
-                    reader.ConfirmElement("Songs");
+                    reader.ConfirmElement(Constants.Db.Songs);
                     if (reader.IsEmptyElement)
                         Logger.Debug("Songs is empty");
                     else
@@ -95,12 +95,12 @@ namespace Musagetes.DataAccess
         private async Task ReadColumnsAsync(XmlReader reader)
         {
             await reader.ReadAsync();
-            while (reader.LocalName.Equals("Column"))
+            while (reader.LocalName.Equals(Constants.Db.Column))
             {
                 Logger.Debug("Reading a column");
-                var header = reader.GetAttribute("header");
+                var header = reader.GetAttribute(Constants.Db.Header);
 
-                var type = reader.GetAttribute("type");
+                var type = reader.GetAttribute(Constants.Db.Type);
                 GridColumn.ColumnTypeEnum cType;
                 if (!Enum.TryParse(type, out cType))
                 {
@@ -109,7 +109,7 @@ namespace Musagetes.DataAccess
                     continue;
                 }
 
-                var displayStr = reader.GetAttribute("display");
+                var displayStr = reader.GetAttribute(Constants.Db.Display);
                 bool display;
                 if (!bool.TryParse(displayStr, out display))
                 {
@@ -118,7 +118,7 @@ namespace Musagetes.DataAccess
                     continue;
                 }
 
-                var orderStr = reader.GetAttribute("order");
+                var orderStr = reader.GetAttribute(Constants.Db.Order);
                 int order;
                 if (!int.TryParse(orderStr, out order))
                 {
@@ -141,7 +141,7 @@ namespace Musagetes.DataAccess
                 switch (cType)
                 {
                     case GridColumn.ColumnTypeEnum.BasicText:
-                        var binding = reader.GetAttribute("binding");
+                        var binding = reader.GetAttribute(Constants.Db.Binding);
                         _columns.Add(order,
                             new GridColumn(header: header, binding: binding,
                                 isVisible: display));
@@ -160,7 +160,7 @@ namespace Musagetes.DataAccess
         private async Task ReadSongsAsync(XmlReader reader)
         {
             await reader.ReadAsync();
-            while (reader.LocalName.Equals("Song"))
+            while (reader.LocalName.Equals(Constants.Db.Song))
             {
                 Logger.Debug("Reading a song");
                 if (reader.IsEmptyElement)
@@ -171,34 +171,34 @@ namespace Musagetes.DataAccess
                 }
 
                 await reader.ReadAsync();
-                if (reader.IsEndElement("Song"))
+                if (reader.IsEndElement(Constants.Db.Song))
                 {
                     Logger.Debug("Song element is followed by end element");
                     reader.ReadEndElement();
                     continue;
                 }
 
-                reader.ConfirmElement("SongTitle");
+                reader.ConfirmElement(Constants.Db.SongTitle);
                 var title = await reader.TryGetContentAsync();
 
-                reader.ConfirmElement("Location");
+                reader.ConfirmElement(Constants.Db.Location);
                 var location = await reader.TryGetContentAsync();
 
-                reader.ConfirmElement("Seconds");
-                long seconds;
-                if(!long.TryParse(await reader.TryGetContentAsync(), out seconds))
+                reader.ConfirmElement(Constants.Db.Timespan);
+                long timespan;
+                if(!long.TryParse(await reader.TryGetContentAsync(), out timespan))
                     Logger.Error("Song {0} has a missing or unreadable timespan", title);
 
-                reader.ConfirmElement("BPM");
-                var guess = Convert.ToBoolean(reader.GetAttribute("Guess"));
+                reader.ConfirmElement(Constants.Db.Bpm);
+                var guess = Convert.ToBoolean(reader.GetAttribute(Constants.Db.Guess));
                 Int32 bpmValue;
                 if(!Int32.TryParse(await reader.TryGetContentAsync(), out bpmValue))
                     Logger.Error("Song {0} has a missing or unreadable BPM value", title);
 
-                var song = new Song(title, location, seconds, new BPM(bpmValue, guess), SongDb);
+                var song = new Song(title, location, timespan, new BPM(bpmValue, guess), SongDb);
                 SongDb.AddSong(song);
 
-                reader.ConfirmElement("Tags");
+                reader.ConfirmElement(Constants.Db.Tags);
                 if (reader.IsEmptyElement)
                 {
                     await reader.ReadAsync();
@@ -216,7 +216,7 @@ namespace Musagetes.DataAccess
         private async Task ReadSongTagsAsync(XmlReader reader, Song song)
         {
             await reader.ReadAsync();
-            while (reader.LocalName.Equals("Tag"))
+            while (reader.LocalName.Equals(Constants.Db.Tag))
             {
                 Int32 id;
                 if (!Int32.TryParse(await reader.TryGetContentAsync(), out id))
@@ -234,9 +234,9 @@ namespace Musagetes.DataAccess
         private async Task ReadCategoryTagsAsync(XmlReader reader)
         {
             await reader.ReadAsync();
-            while (reader.LocalName.Equals("Category"))
+            while (reader.LocalName.Equals(Constants.Db.Category))
             {
-                var cat = new Category(reader.GetAttribute("name"));
+                var cat = new Category(reader.GetAttribute(Constants.Db.Name));
                 Logger.Debug("Reading category {0}", cat.CategoryName);
                 if (reader.IsEmptyElement)
                 {
@@ -245,7 +245,7 @@ namespace Musagetes.DataAccess
                     continue;
                 }
 
-                var displayStr = reader.GetAttribute("display");
+                var displayStr = reader.GetAttribute(Constants.Db.Display);
                 bool display;
                 if (!bool.TryParse(displayStr, out display))
                 {
@@ -254,7 +254,7 @@ namespace Musagetes.DataAccess
                     continue;
                 }
 
-                var orderStr = reader.GetAttribute("order");
+                var orderStr = reader.GetAttribute(Constants.Db.Order);
                 int order;
                 if (!int.TryParse(orderStr, out order))
                 {
@@ -276,19 +276,19 @@ namespace Musagetes.DataAccess
         private async Task ReadTagsAsync(XmlReader reader, Category cat)
         {
             await reader.ReadAsync();
-            while (reader.LocalName.Equals("Tag"))
+            while (reader.LocalName.Equals(Constants.Db.Tag))
             {
                 Logger.Debug("Reading tag");
 
                 Int32 id;
-                if (!Int32.TryParse(reader.GetAttribute("id"), out id))
+                if (!Int32.TryParse(reader.GetAttribute(Constants.Db.Id), out id))
                 {
                     Logger.Debug("Could not read tag id");
                     await reader.ReadAsync();
                     continue;
                 }
 
-                var name = reader.GetAttribute("name");
+                var name = reader.GetAttribute(Constants.Db.Name);
                 var t = new Tag(name, cat, id);
                 SongDb.AddTag(t);
 

@@ -40,5 +40,37 @@ namespace Musagetes.DataObjects
             /* ac-3 */
             ".ac3", ".ec3"
         };
+
+        /* DB Constants */
+
+        public static class Db
+        {
+            public const string MusagetesSongDb = "MusagetesSongDb";
+
+            public const string Columns = "Columns";
+            public const string Column = "Column";
+            public const string Header = "header";
+            public const string Type = "type";
+            public const string Display = "display";
+            public const string Order = "order";
+            public const string Binding = "binding";
+
+            public const string CategoryTags = "CategoryTags";
+            public const string Category = "Category";
+            public const string Name = "name";
+            public const string Id = "id";
+
+            public const string Songs = "Songs";
+            public const string Song = "Song";
+            public const string SongTitle = "SongTitle";
+            public const string Location = "Location";
+            public const string Timespan = "Timespan";
+            
+            public const string Bpm = "BPM";
+            public const string Guess = "Guess";
+            
+            public const string Tags = "Tags";
+            public const string Tag = "Tag";
+        }
     }
 }
