@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Xml;
 using Musagetes.DataObjects;
@@ -66,10 +65,14 @@ namespace Musagetes.DataAccess
             foreach (var song in SongDb.Songs)
             {
                 await writer.WriteStartElementAsync(null, Constants.Db.Song, null);
-                await writer.WriteElementStringAsync(null, Constants.Db.SongTitle, null, song.SongTitle);
-                await writer.WriteElementStringAsync(null, Constants.Db.Location, null, song.Location);
-                await writer.WriteElementStringAsync(null, Constants.Db.Timespan, null, 
-                    song.Seconds.ToString(CultureInfo.InvariantCulture));
+                await writer.WriteElementStringAsync(null, Constants.Db.SongTitle, null, 
+                    song.SongTitle);
+                await writer.WriteElementStringAsync(null, Constants.Db.Location, null, 
+                    song.Location);
+                await writer.WriteElementStringAsync(null, Constants.Db.Milliseconds, null, 
+                    song.Milliseconds.ToString(CultureInfo.InvariantCulture));
+                await writer.WriteElementStringAsync(null, Constants.Db.PlayCount, null, 
+                    song.PlayCount.ToString());
 
                 await writer.WriteStartElementAsync(null, Constants.Db.Bpm, null);
                 await writer.WriteAttributeStringAsync(null, Constants.Db.Guess, null,

@@ -6,11 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 
 namespace Musagetes.DataObjects
 {
     public class SongDb
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public ObservableCollection<GridColumn> Columns { get; private set; }
         public OrderedObservableCollection<Category> GroupCategories { get { return _groupCategories; } }
         public ReadOnlyObservableCollection<Category> Categories { get { return _categoriesReadOnly; } }
@@ -89,8 +91,6 @@ namespace Musagetes.DataObjects
                 _categories.Add(cat);
                 _categoryDictionary.Add(cat.CategoryName, cat);
             }
-            Columns.Add(new GridColumn(
-                GridColumn.ColumnTypeEnum.Category, cat, isVisible: false));
             return true;
         }
 
@@ -129,10 +129,13 @@ namespace Musagetes.DataObjects
         public void AddDefaultCategories()
         {
             CategoriesRead.WaitOne();
-            AddCategory(new Category(Constants.Artist));
+            if(AddCategory(new Category(Constants.Artist)))
+                Columns.Add(new GridColumn(
+                    GridColumn.ColumnTypeEnum.Category, ArtistCategory, isVisible: false));
             AddCategory(new Category(Constants.Album));
             AddCategory(new Category(Constants.Genre));
             AddCategory(new Category(Constants.Uncategorized));
+
         }
 
         private readonly Object _tagIdLock = new object();
@@ -151,11 +154,16 @@ namespace Musagetes.DataObjects
             CategoriesRead.WaitOne();
             try
             {
-                if (!File.Exists(filename)) return;
+                Logger.Debug("Attempting to add {0}", filename);
+                if (!File.Exists(filename))
+                {
+                    Logger.Error("File {0} does not exist", filename);
+                    return;
+                }
 
                 using (var file = TagLib.File.Create(filename))
                 {
-                    Song song = new Song(file.Tag.Title, filename,
+                    var song = new Song(file.Tag.Title, filename,
                         (long)file.Properties.Duration.TotalMilliseconds, new BPM(0, false), this);
                     AddBaseTags(song, ArtistCategory, file.Tag.AlbumArtists);
                     AddBaseTags(song, GenreCategory, file.Tag.Genres);
@@ -165,15 +173,16 @@ namespace Musagetes.DataObjects
                             ?? new Tag(file.Tag.Album, AlbumCategory, GetNextTagId());
                         song.TagSong(albumTag);
                     }
+                    if(file.Tag.BeatsPerMinute > 0 && file.Tag.BeatsPerMinute < int.MaxValue)
+                        song.Bpm = new BPM((int)file.Tag.BeatsPerMinute, true);
                     AddSong(song);
                     //SaveChanges();
                 }
             }
             catch (Exception e)
             {
-                //TODO: Log, handle
-                Console.WriteLine(e.Message);
-                Console.WriteLine(e.StackTrace);
+                Logger.Error("Couldn't open file with TagLib: {0}\n{1}",
+                    e.Message, e.StackTrace);
             }
         }
 

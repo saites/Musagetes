@@ -64,7 +64,8 @@ namespace Musagetes.DataObjects
             public const string Song = "Song";
             public const string SongTitle = "SongTitle";
             public const string Location = "Location";
-            public const string Timespan = "Timespan";
+            public const string Milliseconds = "Milliseconds";
+            public const string PlayCount = "PlayCount";
             
             public const string Bpm = "BPM";
             public const string Guess = "Guess";

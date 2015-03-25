@@ -10,17 +10,12 @@ namespace Musagetes.DataObjects
     public class Song : INotifyPropertyChanged
     {
         public string SongTitle { get; set; }
-
-        public long Seconds
-        {
-            get { return Milliseconds/1000;}
-            set { Milliseconds = value*1000; }
-        }
         public long Milliseconds { get; set; }
         public string Location { get; set; }
         public BPM Bpm { get; set; }
         public CategoryTag CategoryTags { get; set; }
         public SongDb SongDb { get; private set; }
+        public uint PlayCount { get; set; }
         public IEnumerable<Tag> Tags
         {
             get { return _categoryToTag.Values.SelectMany(tagSet => tagSet); }
@@ -83,13 +78,14 @@ namespace Musagetes.DataObjects
             }
         }
 
-        public Song(string title, string location, long milliseconds, BPM bpm, SongDb songDb)
+        public Song(string title, string location, long milliseconds, BPM bpm, SongDb songDb, uint playCount)
         {
             SongTitle = title;
             Location = location;
             Milliseconds = milliseconds;
             Bpm = bpm;
             SongDb = songDb;
+            PlayCount = playCount;
             CategoryTags = new CategoryTag(this);
         }
 
@@ -156,9 +152,8 @@ namespace Musagetes.DataObjects
         {
             get
             {
-                return Seconds < 3600
-                    ? string.Format("{0}:{1:00}", Seconds / 60, Seconds % 60)
-                    : string.Format("{0}:{1:00}:{2:00}", Seconds / 3600, (Seconds % 3600) / 60, Seconds % 60);
+                var ts = new TimeSpan(milliseconds: Milliseconds);
+                return ts.ToString();
             }
         }
 

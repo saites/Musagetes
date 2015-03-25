@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <MusagetesSongDb>
+	<!-- Note: add support for play count -->
   <Columns>
     <Column header="Title" type="BasicText" display="True" order="1" binding="SongTitle"/>
 	<Column header="Location" type="BasicText" display="False" order="3" binding="Location" />
@@ -21,8 +22,9 @@
     <Song>
       <SongTitle>Mud on the Tires</SongTitle>
       <Location>E:\Music\Brad Paisley\Brad Paisley - Mud on The Tires\Brad Paisley - 01 - Mud On The Tires.mp3</Location>
-      <Seconds>140</Seconds>
+      <Milliseconds>140000</Milliseconds>
       <BPM Guess="False">140</BPM>
+	  <PlayCount>0</PlayCount>
       <Tags>
         <Tag>1</Tag>
         <Tag>3</Tag>
@@ -31,8 +33,9 @@
     <Song>
       <SongTitle>Throttleneck</SongTitle>
       <Location>E:\Music\Brad Paisley\Brad Paisley - 5th Gear\16-brad_paisley-throttleneck.mp3</Location>
-      <Seconds>1</Seconds>
+      <Milliseconds>1000</Milliseconds>
       <BPM Guess="True">1</BPM>
+	  <PlayCount>0</PlayCount>
       <Tags>
         <Tag>1</Tag>
         <Tag>3</Tag>
@@ -41,8 +44,9 @@
     <Song>
       <SongTitle>When We All Get To Heaven</SongTitle>
       <Location>E:\Music\Brad Paisley\Brad Paisley - 5th Gear\15-brad_paisley-when_we_all_get_to_heaven.mp3</Location>
-      <Seconds>1</Seconds>
+      <Milliseconds>1000</Milliseconds>
       <BPM Guess="True">1</BPM>
+	  <PlayCount>0</PlayCount>
       <Tags>
         <Tag>1</Tag>
         <Tag>4</Tag>
