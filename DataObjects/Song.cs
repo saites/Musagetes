@@ -10,7 +10,7 @@ namespace Musagetes.DataObjects
     public class Song : INotifyPropertyChanged
     {
         public string SongTitle { get; set; }
-        public long Milliseconds { get; set; }
+        public int Milliseconds { get; set; }
         public string Location { get; set; }
         public BPM Bpm { get; set; }
         public CategoryTag CategoryTags { get; set; }
@@ -78,7 +78,7 @@ namespace Musagetes.DataObjects
             }
         }
 
-        public Song(string title, string location, long milliseconds, BPM bpm, SongDb songDb, uint playCount)
+        public Song(string title, string location, int milliseconds, BPM bpm, SongDb songDb, uint playCount)
         {
             SongTitle = title;
             Location = location;
@@ -152,7 +152,7 @@ namespace Musagetes.DataObjects
         {
             get
             {
-                var ts = new TimeSpan(milliseconds: Milliseconds);
+                var ts = new TimeSpan(0, 0, 0, 0, Milliseconds);
                 return ts.ToString();
             }
         }

@@ -132,10 +132,15 @@ namespace Musagetes.DataObjects
             if(AddCategory(new Category(Constants.Artist)))
                 Columns.Add(new GridColumn(
                     GridColumn.ColumnTypeEnum.Category, ArtistCategory, isVisible: false));
-            AddCategory(new Category(Constants.Album));
-            AddCategory(new Category(Constants.Genre));
-            AddCategory(new Category(Constants.Uncategorized));
-
+            if(AddCategory(new Category(Constants.Album)))
+                Columns.Add(new GridColumn(
+                    GridColumn.ColumnTypeEnum.Category, AlbumCategory, isVisible: false));
+            if(AddCategory(new Category(Constants.Genre)))
+                Columns.Add(new GridColumn(
+                    GridColumn.ColumnTypeEnum.Category, GenreCategory, isVisible: false));
+            if(AddCategory(new Category(Constants.Uncategorized)))
+                Columns.Add(new GridColumn(
+                    GridColumn.ColumnTypeEnum.Category, UncategorizedCategory, isVisible: false));
         }
 
         private readonly Object _tagIdLock = new object();
@@ -164,7 +169,8 @@ namespace Musagetes.DataObjects
                 using (var file = TagLib.File.Create(filename))
                 {
                     var song = new Song(file.Tag.Title, filename,
-                        (long)file.Properties.Duration.TotalMilliseconds, new BPM(0, false), this);
+                        (int)file.Properties.Duration.TotalMilliseconds, new BPM(0, false), 
+                        this, 0);
                     AddBaseTags(song, ArtistCategory, file.Tag.AlbumArtists);
                     AddBaseTags(song, GenreCategory, file.Tag.Genres);
                     if (file.Tag.Album != null)

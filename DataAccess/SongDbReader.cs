@@ -185,8 +185,8 @@ namespace Musagetes.DataAccess
                 var location = await reader.TryGetContentAsync();
 
                 reader.ConfirmElement(Constants.Db.Milliseconds);
-                long milliseconds;
-                if(!long.TryParse(await reader.TryGetContentAsync(), out milliseconds))
+                int milliseconds;
+                if(!int.TryParse(await reader.TryGetContentAsync(), out milliseconds))
                     Logger.Error("Song {0} has a missing or unreadable millisecond value", title);
 
                 reader.ConfirmElement(Constants.Db.PlayCount);
@@ -196,8 +196,8 @@ namespace Musagetes.DataAccess
 
                 reader.ConfirmElement(Constants.Db.Bpm);
                 var guess = Convert.ToBoolean(reader.GetAttribute(Constants.Db.Guess));
-                Int32 bpmValue;
-                if(!Int32.TryParse(await reader.TryGetContentAsync(), out bpmValue))
+                int bpmValue;
+                if(!int.TryParse(await reader.TryGetContentAsync(), out bpmValue))
                     Logger.Error("Song {0} has a missing or unreadable BPM value", title);
 
                 var song = new Song(title, location, milliseconds, new BPM(bpmValue, guess), SongDb, playCount);

@@ -55,7 +55,7 @@ namespace Musagetes
         public void AddBpmColumn()
         {
 
-            var col = new DataGridTemplateColumn()
+            var col = new DataGridTemplateColumn
             {
                 Header = "BPM",
                 Width = new DataGridLength(1.0, DataGridLengthUnitType.Auto),
