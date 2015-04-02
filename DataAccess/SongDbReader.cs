@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using Musagetes.DataObjects;
@@ -13,12 +14,14 @@ namespace Musagetes.DataAccess
         public string Filename { get; private set; }
         public SongDb SongDb { get; private set; }
         private readonly SortedList<int, GridColumn> _columns 
-            = new SortedList<int, GridColumn>(); 
+            = new SortedList<int, GridColumn>();
+        public bool ReadSuccessful { get; private set; }
 
         public SongDbReader(string filename, SongDb songDb)
         {
             Filename = filename;
             SongDb = songDb;
+            ReadSuccessful = true;
         }
 
         public async Task ReadDb()
@@ -40,7 +43,6 @@ namespace Musagetes.DataAccess
                     await reader.ReadAsync();
                     reader.ConfirmElement(Constants.Db.MusagetesSongDb);
                     await reader.ReadAsync();
-
 
                     Logger.Debug("Looking for Columns element");
                     reader.ConfirmElement(Constants.Db.Columns);
@@ -83,6 +85,9 @@ namespace Musagetes.DataAccess
             {
                 Logger.Error("Unable to read XML: {0}", e.Message);
                 Logger.Error("Stack: {0}", e.StackTrace);
+                Console.WriteLine(e.Message);
+                ReadSuccessful = false;
+                throw;
             }
         }
 

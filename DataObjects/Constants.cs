@@ -8,7 +8,9 @@ namespace Musagetes.DataObjects
         public const string Artist = "Artist";
         public const string CategoryTagsBinding = "CategoryTags[{0}]";
         //public const string DbLocation = @"C:\Users\ajsaites\Documents\Mine\Musagetes\Musagetes\Collaterals\SongDBEmpty.xml";
-        public const string DbLocation = @"C:\Users\ajsaites\Documents\Mine\Musagetes\Musagetes\Collaterals\SongDB.xml";
+
+        public const string DbLocation = "../../../Musagetes/Collaterals/Testing/BasicDb.xml";
+        //public const string DbLocation = @"C:\Users\ajsaites\Documents\Mine\Musagetes\Musagetes\Collaterals\SongDB.xml";
         public const string DisplayedSongs = "DisplayedSongs";
         public const string Genre = "Genre";
         public const string SongQueue = "SongQueue";
