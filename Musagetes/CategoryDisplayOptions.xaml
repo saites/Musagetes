@@ -2,9 +2,10 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:musagetes="clr-namespace:Musagetes"
+        xmlns:wpfElements="clr-namespace:Musagetes.WpfElements"
         Title="CategoryDisplayOptions" Height="300" Width="300">
     <Window.Resources>
-        <musagetes:VisibilityToBooleanConverter x:Key="V2B"/>
+        <wpfElements:VisibilityToBooleanConverter x:Key="V2B"/>
     </Window.Resources>
     <Grid>
         <ListBox 

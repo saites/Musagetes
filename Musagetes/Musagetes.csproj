@@ -93,9 +93,9 @@
     <Compile Include="CreateNewTagWindow.xaml.cs">
       <DependentUpon>CreateNewTagWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DataGridColumnsBehavior.cs" />
+    <Compile Include="WpfElements\DataGridColumnsBehavior.cs" />
     <Compile Include="MainWindowVm.cs" />
-    <Compile Include="PlaybackControlBehavior.cs" />
+    <Compile Include="WpfElements\PlaybackControlBehavior.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="TagEditorVm.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -106,8 +106,8 @@
     <Compile Include="TagEditorWindow.xaml.cs">
       <DependentUpon>TagEditorWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="VisibilityToBooleanConverter.cs" />
-    <Compile Include="WpfDataGrid.cs" />
+    <Compile Include="WpfElements\VisibilityToBooleanConverter.cs" />
+    <Compile Include="WpfElements\WpfDataGrid.cs" />
     <Page Include="CategoryDisplayOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

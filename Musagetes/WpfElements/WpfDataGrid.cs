@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Musagetes
+namespace Musagetes.WpfElements
 {
     public class WpfDataGrid : DataGrid
     {

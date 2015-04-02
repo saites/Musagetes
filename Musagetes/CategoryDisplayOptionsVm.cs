@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using Musagetes.WpfElements;
 using MvvmFoundation.Wpf;
 
 namespace Musagetes

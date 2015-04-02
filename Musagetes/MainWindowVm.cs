@@ -15,7 +15,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using Musagetes.Annotations;
 using Musagetes.DataObjects;
-using Pcb = Musagetes.PlaybackControlBehavior;
+using Pcb = Musagetes.WpfElements.PlaybackControlBehavior;
 
 namespace Musagetes
 {
@@ -58,9 +58,9 @@ namespace Musagetes
             }
         }
 
-        private PlaybackControlBehavior.Playback _playbackState = PlaybackControlBehavior.Playback.Stop;
+        private Pcb.Playback _playbackState = Pcb.Playback.Stop;
 
-        public PlaybackControlBehavior.Playback PlaybackState
+        public Pcb.Playback PlaybackState
         {
             get { return _playbackState; }
             set

@@ -3,6 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:Musagetes"
     xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+    xmlns:wpfElements="clr-namespace:Musagetes.WpfElements"
     x:Class="Musagetes.MainWindow"
 	x:Name="Window"
 	Title="Musagetes"
@@ -96,11 +97,11 @@
         <MediaElement x:Name="Media"
                       Source="{Binding SelectedSong.Location}"
                       LoadedBehavior="Manual"
-                      local:PlaybackControlBehavior.PlaybackState="{Binding PlaybackState}"
+                      wpfElements:PlaybackControlBehavior.PlaybackState="{Binding PlaybackState}"
                       Volume="{Binding ElementName=VolumeSlider, Path=Value}"
-                      local:PlaybackControlBehavior.Milliseconds="{Binding CurrentTime, Mode=TwoWay}"
+                      wpfElements:PlaybackControlBehavior.Milliseconds="{Binding CurrentTime, Mode=TwoWay}"
                       />
-        <local:WpfDataGrid DockPanel.Dock="Right" 
+        <wpfElements:WpfDataGrid DockPanel.Dock="Right" 
                   ItemsSource="{Binding DisplayedSongs, IsAsync=True}" 
                   AutoGenerateColumns="False"
                   SelectionMode="Extended" 
@@ -110,7 +111,7 @@
                   VirtualizingPanel.IsVirtualizing="True"
                   VirtualizingPanel.IsVirtualizingWhenGrouping="True"
                   SelectedItemsList="{Binding TagEditorVm.Songs, Mode=OneWayToSource}"
-                  local:DataGridColumnsBehavior.BindableColumns="{Binding ColumnManager.Columns, Mode=OneWay}"
+                  wpfElements:DataGridColumnsBehavior.BindableColumns="{Binding ColumnManager.Columns, Mode=OneWay}"
                   SelectedItem="{Binding SelectedSong, Mode=OneWayToSource}">
             <DataGrid.ContextMenu>
                 <ContextMenu >
@@ -150,6 +151,6 @@
                     </GroupStyle.ContainerStyle>
                 </GroupStyle>
             </DataGrid.GroupStyle>
-        </local:WpfDataGrid>
+        </wpfElements:WpfDataGrid>
     </DockPanel>
 </Window>
