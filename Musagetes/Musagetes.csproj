@@ -95,6 +95,7 @@
     </Compile>
     <Compile Include="WpfElements\DataGridColumnsBehavior.cs" />
     <Compile Include="MainWindowVm.cs" />
+    <Compile Include="WpfElements\DragAndDropBehavior.cs" />
     <Compile Include="WpfElements\PlaybackControlBehavior.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="TagEditorVm.cs" />

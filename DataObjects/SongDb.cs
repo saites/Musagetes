@@ -12,7 +12,6 @@ namespace Musagetes.DataObjects
 {
     public class SongDb
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public ObservableCollection<GridColumn> Columns { get; private set; }
         public OrderedObservableCollection<Category> GroupCategories { get { return _groupCategories; } }
         public ReadOnlyObservableCollection<Category> Categories { get { return _categoriesReadOnly; } }
@@ -30,6 +29,7 @@ namespace Musagetes.DataObjects
         private readonly Dictionary<int, Tag> _tagIds;
         private readonly ReadOnlyDictionary<int, Tag> _tagIdsReadOnly;
         private readonly OrderedObservableCollection<Category> _groupCategories;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public Category ArtistCategory
         {

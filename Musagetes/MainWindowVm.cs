@@ -21,8 +21,46 @@ namespace Musagetes
 {
     class MainWindowVm : INotifyPropertyChanged
     {
-        private long _currentTime;
+        ObservableCollection<Song> _songQueue;
+        ListCollectionView _displayedSongs;
+        private Song _currentSong;
 
+        public MainWindowVm()
+        {
+            TagEditorVm = new TagEditorVm();
+            _columnManager = new ColumnManager();
+
+            BindingOperations.EnableCollectionSynchronization(
+                App.SongDb.Songs,
+                (App.SongDb.Songs as ICollection).SyncRoot);
+            BindingOperations.EnableCollectionSynchronization(
+                App.SongDb.GroupCategories,
+                (App.SongDb.GroupCategories as ICollection).SyncRoot);
+
+            lock ((App.SongDb.Songs as ICollection).SyncRoot)
+            {
+                DisplayedSongs = new ListCollectionView(App.SongDb.Songs);
+            }
+
+            lock ((App.SongDb.GroupCategories as ICollection).SyncRoot)
+            {
+                AddGroupDescriptions(App.SongDb.GroupCategories);
+                App.SongDb.GroupCategories.CollectionChanged +=
+                    GroupCategoriesCollectionChanged;
+                lock (_displayedSongs) DisplayedSongs.Refresh();
+            }
+
+            lock ((App.SongDb.Columns as ICollection).SyncRoot)
+            {
+                ((App.SongDb.Columns) as INotifyCollectionChanged).CollectionChanged
+                    += OnColumnsChange;
+                foreach (var col in App.SongDb.Columns) AddColumn(col);
+            }
+
+            SongQueue = new OrderedObservableCollection<Song>();
+        }
+
+        private long _currentTime;
         public long CurrentTime
         {
             get { return _currentTime; }
@@ -32,9 +70,6 @@ namespace Musagetes
                 OnPropertyChanged();
             }
         }
-        ObservableCollection<Song> _songQueue;
-        ListCollectionView _displayedSongs;
-        private Song _currentSong;
         public Song CurrentSong
         {
             get { return _currentSong; }
@@ -80,39 +115,6 @@ namespace Musagetes
             {
                 _columnManager = value;
                 OnPropertyChanged();
-            }
-        }
-
-        public MainWindowVm()
-        {
-            TagEditorVm = new TagEditorVm();
-            _columnManager = new ColumnManager();
-
-            BindingOperations.EnableCollectionSynchronization(
-                App.SongDb.Songs,
-                (App.SongDb.Songs as ICollection).SyncRoot);
-            BindingOperations.EnableCollectionSynchronization(
-                App.SongDb.GroupCategories,
-                (App.SongDb.GroupCategories as ICollection).SyncRoot);
-
-            lock ((App.SongDb.Songs as ICollection).SyncRoot)
-            {
-                DisplayedSongs = new ListCollectionView(App.SongDb.Songs);
-            }
-
-            lock ((App.SongDb.GroupCategories as ICollection).SyncRoot)
-            {
-                AddGroupDescriptions(App.SongDb.GroupCategories);
-                App.SongDb.GroupCategories.CollectionChanged +=
-                    GroupCategoriesCollectionChanged;
-                lock (_displayedSongs) DisplayedSongs.Refresh();
-            }
-
-            lock ((App.SongDb.Columns as ICollection).SyncRoot)
-            {
-                ((App.SongDb.Columns) as INotifyCollectionChanged).CollectionChanged
-                    += OnColumnsChange;
-                foreach (var col in App.SongDb.Columns) AddColumn(col);
             }
         }
 
@@ -201,14 +203,17 @@ namespace Musagetes
         {
             lock (_displayedSongs)
             {
-                if (DisplayedSongs == null || DisplayedSongs.GroupDescriptions == null) return;
-                foreach (var cat in categories)
+                if (DisplayedSongs == null
+                    || DisplayedSongs.GroupDescriptions == null) return;
+                lock (_groupDescriptionDictionary)
                 {
-                    var groupDesc = new PropertyGroupDescription(
-                        string.Format(Constants.CategoryTagsBinding, cat.CategoryName));
-                    DisplayedSongs.GroupDescriptions.Add(groupDesc);
-                    lock (_groupDescriptionDictionary)
+                    foreach (var cat in categories)
                     {
+                        if (_groupDescriptionDictionary.ContainsKey(cat))
+                            continue;
+                        var groupDesc = new PropertyGroupDescription(
+                            string.Format(Constants.CategoryTagsBinding, cat.CategoryName));
+                        DisplayedSongs.GroupDescriptions.Add(groupDesc);
                         _groupDescriptionDictionary.Add(cat, groupDesc);
                     }
                 }
@@ -362,6 +367,48 @@ namespace Musagetes
         public ICommand RefreshTagsCmd
         {
             get { return new RelayCommand(() => DisplayedSongs.Refresh()); }
+        }
+
+        public ICommand QueueDropCmd
+        {
+            get
+            {
+                return new DropListCommand<Song>(SongQueue);
+            }
+        }
+
+        public class DropListCommand<T> : ICommand
+        {
+            private readonly IList _list;
+
+            public DropListCommand(IList list)
+            {
+                _list = list;
+            }
+
+            public bool CanExecute(object parameter)
+            {
+                var dataObj = parameter as IDataObject;
+                if (dataObj == null) return false;
+
+                var l = dataObj.GetData(typeof (IList));
+                if (l == null) return false;
+                return ((IList)(l))
+                    .Cast<object>().All(item => item is T);
+            }
+
+            public void Execute(object parameter)
+            {
+                var dataObj = parameter as IDataObject;
+                if (dataObj == null) return;
+
+                var l = dataObj.GetData(typeof(IList));
+                if (l == null) return;
+                foreach (T s in (IList)l)
+                    _list.Add(s);
+            }
+
+            public event EventHandler CanExecuteChanged;
         }
 
         private async Task AddDirAndFiles(string dir)

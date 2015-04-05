@@ -93,7 +93,11 @@
                 </i:Interaction.Triggers>
             </ListBox>
         </Grid>
-        <ListBox DockPanel.Dock="Left" Width="141" ItemsSource="{Binding Queue, Mode=TwoWay}"/>
+        <ListBox DockPanel.Dock="Left" Width="141" 
+                 ItemsSource="{Binding SongQueue, Mode=TwoWay}"
+                 wpfElements:DragAndDropBehavior.DragAndDropBehaviour="{Binding QueueDropCmd}"
+                 AllowDrop="True"
+                 />
         <MediaElement x:Name="Media"
                       Source="{Binding SelectedSong.Location}"
                       LoadedBehavior="Manual"

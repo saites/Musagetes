@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Musagetes.WpfElements
 {
@@ -25,5 +26,16 @@ namespace Musagetes.WpfElements
         public static DependencyProperty SelectedItemsListProperty =
             DependencyProperty.Register("SelectedItemsList", typeof(IList),
             typeof(WpfDataGrid), new PropertyMetadata(default(IList)));
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            if (e.LeftButton != MouseButtonState.Pressed) return;
+
+            var data = new DataObject();
+            data.SetData(typeof(IList), SelectedItems);
+
+            DragDrop.DoDragDrop(this, data, DragDropEffects.Copy | DragDropEffects.Move);
+        }
     }
 }
