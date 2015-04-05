@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MusagetesSongDb>
+  <Columns>
+    <Column header="Title" type="BasicText" display="True" order="1" binding="SongTitle"/>
+	<Column header="Location" type="BasicText" display="True" order="2" binding="Location" />
+	<Column header="Length" type="BasicText" display="True" order="3" binding="Length" />
+	<Column header="BPM" type="Bpm" display="True" order="4" />
+	<Column header="Tags" type="BasicText" display="True" order="5" binding="SongTags" />
+	<Column header="Count" type="BasicText" display="True" order="6" binding="PlayCount" />
+  </Columns>
+  <CategoryTags />
+  <Songs />
+</MusagetesSongDb>
