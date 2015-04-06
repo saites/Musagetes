@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows.Forms;
 using System.Windows.Input;
 using Musagetes.Annotations;
 using Musagetes.DataObjects;
@@ -43,6 +42,9 @@ namespace Musagetes
                     {
                         AssignedCategory = new Category(CategoryName.Trim());
                         App.SongDb.AddCategory(AssignedCategory);
+                        App.SongDb.Columns.Add(
+                            new GridColumn(GridColumn.ColumnTypeEnum.Category,
+                                AssignedCategory, isVisible: false));
                     }
                     if (NewTag == null)
                     {

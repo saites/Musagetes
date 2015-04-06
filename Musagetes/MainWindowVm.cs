@@ -15,6 +15,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using Musagetes.Annotations;
 using Musagetes.DataObjects;
+using Musagetes.WpfElements;
 using Pcb = Musagetes.WpfElements.PlaybackControlBehavior;
 
 namespace Musagetes
@@ -377,38 +378,39 @@ namespace Musagetes
             }
         }
 
-        public class DropListCommand<T> : ICommand
+        private Song _selectedInQueue;
+        public Song SelectedInQueue
         {
-            private readonly IList _list;
-
-            public DropListCommand(IList list)
+            get { return _selectedInQueue; }
+            set
             {
-                _list = list;
+                _selectedInQueue = value;
+                OnPropertyChanged();
             }
+        }
 
-            public bool CanExecute(object parameter)
+        public ICommand SwitchToSongCmd
+        {
+            get
             {
-                var dataObj = parameter as IDataObject;
-                if (dataObj == null) return false;
-
-                var l = dataObj.GetData(typeof (IList));
-                if (l == null) return false;
-                return ((IList)(l))
-                    .Cast<object>().All(item => item is T);
+                return new RelayCommand(() =>
+                {
+                    CurrentSong = SelectedInQueue;
+                    PlaybackState = Pcb.Playback.Play;
+                    CurrentTime = 0;
+                });
             }
+        }
 
-            public void Execute(object parameter)
+        public ICommand RemoveFromQueueCmd
+        {
+            get
             {
-                var dataObj = parameter as IDataObject;
-                if (dataObj == null) return;
-
-                var l = dataObj.GetData(typeof(IList));
-                if (l == null) return;
-                foreach (T s in (IList)l)
-                    _list.Add(s);
+                return new RelayCommand(() =>
+                {
+                    SongQueue.Remove(SelectedInQueue);
+                });
             }
-
-            public event EventHandler CanExecuteChanged;
         }
 
         private async Task AddDirAndFiles(string dir)

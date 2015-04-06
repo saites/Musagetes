@@ -43,61 +43,6 @@
                     Value="{Binding ElementName=Media, Path=Position.TotalMilliseconds, Mode=OneWay}"/>
             <Button Grid.Column="4" Content="Next" Command="{Binding StopCmd}"/>
         </Grid>
-        <Grid DockPanel.Dock="Right" Width="141" Margin="5">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="2*"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="3*"/>
-            </Grid.RowDefinitions>
-            <TextBlock HorizontalAlignment="Center" Grid.Row="0"
-                        TextWrapping="Wrap"
-                        TextAlignment="Center"
-                       Text="{Binding SelectedSong}" />
-            <TextBlock Text="{Binding TagEditorVm.TagHeader}" Grid.Row="1"/>
-            <ListBox ItemsSource="{Binding TagEditorVm.TagList}" Grid.Row="2" 
-                     SelectedItem="{Binding TagEditorVm.SelectedOldTag}"
-                     SelectedIndex="{Binding TagEditorVm.TagListIndex}"
-                     >
-                <ListBox.InputBindings>
-                    <KeyBinding Key="Delete" Command="{Binding TagEditorVm.RemoveTagCmd}"/>
-                </ListBox.InputBindings>
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction Command="{Binding TagEditorVm.RemoveTagCmd}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </ListBox>
-            <TextBox x:Name="TagPrefixBox"
-                     Text="{Binding TagEditorVm.Prefix, UpdateSourceTrigger=PropertyChanged}" 
-                     PreviewKeyDown="TagPrefixBox_OnPreviewKeyDown" 
-                     Grid.Row="3" >
-                <TextBox.InputBindings>
-                    <KeyBinding Key="Enter" Command="{Binding TagEditorVm.CreateNewTagCmd}"/>
-                </TextBox.InputBindings>
-            </TextBox>
-            <ListBox x:Name="TagPredictionBox"
-                     PreviewKeyDown="TagPredictionBox_OnPreviewKeyDown"
-                     Height="300"
-                     ItemsSource="{Binding TagEditorVm.Prediction}"
-                     SelectedIndex="{Binding TagEditorVm.SelectedIndex}" Grid.Row="4"
-                     SelectedItem="{Binding TagEditorVm.SelectedNewTag, Mode=OneWayToSource}">
-                <ListBox.InputBindings>
-                    <KeyBinding Key="Enter" Command="{Binding TagEditorVm.AddTagCmd}"/>
-                </ListBox.InputBindings>
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction Command="{Binding TagEditorVm.AddTagCmd}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </ListBox>
-        </Grid>
-        <ListBox DockPanel.Dock="Left" Width="141" 
-                 ItemsSource="{Binding SongQueue, Mode=TwoWay}"
-                 wpfElements:DragAndDropBehavior.DragAndDropBehaviour="{Binding QueueDropCmd}"
-                 AllowDrop="True"
-                 />
         <MediaElement x:Name="Media"
                       Source="{Binding SelectedSong.Location}"
                       LoadedBehavior="Manual"
@@ -105,7 +50,33 @@
                       Volume="{Binding ElementName=VolumeSlider, Path=Value}"
                       wpfElements:PlaybackControlBehavior.Milliseconds="{Binding CurrentTime, Mode=TwoWay}"
                       />
-        <wpfElements:WpfDataGrid DockPanel.Dock="Right" 
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <ListBox Grid.Column="0" 
+                 ItemsSource="{Binding SongQueue, Mode=TwoWay}"
+                 wpfElements:DragAndDropBehavior.DragAndDropBehaviour="{Binding QueueDropCmd}"
+                 AllowDrop="True"
+                 SelectedItem="{Binding SelectedInQueue, Mode=TwoWay}"
+                 >
+                <ListBox.InputBindings>
+                    <KeyBinding Key="Delete" Command="{Binding RemoveFromQueueCmd}"/>
+                </ListBox.InputBindings>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction Command="{Binding SwitchToSongCmd}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
+            <GridSplitter Grid.Column ="1" Background="LightGray" Width="3"
+                HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                          ShowsPreview="True"/>
+            <wpfElements:WpfDataGrid Grid.Column="2"
                   ItemsSource="{Binding DisplayedSongs, IsAsync=True}" 
                   AutoGenerateColumns="False"
                   SelectionMode="Extended" 
@@ -117,44 +88,98 @@
                   SelectedItemsList="{Binding TagEditorVm.Songs, Mode=OneWayToSource}"
                   wpfElements:DataGridColumnsBehavior.BindableColumns="{Binding ColumnManager.Columns, Mode=OneWay}"
                   SelectedItem="{Binding SelectedSong, Mode=OneWayToSource}">
-            <DataGrid.ContextMenu>
-                <ContextMenu >
-                    <MenuItem Header="Edit Tags" Command="{Binding OpenContextMenu}"/>
-                </ContextMenu>
-            </DataGrid.ContextMenu>
-            <DataGrid.GroupStyle>
-                <GroupStyle>
-                    <GroupStyle.Panel>
-                        <ItemsPanelTemplate>
-                            <DataGridRowsPresenter/>
-                        </ItemsPanelTemplate>
-                    </GroupStyle.Panel>
-                    <GroupStyle.ContainerStyle>
-                        <Style TargetType="{x:Type GroupItem}">
-                            <Setter Property="Margin" Value="0,0,0,5"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type GroupItem}">
-                                        <Expander IsExpanded="True">
-                                            <Expander.Header>
-                                                <DockPanel>
-                                                    <TextBlock Text="{Binding Path=Name}"/>
-                                                    <TextBlock Text=" ("/>
-                                                    <TextBlock Text="{Binding Path=ItemCount}"/>
-                                                    <TextBlock Text=" songs)"/>
-                                                </DockPanel>
-                                            </Expander.Header>
-                                            <Expander.Content>
-                                                <ItemsPresenter />
-                                            </Expander.Content>
-                                        </Expander>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </GroupStyle.ContainerStyle>
-                </GroupStyle>
-            </DataGrid.GroupStyle>
-        </wpfElements:WpfDataGrid>
+                <DataGrid.ContextMenu>
+                    <ContextMenu >
+                        <MenuItem Header="Edit Tags" Command="{Binding OpenContextMenu}"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.Panel>
+                            <ItemsPanelTemplate>
+                                <DataGridRowsPresenter/>
+                            </ItemsPanelTemplate>
+                        </GroupStyle.Panel>
+                        <GroupStyle.ContainerStyle>
+                            <Style TargetType="{x:Type GroupItem}">
+                                <Setter Property="Margin" Value="0,0,0,5"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type GroupItem}">
+                                            <Expander IsExpanded="True">
+                                                <Expander.Header>
+                                                    <DockPanel>
+                                                        <TextBlock Text="{Binding Path=Name}"/>
+                                                        <TextBlock Text=" ("/>
+                                                        <TextBlock Text="{Binding Path=ItemCount}"/>
+                                                        <TextBlock Text=" songs)"/>
+                                                    </DockPanel>
+                                                </Expander.Header>
+                                                <Expander.Content>
+                                                    <ItemsPresenter />
+                                                </Expander.Content>
+                                            </Expander>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </GroupStyle.ContainerStyle>
+                    </GroupStyle>
+                </DataGrid.GroupStyle>
+            </wpfElements:WpfDataGrid>
+            <GridSplitter Grid.Column ="3" Background="LightGray" Width="3"
+                HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                          ShowsPreview="True"/>
+            <Grid Grid.Column="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="3*"/>
+                </Grid.RowDefinitions>
+                <TextBlock HorizontalAlignment="Center" Grid.Row="0"
+                        TextWrapping="Wrap"
+                        TextAlignment="Center"
+                       Text="{Binding SelectedSong}" />
+                <TextBlock Text="{Binding TagEditorVm.TagHeader}" Grid.Row="1"/>
+                <ListBox ItemsSource="{Binding TagEditorVm.TagList}" Grid.Row="2" 
+                     SelectedItem="{Binding TagEditorVm.SelectedOldTag}"
+                     SelectedIndex="{Binding TagEditorVm.TagListIndex}"
+                     >
+                    <ListBox.InputBindings>
+                        <KeyBinding Key="Delete" Command="{Binding TagEditorVm.RemoveTagCmd}"/>
+                    </ListBox.InputBindings>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding TagEditorVm.RemoveTagCmd}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
+                <TextBox x:Name="TagPrefixBox"
+                     Text="{Binding TagEditorVm.Prefix, UpdateSourceTrigger=PropertyChanged}" 
+                     PreviewKeyDown="TagPrefixBox_OnPreviewKeyDown" 
+                     Grid.Row="3" >
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding TagEditorVm.CreateNewTagCmd}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+                <ListBox x:Name="TagPredictionBox"
+                     PreviewKeyDown="TagPredictionBox_OnPreviewKeyDown"
+                     Height="300"
+                     ItemsSource="{Binding TagEditorVm.Prediction}"
+                     SelectedIndex="{Binding TagEditorVm.SelectedIndex}" Grid.Row="4"
+                     SelectedItem="{Binding TagEditorVm.SelectedNewTag, Mode=OneWayToSource}">
+                    <ListBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding TagEditorVm.AddTagCmd}"/>
+                    </ListBox.InputBindings>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding TagEditorVm.AddTagCmd}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ListBox>
+            </Grid>
+        </Grid>
     </DockPanel>
 </Window>
