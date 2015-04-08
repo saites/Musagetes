@@ -66,6 +66,7 @@
       <HintPath>..\packages\MvvmFoundation.Wpf.1.0.0\lib\net40\MvvmFoundation.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
@@ -93,6 +94,11 @@
     <Compile Include="CreateNewTagWindow.xaml.cs">
       <DependentUpon>CreateNewTagWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="WpfElements\DataGridColumnsBehavior.cs" />
     <Compile Include="MainWindowVm.cs" />
     <Compile Include="WpfElements\DragAndDropBehavior.cs" />
@@ -108,6 +114,7 @@
     <Compile Include="TagEditorWindow.xaml.cs">
       <DependentUpon>TagEditorWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WpfElements\PlaybackStateToImageConverter.cs" />
     <Compile Include="WpfElements\VisibilityToBooleanConverter.cs" />
     <Compile Include="WpfElements\WpfDataGrid.cs" />
     <Page Include="CategoryDisplayOptions.xaml">
@@ -152,6 +159,12 @@
     <None Include="Application.ico">
       <Visible>false</Visible>
     </None>
+    <Resource Include="Collaterals\Images\BackButton.png" />
+    <Resource Include="Collaterals\Images\NextButton.png" />
+    <Resource Include="Collaterals\Images\PauseButton.png" />
+    <Resource Include="Collaterals\Images\PlayButton.png" />
+    <Resource Include="Collaterals\Images\StopButton.png" />
+    <Resource Include="Collaterals\Images\VolumeButton.png" />
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -207,6 +220,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Collaterals\SongDBNewlySaved.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath32)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,7 +1,6 @@
 ﻿<Window
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:Musagetes"
     xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
     xmlns:wpfElements="clr-namespace:Musagetes.WpfElements"
     x:Class="Musagetes.MainWindow"
@@ -9,6 +8,11 @@
 	Title="Musagetes"
 	Width="640" Height="480">
     <Window.Resources>
+        <Image Source="Collaterals/Images/PlayButton.png" x:Key="PlayButton"/>
+        <Image Source="Collaterals/Images/StopButton.png" x:Key="StopButton"/>
+        <Image Source="Collaterals/Images/PauseButton.png" x:Key="PauseButton"/>
+        <Image Source="Collaterals/Images/NextButton.png" x:Key="NextButton"/>
+        <Image Source="Collaterals/Images/BackButton.png" x:Key="BackButton"/>
     </Window.Resources>
 
     <DockPanel>
@@ -25,23 +29,52 @@
                 <MenuItem Header="Change Category Display..." Command="{Binding ChangeGroupingCmd}"/>
             </MenuItem>
         </Menu>
-        <Grid x:Name="PlaybackControls"  DockPanel.Dock="Bottom">
+        <Grid x:Name="PlaybackControls"  DockPanel.Dock="Bottom" Height="25">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="5*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Content="Play/Pause" Command="{Binding PlayCmd}"/>
-            <Slider x:Name="VolumeSlider" Grid.Column="1" 
-                    Maximum="1" Minimum="0" Value=".5" SmallChange="0.01" LargeChange=".1" />
-            <Button Grid.Column="2" Content="Prev" Command="{Binding StopCmd}"/>
-            <Slider x:Name="PositionSlider"  Grid.Column="3" 
-                    Maximum="{Binding SelectedSong.Milliseconds}" Minimum="0" 
-
-                    Value="{Binding ElementName=Media, Path=Position.TotalMilliseconds, Mode=OneWay}"/>
-            <Button Grid.Column="4" Content="Next" Command="{Binding StopCmd}"/>
+            <Button Grid.Column="0" Command="{Binding PlayCmd}">
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Setter Property="Content" Value="{StaticResource PlayButton}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PlaybackState}" 
+                                             Value="{x:Static 
+                                    wpfElements:PlaybackControlBehavior+Playback.Play}">
+                                    
+                                    <Setter Property="Content" 
+                                            Value="{StaticResource PauseButton}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+            </Button>
+            <Button Grid.Column="1" 
+                    Content="{StaticResource StopButton}" 
+                    Command="{Binding StopCmd}"/>
+            <Slider x:Name="VolumeSlider" 
+                    Grid.Column="2" 
+                    Maximum="1" 
+                    Minimum="0" 
+                    Value=".5" 
+                    SmallChange="0.01" 
+                    LargeChange=".1" />
+            <Button Grid.Column="3" Content="{StaticResource BackButton}" 
+                    Command="{Binding PrevCmd}"/>
+            <Slider x:Name="PositionSlider"  
+                    Grid.Column="4" 
+                    Maximum="{Binding SelectedSong.Milliseconds}" 
+                    Minimum="0" 
+                    Value="{Binding ElementName=Media, 
+                        Path=Position.TotalMilliseconds, Mode=OneWay}"/>
+            <Button Grid.Column="5" 
+                    Content="{StaticResource NextButton}" 
+                    Command="{Binding NextCmd}"/>
         </Grid>
         <MediaElement x:Name="Media"
                       Source="{Binding SelectedSong.Location}"

@@ -94,6 +94,38 @@ namespace Musagetes
             }
         }
 
+        public ICommand StopCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    PlaybackState = Pcb.Playback.Stop;
+                });
+            }
+        }
+
+        public ICommand NextCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    
+                });
+            }
+        }
+
+        public ICommand PrevCmd 
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    
+                });
+            }
+        }
         private Pcb.Playback _playbackState = Pcb.Playback.Stop;
 
         public Pcb.Playback PlaybackState
