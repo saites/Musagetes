@@ -29,10 +29,11 @@ namespace Musagetes.WpfElements
             typeof(WpfDataGrid), new PropertyMetadata(default(IList)));
 
         public bool IsSelecting { get; private set; }
+        public bool MouseMoved { get; private set; }
         protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
         {
             base.OnPreviewMouseDown(e);
-            _mouseMoved = false;
+            MouseMoved = false;
             var row = ((UIElement)e.OriginalSource).TryFindParent<DataGridRow>();
             if (row == null
                 || Keyboard.IsKeyDown(Key.LeftCtrl)
@@ -50,14 +51,13 @@ namespace Musagetes.WpfElements
             }
         }
 
-        private bool _mouseMoved = false;
         protected override void OnPreviewMouseUp(MouseButtonEventArgs e)
         {
             base.OnPreviewMouseUp(e);
             IsSelecting = false;
             if (Keyboard.IsKeyDown(Key.LeftCtrl) 
                 || Keyboard.IsKeyDown(Key.RightCtrl)
-                || _mouseMoved) return;
+                || MouseMoved) return;
             var row = ((UIElement)e.OriginalSource).TryFindParent<DataGridRow>();
             if (row == null) return;
             SelectedItems.Clear();
@@ -68,7 +68,7 @@ namespace Musagetes.WpfElements
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            _mouseMoved = true;
+            MouseMoved = true;
             if (e.LeftButton != MouseButtonState.Pressed
                 || IsSelecting) return;
             
