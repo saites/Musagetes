@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Drawing.Imaging;
 using System.Globalization;
+using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media.Imaging;
 
 namespace Musagetes.WpfElements
 {
@@ -10,14 +9,14 @@ namespace Musagetes.WpfElements
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(value is PlaybackControlBehavior.Playback)) return value;
-            switch ((PlaybackControlBehavior.Playback)value)
+            if (!(value is MediaState)) return value;
+            switch ((MediaState)value)
             {
-                case PlaybackControlBehavior.Playback.Play:
+                case MediaState.Play:
                     return Properties.Resources.PlayButton;
-                case PlaybackControlBehavior.Playback.Pause:
+                case MediaState.Pause:
                     return Properties.Resources.PauseButton;
-                case PlaybackControlBehavior.Playback.Stop:
+                case MediaState.Stop:
                     return Properties.Resources.StopButton;
             }
             return value;

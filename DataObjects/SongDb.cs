@@ -129,18 +129,25 @@ namespace Musagetes.DataObjects
         public void AddDefaultCategories()
         {
             CategoriesRead.WaitOne();
-            if(AddCategory(new Category(Constants.Artist)))
-                Columns.Add(new GridColumn(
-                    GridColumn.ColumnTypeEnum.Category, ArtistCategory, isVisible: false));
-            if(AddCategory(new Category(Constants.Album)))
-                Columns.Add(new GridColumn(
-                    GridColumn.ColumnTypeEnum.Category, AlbumCategory, isVisible: false));
-            if(AddCategory(new Category(Constants.Genre)))
-                Columns.Add(new GridColumn(
-                    GridColumn.ColumnTypeEnum.Category, GenreCategory, isVisible: false));
-            if(AddCategory(new Category(Constants.Uncategorized)))
-                Columns.Add(new GridColumn(
-                    GridColumn.ColumnTypeEnum.Category, UncategorizedCategory, isVisible: false));
+            lock (((ICollection) Columns).SyncRoot)
+            {
+                if (AddCategory(new Category(Constants.Artist)))
+                    Columns.Add(new GridColumn(
+                        GridColumn.ColumnTypeEnum.Category, ArtistCategory, 
+                        isVisible: false));
+                if (AddCategory(new Category(Constants.Album)))
+                    Columns.Add(new GridColumn(
+                        GridColumn.ColumnTypeEnum.Category, AlbumCategory, 
+                        isVisible: false));
+                if (AddCategory(new Category(Constants.Genre)))
+                    Columns.Add(new GridColumn(
+                        GridColumn.ColumnTypeEnum.Category, GenreCategory, 
+                        isVisible: false));
+                if (AddCategory(new Category(Constants.Uncategorized)))
+                    Columns.Add(new GridColumn(
+                        GridColumn.ColumnTypeEnum.Category, UncategorizedCategory, 
+                        isVisible: false));
+            }
         }
 
         private readonly Object _tagIdLock = new object();

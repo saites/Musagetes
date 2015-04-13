@@ -44,9 +44,7 @@
                             <Setter Property="Content" Value="{StaticResource PlayButton}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding PlaybackState}" 
-                                             Value="{x:Static 
-                                    wpfElements:PlaybackControlBehavior+Playback.Play}">
-                                    
+                                             Value="{x:Static MediaState.Play}">
                                     <Setter Property="Content" 
                                             Value="{StaticResource PauseButton}"/>
                                 </DataTrigger>
@@ -76,12 +74,11 @@
                     Content="{StaticResource NextButton}" 
                     Command="{Binding NextCmd}"/>
         </Grid>
-        <MediaElement x:Name="Media"
-                      Source="{Binding SelectedSong.Location}"
+        <wpfElements:WpfMediaElement x:Name="Media"
+                      Source="{Binding CurrentSong.Location}"
                       LoadedBehavior="Manual"
-                      wpfElements:PlaybackControlBehavior.PlaybackState="{Binding PlaybackState}"
+                      PlaybackState="{Binding PlaybackState}"
                       Volume="{Binding ElementName=VolumeSlider, Path=Value}"
-                      wpfElements:PlaybackControlBehavior.Milliseconds="{Binding CurrentTime, Mode=TwoWay}"
                       />
         <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
@@ -112,15 +109,15 @@
             <wpfElements:WpfDataGrid Grid.Column="2"
                   ItemsSource="{Binding DisplayedSongs, IsAsync=True}" 
                   AutoGenerateColumns="False"
-                  SelectionMode="Extended" 
-                  IsReadOnly="True"
+                  SelectionMode="Extended"
                   CanUserResizeRows="False"
                   x:Name="SongList"
                   VirtualizingPanel.IsVirtualizing="True"
                   VirtualizingPanel.IsVirtualizingWhenGrouping="True"
                   SelectedItemsList="{Binding TagEditorVm.Songs, Mode=OneWayToSource}"
-                  wpfElements:DataGridColumnsBehavior.BindableColumns="{Binding ColumnManager.Columns, Mode=OneWay}"
-                  SelectedItem="{Binding SelectedSong, Mode=OneWayToSource}">
+                  wpfElements:DataGridColumnsBehavior.BindableColumns=
+                                     "{Binding ColumnManager.Columns, Mode=OneWay}"
+                >
                 <DataGrid.ContextMenu>
                     <ContextMenu >
                         <MenuItem Header="Edit Tags" Command="{Binding OpenContextMenu}"/>

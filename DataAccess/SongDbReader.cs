@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -93,8 +94,11 @@ namespace Musagetes.DataAccess
 
         private void AddColumns()
         {
-            foreach(var col in _columns.Values)
-                SongDb.Columns.Add(col);
+            lock (((ICollection) SongDb.Columns).SyncRoot)
+            {
+                foreach (var col in _columns.Values)
+                    SongDb.Columns.Add(col);
+            }
         }
 
         private async Task ReadColumnsAsync(XmlReader reader)

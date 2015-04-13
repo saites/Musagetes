@@ -65,6 +65,10 @@
     <Reference Include="MvvmFoundation.Wpf">
       <HintPath>..\packages\MvvmFoundation.Wpf.1.0.0\lib\net40\MvvmFoundation.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="NLog, Version=3.2.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -99,11 +103,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Toolkit\UiHelper.cs" />
     <Compile Include="WpfElements\DataGridColumnsBehavior.cs" />
     <Compile Include="MainWindowVm.cs" />
     <Compile Include="WpfElements\DragAndDropBehavior.cs" />
     <Compile Include="WpfElements\DropListCommand.cs" />
-    <Compile Include="WpfElements\PlaybackControlBehavior.cs" />
+    <Compile Include="WpfElements\WpfMediaElement.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="TagEditorVm.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -227,6 +232,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath32)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.

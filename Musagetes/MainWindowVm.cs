@@ -13,10 +13,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
 using Musagetes.Annotations;
 using Musagetes.DataObjects;
 using Musagetes.WpfElements;
-using Pcb = Musagetes.WpfElements.PlaybackControlBehavior;
 
 namespace Musagetes
 {
@@ -87,9 +87,11 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
-                    PlaybackState = PlaybackState == Pcb.Playback.Play
-                        ? Pcb.Playback.Pause
-                        : Pcb.Playback.Play;
+                    PlaybackState = CurrentSong == null
+                        ? MediaState.Stop
+                        : (PlaybackState == MediaState.Play
+                            ? MediaState.Pause
+                            : MediaState.Play);
                 });
             }
         }
@@ -100,7 +102,7 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
-                    PlaybackState = Pcb.Playback.Stop;
+                    PlaybackState = MediaState.Stop;
                 });
             }
         }
@@ -111,7 +113,16 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
-                    
+                    var songIdx = SongQueue.IndexOf(CurrentSong);
+                    if (songIdx >= SongQueue.Count || songIdx < 0)
+                    {
+                        StopCmd.Execute(null);
+                    }
+                    else
+                    {
+                        SelectedInQueue = SongQueue.ElementAt(songIdx + 1);
+                        SwitchToSongCmd.Execute(null);
+                    }
                 });
             }
         }
@@ -122,13 +133,21 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
-                    
+                    var songIdx = SongQueue.IndexOf(CurrentSong);
+                    if (songIdx > SongQueue.Count || songIdx <= 0)
+                    {
+                        StopCmd.Execute(null);
+                    }
+                    else
+                    {
+                        SelectedInQueue = SongQueue.ElementAt(songIdx - 1);
+                        SwitchToSongCmd.Execute(null);
+                    }
                 });
             }
         }
-        private Pcb.Playback _playbackState = Pcb.Playback.Stop;
-
-        public Pcb.Playback PlaybackState
+        private MediaState _playbackState = MediaState.Stop;
+        public MediaState PlaybackState
         {
             get { return _playbackState; }
             set
@@ -428,7 +447,7 @@ namespace Musagetes
                 return new RelayCommand(() =>
                 {
                     CurrentSong = SelectedInQueue;
-                    PlaybackState = Pcb.Playback.Play;
+                    PlaybackState = MediaState.Play;
                     CurrentTime = 0;
                 });
             }

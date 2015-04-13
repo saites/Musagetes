@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -39,21 +40,30 @@ namespace Musagetes
                 return new RelayCommand(() =>
                 {
                     if (AssignedCategory == null)
-                    {
-                        AssignedCategory = new Category(CategoryName.Trim());
-                        App.SongDb.AddCategory(AssignedCategory);
-                        App.SongDb.Columns.Add(
-                            new GridColumn(GridColumn.ColumnTypeEnum.Category,
-                                AssignedCategory, isVisible: false));
-                    }
+                        CreateCategory();
                     if (NewTag == null)
-                    {
-                        NewTag = new Tag(TagName.Trim(),
-                            AssignedCategory, App.SongDb.GetNextTagId());
-                        App.SongDb.AddTag(NewTag);
-                    }
+                        CreateTag();
                     CloseAction();
                 });
+            }
+        }
+
+        private void CreateTag()
+        {
+            NewTag = new Tag(TagName.Trim(),
+                AssignedCategory, App.SongDb.GetNextTagId());
+            App.SongDb.AddTag(NewTag);
+        }
+
+        private void CreateCategory()
+        {
+            AssignedCategory = new Category(CategoryName.Trim());
+            App.SongDb.AddCategory(AssignedCategory);
+            lock (((ICollection) App.SongDb.Columns).SyncRoot)
+            {
+                App.SongDb.Columns.Add(
+                    new GridColumn(GridColumn.ColumnTypeEnum.Category,
+                        AssignedCategory, isVisible: false));
             }
         }
 

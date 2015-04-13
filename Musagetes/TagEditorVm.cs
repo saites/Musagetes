@@ -61,7 +61,7 @@ namespace Musagetes
             get
             {
                 _tagList.Clear();
-                if (_songs == null) return _tagList;
+                if (_songs == null || _songs.Count == 0) return _tagList;
 
                 foreach (var tag in _songs
                     .Cast<Song>()
