@@ -54,6 +54,7 @@ namespace Musagetes.DataAccess
                 await writer.WriteAttributeStringAsync(null, Constants.Db.Type, null, col.ColumnType.ToString());
                 await writer.WriteAttributeStringAsync(null, Constants.Db.Display, null, col.IsVisible.ToString());
                 await writer.WriteAttributeStringAsync(null, Constants.Db.Order, null, i.ToString());
+                await writer.WriteAttributeStringAsync(null, Constants.Db.Binding, null, col.Binding);
                 await writer.WriteEndElementAsync(); //</Column>
             }
             await writer.WriteEndElementAsync(); //</Columns>

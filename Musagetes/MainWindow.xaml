@@ -37,6 +37,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="5*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" Command="{Binding PlayCmd}">
                     <Button.Style>
@@ -73,13 +74,14 @@
             <Button Grid.Column="5" 
                     Content="{StaticResource NextButton}" 
                     Command="{Binding NextCmd}"/>
+            <Slider x:Name="DeviceSlider"
+                    Grid.Column="6"
+                    Maximum="{Binding DeviceCount}"
+                    Minimum="0"
+                    Value="{Binding DeviceChoice}"
+                    SmallChange="1"
+                    LargeChange="1" />
         </Grid>
-        <wpfElements:WpfMediaElement x:Name="Media"
-                      Source="{Binding CurrentSong.Location}"
-                      LoadedBehavior="Manual"
-                      PlaybackState="{Binding PlaybackState}"
-                      Volume="{Binding ElementName=VolumeSlider, Path=Value}"
-                      />
         <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -106,7 +108,7 @@
             <GridSplitter Grid.Column ="1" Background="LightGray" Width="3"
                 HorizontalAlignment="Center" VerticalAlignment="Stretch"
                           ShowsPreview="True"/>
-            <wpfElements:WpfDataGrid Grid.Column="2"
+            <wpfElements:MusagetesDataGrid Grid.Column="2"
                   ItemsSource="{Binding DisplayedSongs, IsAsync=True}" 
                   AutoGenerateColumns="False"
                   SelectionMode="Extended"
@@ -115,11 +117,24 @@
                   VirtualizingPanel.IsVirtualizing="True"
                   VirtualizingPanel.IsVirtualizingWhenGrouping="True"
                   SelectedItemsList="{Binding TagEditorVm.Songs, Mode=OneWayToSource}"
+                  SelectedItem="{Binding SelectedInGrid}"
                   wpfElements:DataGridColumnsBehavior.BindableColumns=
                                      "{Binding ColumnManager.Columns, Mode=OneWay}"
+                  PreviewTarget="{Binding PreviewSong}"
                 >
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction Command="{Binding EnqueueSongCmd}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+                <Popup>
+                   <TextBlock Text="Hello"/> 
+                </Popup>
                 <DataGrid.ContextMenu>
                     <ContextMenu >
+                        <MenuItem Header="Preview Song" Command="{Binding PreviewSongCmd}"/>
+                        <MenuItem Header="Stop Previewing Song" 
+                                  Command="{Binding StopPreviewCmd}"/>
                         <MenuItem Header="Edit Tags" Command="{Binding OpenContextMenu}"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
@@ -156,7 +171,7 @@
                         </GroupStyle.ContainerStyle>
                     </GroupStyle>
                 </DataGrid.GroupStyle>
-            </wpfElements:WpfDataGrid>
+            </wpfElements:MusagetesDataGrid>
             <GridSplitter Grid.Column ="3" Background="LightGray" Width="3"
                 HorizontalAlignment="Center" VerticalAlignment="Stretch"
                           ShowsPreview="True"/>

@@ -17,6 +17,9 @@ using System.Windows.Controls;
 using Musagetes.Annotations;
 using Musagetes.DataObjects;
 using Musagetes.WpfElements;
+using NAudio;
+using NAudio.Wave;
+using NLog;
 
 namespace Musagetes
 {
@@ -76,6 +79,8 @@ namespace Musagetes
             get { return _currentSong; }
             set
             {
+                if (_currentSong == value) return;
+                PlaybackState = MediaState.Stop;
                 _currentSong = value;
                 OnPropertyChanged();
             }
@@ -127,7 +132,7 @@ namespace Musagetes
             }
         }
 
-        public ICommand PrevCmd 
+        public ICommand PrevCmd
         {
             get
             {
@@ -146,12 +151,58 @@ namespace Musagetes
                 });
             }
         }
+
+        public int DeviceCount { get { return WaveOut.DeviceCount - 1; } }
+
+        public int DeviceChoice
+        {
+            get { return _deviceChoice; }
+            set
+            {
+                _deviceChoice = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private WaveOut waveOutDevice;
+        private AudioFileReader audioFileReader;
+
         private MediaState _playbackState = MediaState.Stop;
         public MediaState PlaybackState
         {
             get { return _playbackState; }
             set
             {
+                if (value == MediaState.Play)
+                {
+                    if (waveOutDevice == null)
+                    {
+                        waveOutDevice = new WaveOut
+                        {
+                            DeviceNumber = DeviceChoice
+                        };
+                        audioFileReader = new AudioFileReader(CurrentSong.Location);
+                        waveOutDevice.Init(audioFileReader);
+                        waveOutDevice.Play();
+                        Console.WriteLine(WaveOut.DeviceCount);
+                    }
+                    else
+                    {
+                        if (waveOutDevice.PlaybackState != NAudio.Wave.PlaybackState.Playing)
+                            waveOutDevice.Play();
+                    }
+                }
+                else if (value == MediaState.Pause && waveOutDevice != null)
+                    waveOutDevice.Pause();
+                else if (value == MediaState.Stop && waveOutDevice != null)
+                {
+                    waveOutDevice.Stop();
+                    audioFileReader.Dispose();
+                    audioFileReader = null;
+                    waveOutDevice.Dispose();
+                    waveOutDevice = null;
+                }
+
                 _playbackState = value;
                 OnPropertyChanged();
             }
@@ -429,7 +480,113 @@ namespace Musagetes
             }
         }
 
+        public ICommand EnqueueSongCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    if (SelectedInGrid != null)
+                        SongQueue.Add(SelectedInGrid);
+                });
+            }
+        }
+
+        public int PreviewDevice
+        {
+            get { return _previewDevice; }
+            set
+            {
+                _previewDevice = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public Song PreviewSong
+        {
+            get { return _previewSong; }
+            set
+            {
+                _previewSong = value;
+                PopupOpen = value != null;
+            }
+        }
+
+
+        public bool PopupOpen
+        {
+            get { return _popupOpen; }
+            set
+            {
+                _popupOpen = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private WaveOut _previewWaveOut;
+        private AudioFileReader _previewReader;
+        public ICommand PreviewSongCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    if (_selectedInGrid == null) return;
+
+                    try
+                    {
+                        StopPreviewCmd.Execute(null);
+                        _previewWaveOut = new WaveOut { DeviceNumber = PreviewDevice };
+                        _previewReader = new AudioFileReader(PreviewSong.Location);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        return;
+                    }
+
+                    _previewWaveOut.Init(_previewReader);
+                    _previewWaveOut.Play();
+                });
+            }
+        }
+
+        public ICommand StopPreviewCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    if (_previewWaveOut != null)
+                    {
+                        _previewWaveOut.Stop();
+                        _previewWaveOut.Dispose();
+                    }
+                    if(_previewReader != null)
+                        _previewReader.Dispose();
+                    _previewReader = null;
+                    _previewWaveOut = null;
+                });
+            }
+        }
+
+        public Song SelectedInGrid
+        {
+            get { return _selectedInGrid; }
+            set
+            {
+                _selectedInGrid = value;
+                OnPropertyChanged();
+            }
+        }
+
         private Song _selectedInQueue;
+        private int _deviceChoice;
+        private Song _selectedInGrid;
+        private int _previewDevice;
+        private Song _previewSong;
+        private bool _popupOpen;
+
         public Song SelectedInQueue
         {
             get { return _selectedInQueue; }

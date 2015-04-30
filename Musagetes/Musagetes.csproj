@@ -65,6 +65,9 @@
     <Reference Include="MvvmFoundation.Wpf">
       <HintPath>..\packages\MvvmFoundation.Wpf.1.0.0\lib\net40\MvvmFoundation.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="NAudio">
+      <HintPath>..\packages\NAudio.1.7.3\lib\net35\NAudio.dll</HintPath>
+    </Reference>
     <Reference Include="NLog, Version=3.2.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
@@ -121,7 +124,7 @@
     </Compile>
     <Compile Include="WpfElements\PlaybackStateToImageConverter.cs" />
     <Compile Include="WpfElements\VisibilityToBooleanConverter.cs" />
-    <Compile Include="WpfElements\WpfDataGrid.cs" />
+    <Compile Include="WpfElements\MusagetesDataGrid.cs" />
     <Page Include="CategoryDisplayOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

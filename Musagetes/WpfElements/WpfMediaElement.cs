@@ -1,36 +1,13 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using NLog;
 
 namespace Musagetes.WpfElements
 {
-    public class WpfMediaElement : MediaElement
+    public class WpfMediaElement 
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
-        public WpfMediaElement()
-        {
-            MediaEnded += OnEnded;
-            MediaFailed += OnFailed;
-            MediaOpened += OnOpened;
-        }
-
-        private void OnOpened(object sender, RoutedEventArgs args)
-        {
-            PlaybackState = MediaState.Play;
-        }
-
-        private void OnFailed(object sender, ExceptionRoutedEventArgs args)
-        {
-            PlaybackState = MediaState.Stop;
-        }
-
-        private void OnEnded(object sender, RoutedEventArgs args)
-        {
-            PlaybackState = MediaState.Stop;
-        }
 
         public static readonly DependencyProperty MillisecondsProperty =
             DependencyProperty.RegisterAttached("Milliseconds",
@@ -87,10 +64,5 @@ namespace Musagetes.WpfElements
             }
         }
 
-        public MediaState PlaybackState
-        {
-            get { return (MediaState)GetValue(PlaybackStateProperty); }
-            set { SetValue(PlaybackStateProperty, value); }
-        }
     }
 }
