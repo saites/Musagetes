@@ -40,18 +40,18 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" Command="{Binding PlayCmd}">
-                    <Button.Style>
-                        <Style TargetType="{x:Type Button}">
-                            <Setter Property="Content" Value="{StaticResource PlayButton}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding PlaybackState}" 
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="Content" Value="{StaticResource PlayButton}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PlaybackState}" 
                                              Value="{x:Static MediaState.Play}">
-                                    <Setter Property="Content" 
+                                <Setter Property="Content" 
                                             Value="{StaticResource PauseButton}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
             </Button>
             <Button Grid.Column="1" 
                     Content="{StaticResource StopButton}" 
@@ -127,17 +127,30 @@
                         <i:InvokeCommandAction Command="{Binding EnqueueSongCmd}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
-                <Popup>
-                   <TextBlock Text="Hello"/> 
-                </Popup>
-                <DataGrid.ContextMenu>
-                    <ContextMenu >
-                        <MenuItem Header="Preview Song" Command="{Binding PreviewSongCmd}"/>
-                        <MenuItem Header="Stop Previewing Song" 
-                                  Command="{Binding StopPreviewCmd}"/>
-                        <MenuItem Header="Edit Tags" Command="{Binding OpenContextMenu}"/>
-                    </ContextMenu>
-                </DataGrid.ContextMenu>
+                <DataGrid.Resources>
+                </DataGrid.Resources>
+                <DataGrid.RowDetailsTemplate>
+                    <DataTemplate>
+                        <Popup DataContext="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type wpfElements:MusagetesDataGrid}}, Path=DataContext}" 
+                               IsOpen="{Binding PopupOpen}"
+                               StaysOpen="False"
+                               Placement="Bottom"
+                               >
+                               <TextBlock Text="{Binding PreviewSong.SongTitle}" 
+                                          Background="White"/>
+                        </Popup>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="LightCyan"/>
+                                <Setter Property="Foreground" Value="Black"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
                 <DataGrid.GroupStyle>
                     <GroupStyle>
                         <GroupStyle.Panel>

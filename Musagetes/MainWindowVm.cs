@@ -270,7 +270,10 @@ namespace Musagetes
 
         private void GroupCategoriesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (DisplayedSongs == null || DisplayedSongs.GroupDescriptions == null) return;
+            if (DisplayedSongs == null) return;
+            lock(_displayedSongs)
+                if(DisplayedSongs.GroupDescriptions == null) 
+                    return;
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
@@ -469,7 +472,15 @@ namespace Musagetes
 
         public ICommand RefreshTagsCmd
         {
-            get { return new RelayCommand(() => DisplayedSongs.Refresh()); }
+            get
+            {
+                return new RelayCommand(() =>
+                {
+
+                    lock (_displayedSongs) DisplayedSongs.Refresh();
+
+                });
+            }
         }
 
         public ICommand QueueDropCmd
