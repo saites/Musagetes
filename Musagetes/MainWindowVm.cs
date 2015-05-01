@@ -181,10 +181,15 @@ namespace Musagetes
                         {
                             DeviceNumber = DeviceChoice
                         };
-                        audioFileReader = new AudioFileReader(CurrentSong.Location);
-                        waveOutDevice.Init(audioFileReader);
-                        waveOutDevice.Play();
-                        Console.WriteLine(WaveOut.DeviceCount);
+                        try
+                        {
+                            audioFileReader = new AudioFileReader(CurrentSong.Location);
+                            waveOutDevice.Init(audioFileReader);
+                            waveOutDevice.Play();
+                        } catch(Exception e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
                     }
                     else
                     {
@@ -194,12 +199,16 @@ namespace Musagetes
                 }
                 else if (value == MediaState.Pause && waveOutDevice != null)
                     waveOutDevice.Pause();
-                else if (value == MediaState.Stop && waveOutDevice != null)
+                else if (value == MediaState.Stop)
                 {
-                    waveOutDevice.Stop();
-                    audioFileReader.Dispose();
+                    if(waveOutDevice != null)
+                    {
+                        waveOutDevice.Stop();
+                        waveOutDevice.Dispose();
+                    }
+                    if(audioFileReader != null)
+                        audioFileReader.Dispose();
                     audioFileReader = null;
-                    waveOutDevice.Dispose();
                     waveOutDevice = null;
                 }
 

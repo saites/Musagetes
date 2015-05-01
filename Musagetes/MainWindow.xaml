@@ -13,6 +13,7 @@
         <Image Source="Collaterals/Images/PauseButton.png" x:Key="PauseButton"/>
         <Image Source="Collaterals/Images/NextButton.png" x:Key="NextButton"/>
         <Image Source="Collaterals/Images/BackButton.png" x:Key="BackButton"/>
+
     </Window.Resources>
 
     <DockPanel>
@@ -127,20 +128,31 @@
                         <i:InvokeCommandAction Command="{Binding EnqueueSongCmd}"/>
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
-                <DataGrid.Resources>
-                </DataGrid.Resources>
-                <DataGrid.RowDetailsTemplate>
-                    <DataTemplate>
-                        <Popup DataContext="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type wpfElements:MusagetesDataGrid}}, Path=DataContext}" 
-                               IsOpen="{Binding PopupOpen}"
-                               StaysOpen="False"
-                               Placement="Bottom"
-                               >
-                               <TextBlock Text="{Binding PreviewSong.SongTitle}" 
-                                          Background="White"/>
-                        </Popup>
-                    </DataTemplate>
-                </DataGrid.RowDetailsTemplate>
+                <wpfElements:MusagetesDataGrid.ContextPopup>
+                    <Popup Height="Auto" Width="200" 
+                           IsOpen="False" StaysOpen="False">
+                        <Grid Background="White">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="42" />
+                            </Grid.RowDefinitions>
+                            <Image Grid.Column="0" Grid.Row="0" Source="{Binding Art}" MaxHeight="100" MaxWidth="100"/>
+                            <Grid Grid.Column="1" Grid.Row="0">
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="{Binding SongTitle}" />
+                                    <TextBlock Text="{Binding CategoryTags[Artist]}" />
+                                    <TextBlock Text="{Binding CategoryTags[Album]}" />
+                                </StackPanel>
+                            </Grid>
+                            <Slider Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" />
+                        </Grid>
+                    </Popup>
+                </wpfElements:MusagetesDataGrid.ContextPopup>
+                <!--IsOpen="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type wpfElements:MusagetesDataGrid}}, Path=DataContext.PopupOpen}"-->
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>

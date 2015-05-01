@@ -3,6 +3,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Musagetes.Toolkit;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 
 namespace Musagetes.WpfElements
 {
@@ -30,9 +32,19 @@ namespace Musagetes.WpfElements
             set { SetValue(PreviewTargetProperty, value); }
         }
 
+        public Popup ContextPopup 
+        {
+            get { return (Popup)GetValue(ContextPopupProperty); }
+            set { SetValue(ContextPopupProperty, value); }
+        }
+
         public static DependencyProperty SelectedItemsListProperty =
             DependencyProperty.Register("SelectedItemsList", typeof(IList),
             typeof(MusagetesDataGrid), new PropertyMetadata(default(IList)));
+
+        public static DependencyProperty ContextPopupProperty =
+            DependencyProperty.Register("ContextPopup", typeof(Popup),
+            typeof(MusagetesDataGrid), new PropertyMetadata(null));
 
         public static DependencyProperty PreviewTargetProperty =
             DependencyProperty.Register("PreviewTarget", typeof (object),
@@ -43,6 +55,7 @@ namespace Musagetes.WpfElements
         protected bool MouseMoved { get; private set; }
         protected bool IsLeftButtonPressed { get; private set; }
         protected bool IsMiddleButtonPressed { get; private set; }
+
         protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
         {
             base.OnPreviewMouseDown(e);
@@ -60,6 +73,8 @@ namespace Musagetes.WpfElements
         {
             IsLeftButtonPressed = true;
             MouseMoved = false;
+
+            if (ContextPopup != null) ContextPopup.IsOpen = false;
 
             var row = ((UIElement) e.OriginalSource).TryFindParent<DataGridRow>();
             if (row == null
@@ -114,7 +129,12 @@ namespace Musagetes.WpfElements
         private void HandleMiddleButtonUp(MouseButtonEventArgs e)
         {
             PreviewTarget = ((UIElement)e.OriginalSource).TryFindParent<DataGridRow>();
-            if (PreviewTarget != null) PreviewTarget = ((DataGridRow)PreviewTarget).Item;
+            if (PreviewTarget != null && ContextPopup != null)
+            {
+                ContextPopup.PlacementTarget = (DataGridRow)PreviewTarget;
+                ContextPopup.IsOpen = true;
+                PreviewTarget = ((DataGridRow)PreviewTarget).Item;
+            }
             IsMiddleButtonPressed = false;
         }
 
@@ -130,6 +150,5 @@ namespace Musagetes.WpfElements
 
             DragDrop.DoDragDrop(this, data, DragDropEffects.Copy | DragDropEffects.Move);
         }
-
     }
 }
