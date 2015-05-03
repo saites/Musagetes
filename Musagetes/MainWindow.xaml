@@ -3,6 +3,8 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
     xmlns:wpfElements="clr-namespace:Musagetes.WpfElements"
+    xmlns:svl="clr-namespace:WPFSoundVisualizationLib;assembly=WPFSoundVisualizationLib"
+    xmlns:nad="clr-namespace:NAudio.Gui;assembly=NAudio"
     x:Class="Musagetes.MainWindow"
 	x:Name="Window"
 	Title="Musagetes"
@@ -13,7 +15,7 @@
         <Image Source="Collaterals/Images/PauseButton.png" x:Key="PauseButton"/>
         <Image Source="Collaterals/Images/NextButton.png" x:Key="NextButton"/>
         <Image Source="Collaterals/Images/BackButton.png" x:Key="BackButton"/>
-
+        <wpfElements:ObjectToSongConverter x:Key="ToSong"/>
     </Window.Resources>
 
     <DockPanel>
@@ -25,12 +27,11 @@
                 <MenuItem x:Name="UpdateMenutItem" Header="Update" Command="{Binding UpdateCmd}"/>
             </MenuItem>
             <MenuItem x:Name="TagMenu" Header="Tags">
-                <MenuItem Header="Edit Tags..." Command="{Binding EditTagsCmd}"/>
                 <MenuItem Header="Refresh Tags" Command="{Binding RefreshTagsCmd}"/>
                 <MenuItem Header="Change Category Display..." Command="{Binding ChangeGroupingCmd}"/>
             </MenuItem>
         </Menu>
-        <Grid x:Name="PlaybackControls"  DockPanel.Dock="Bottom" Height="25">
+        <Grid x:Name="PlaybackControls"  DockPanel.Dock="Bottom" Height="100">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -40,12 +41,12 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Command="{Binding PlayCmd}">
+            <Button Grid.Column="0" Command="{Binding TogglePlayCmd}">
                 <Button.Style>
                     <Style TargetType="{x:Type Button}">
                         <Setter Property="Content" Value="{StaticResource PlayButton}"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding PlaybackState}" 
+                            <DataTrigger Binding="{Binding MainPlayer.PlaybackState}" 
                                              Value="{x:Static MediaState.Play}">
                                 <Setter Property="Content" 
                                             Value="{StaticResource PauseButton}"/>
@@ -66,12 +67,8 @@
                     LargeChange=".1" />
             <Button Grid.Column="3" Content="{StaticResource BackButton}" 
                     Command="{Binding PrevCmd}"/>
-            <Slider x:Name="PositionSlider"  
-                    Grid.Column="4" 
-                    Maximum="{Binding SelectedSong.Milliseconds}" 
-                    Minimum="0" 
-                    Value="{Binding ElementName=Media, 
-                        Path=Position.TotalMilliseconds, Mode=OneWay}"/>
+            <svl:WaveformTimeline x:Name="Timeline"
+                    Grid.Column="4" />
             <Button Grid.Column="5" 
                     Content="{StaticResource NextButton}" 
                     Command="{Binding NextCmd}"/>
@@ -79,7 +76,7 @@
                     Grid.Column="6"
                     Maximum="{Binding DeviceCount}"
                     Minimum="0"
-                    Value="{Binding DeviceChoice}"
+                    Value="{Binding MainPlayer.DeviceNumber}"
                     SmallChange="1"
                     LargeChange="1" />
         </Grid>
@@ -121,15 +118,13 @@
                   SelectedItem="{Binding SelectedInGrid}"
                   wpfElements:DataGridColumnsBehavior.BindableColumns=
                                      "{Binding ColumnManager.Columns, Mode=OneWay}"
-                  PreviewTarget="{Binding PreviewSong}"
+                  PreviewTarget="{Binding PreviewPlayer.Song, Mode=OneWayToSource, Converter={StaticResource ToSong}}"
                 >
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseDoubleClick">
-                        <i:InvokeCommandAction Command="{Binding EnqueueSongCmd}"/>
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
+                <wpfElements:MusagetesDataGrid.Resources>
+                    <wpfElements:BindingProxy x:Key="DataGridProxy" Data="{Binding}"/>
+                </wpfElements:MusagetesDataGrid.Resources>
                 <wpfElements:MusagetesDataGrid.ContextPopup>
-                    <Popup Height="Auto" Width="200" 
+                    <Popup Height="Auto" Width="250" 
                            IsOpen="False" StaysOpen="False">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
@@ -140,19 +135,30 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="42" />
                             </Grid.RowDefinitions>
-                            <Image Grid.Column="0" Grid.Row="0" Source="{Binding Art}" MaxHeight="100" MaxWidth="100"/>
-                            <Grid Grid.Column="1" Grid.Row="0">
+                            <Image Grid.Column="0" Grid.Row="0" 
+                                   Source="{Binding Art}" 
+                                   MaxHeight="100" MaxWidth="100"
+                                   Margin="5"/>
+                            <Grid Grid.Column="1" Grid.Row="0" Margin="5">
                                 <StackPanel Orientation="Vertical">
+                                    <StackPanel.Resources>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextWrapping" Value="Wrap"/>
+                                        </Style>
+                                    </StackPanel.Resources>
                                     <TextBlock Text="{Binding SongTitle}" />
                                     <TextBlock Text="{Binding CategoryTags[Artist]}" />
                                     <TextBlock Text="{Binding CategoryTags[Album]}" />
+                                    <StackPanel>
+                                        <Button Content="Play" Command="{Binding Data.TogglePreviewCmd,
+                                            Source={StaticResource DataGridProxy}}"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </Grid>
-                            <Slider Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" />
+                            <svl:WaveformTimeline x:Name="PreviewTimeline" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" />
                         </Grid>
                     </Popup>
                 </wpfElements:MusagetesDataGrid.ContextPopup>
-                <!--IsOpen="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type wpfElements:MusagetesDataGrid}}, Path=DataContext.PopupOpen}"-->
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>
@@ -211,7 +217,7 @@
                 <TextBlock HorizontalAlignment="Center" Grid.Row="0"
                         TextWrapping="Wrap"
                         TextAlignment="Center"
-                       Text="{Binding SelectedSong}" />
+                       Text="{Binding SelectedInGrid}" />
                 <TextBlock Text="{Binding TagEditorVm.TagHeader}" Grid.Row="1"/>
                 <ListBox ItemsSource="{Binding TagEditorVm.TagList}" Grid.Row="2" 
                      SelectedItem="{Binding TagEditorVm.SelectedOldTag}"

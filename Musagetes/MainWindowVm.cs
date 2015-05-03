@@ -17,7 +17,6 @@ using System.Windows.Controls;
 using Musagetes.Annotations;
 using Musagetes.DataObjects;
 using Musagetes.WpfElements;
-using NAudio;
 using NAudio.Wave;
 using NLog;
 
@@ -25,13 +24,29 @@ namespace Musagetes
 {
     class MainWindowVm : INotifyPropertyChanged
     {
-        ObservableCollection<Song> _songQueue;
-        ListCollectionView _displayedSongs;
-        private Song _currentSong;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private ObservableCollection<Song> _songQueue;
+        private ListCollectionView _displayedSongs;
+        private readonly Dictionary<Category, PropertyGroupDescription>
+            _groupDescriptionDictionary = new Dictionary<Category, PropertyGroupDescription>();
+
+        private IList _selectedSongs;
+        private TagEditorVm _tagEditorVm;
+        private ColumnManager _columnManager;
+        private Song _selectedInQueue;
+        private Song _selectedInGrid;
+
+        public NAudioPlayer MainPlayer { get; private set; }
+        public NAudioPlayer PreviewPlayer { get; private set; }
 
         public MainWindowVm()
         {
             TagEditorVm = new TagEditorVm();
+            MainPlayer = new NAudioPlayer(-1, true);
+            PreviewPlayer = DeviceCount > 1 
+                ? new NAudioPlayer(-1, false) 
+                : new NAudioPlayer(-1, false);
+
             _columnManager = new ColumnManager();
 
             BindingOperations.EnableCollectionSynchronization(
@@ -64,162 +79,7 @@ namespace Musagetes
             SongQueue = new OrderedObservableCollection<Song>();
         }
 
-        private long _currentTime;
-        public long CurrentTime
-        {
-            get { return _currentTime; }
-            set
-            {
-                _currentTime = value;
-                OnPropertyChanged();
-            }
-        }
-        public Song CurrentSong
-        {
-            get { return _currentSong; }
-            set
-            {
-                if (_currentSong == value) return;
-                PlaybackState = MediaState.Stop;
-                _currentSong = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ICommand PlayCmd
-        {
-            get
-            {
-                return new RelayCommand(() =>
-                {
-                    PlaybackState = CurrentSong == null
-                        ? MediaState.Stop
-                        : (PlaybackState == MediaState.Play
-                            ? MediaState.Pause
-                            : MediaState.Play);
-                });
-            }
-        }
-
-        public ICommand StopCmd
-        {
-            get
-            {
-                return new RelayCommand(() =>
-                {
-                    PlaybackState = MediaState.Stop;
-                });
-            }
-        }
-
-        public ICommand NextCmd
-        {
-            get
-            {
-                return new RelayCommand(() =>
-                {
-                    var songIdx = SongQueue.IndexOf(CurrentSong);
-                    if (songIdx >= SongQueue.Count || songIdx < 0)
-                    {
-                        StopCmd.Execute(null);
-                    }
-                    else
-                    {
-                        SelectedInQueue = SongQueue.ElementAt(songIdx + 1);
-                        SwitchToSongCmd.Execute(null);
-                    }
-                });
-            }
-        }
-
-        public ICommand PrevCmd
-        {
-            get
-            {
-                return new RelayCommand(() =>
-                {
-                    var songIdx = SongQueue.IndexOf(CurrentSong);
-                    if (songIdx > SongQueue.Count || songIdx <= 0)
-                    {
-                        StopCmd.Execute(null);
-                    }
-                    else
-                    {
-                        SelectedInQueue = SongQueue.ElementAt(songIdx - 1);
-                        SwitchToSongCmd.Execute(null);
-                    }
-                });
-            }
-        }
-
-        public int DeviceCount { get { return WaveOut.DeviceCount - 1; } }
-
-        public int DeviceChoice
-        {
-            get { return _deviceChoice; }
-            set
-            {
-                _deviceChoice = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private WaveOut waveOutDevice;
-        private AudioFileReader audioFileReader;
-
-        private MediaState _playbackState = MediaState.Stop;
-        public MediaState PlaybackState
-        {
-            get { return _playbackState; }
-            set
-            {
-                if (value == MediaState.Play)
-                {
-                    if (waveOutDevice == null)
-                    {
-                        waveOutDevice = new WaveOut
-                        {
-                            DeviceNumber = DeviceChoice
-                        };
-                        try
-                        {
-                            audioFileReader = new AudioFileReader(CurrentSong.Location);
-                            waveOutDevice.Init(audioFileReader);
-                            waveOutDevice.Play();
-                        } catch(Exception e)
-                        {
-                            Console.WriteLine(e.Message);
-                        }
-                    }
-                    else
-                    {
-                        if (waveOutDevice.PlaybackState != NAudio.Wave.PlaybackState.Playing)
-                            waveOutDevice.Play();
-                    }
-                }
-                else if (value == MediaState.Pause && waveOutDevice != null)
-                    waveOutDevice.Pause();
-                else if (value == MediaState.Stop)
-                {
-                    if(waveOutDevice != null)
-                    {
-                        waveOutDevice.Stop();
-                        waveOutDevice.Dispose();
-                    }
-                    if(audioFileReader != null)
-                        audioFileReader.Dispose();
-                    audioFileReader = null;
-                    waveOutDevice = null;
-                }
-
-                _playbackState = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private readonly Dictionary<Category, PropertyGroupDescription>
-            _groupDescriptionDictionary = new Dictionary<Category, PropertyGroupDescription>();
-
+        #region Column Management
         public ColumnManager ColumnManager
         {
             get { return _columnManager; }
@@ -280,8 +140,8 @@ namespace Musagetes
         private void GroupCategoriesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (DisplayedSongs == null) return;
-            lock(_displayedSongs)
-                if(DisplayedSongs.GroupDescriptions == null) 
+            lock (_displayedSongs)
+                if (DisplayedSongs.GroupDescriptions == null)
                     return;
             switch (e.Action)
             {
@@ -334,11 +194,30 @@ namespace Musagetes
                 }
             }
         }
+        #endregion
 
-        public List<string> BigTagList
+        public int MainDeviceNumber
         {
-            get { return App.SongDb.TagIds.Values.Select(t => t.TagName).ToList(); }
+            get { return MainPlayer.DeviceNumber; }
+            set
+            {
+                MainPlayer.DeviceNumber = value;
+                OnPropertyChanged();
+            }
         }
+
+        public int PreviewDeviceNumber
+        {
+            get { return PreviewPlayer.DeviceNumber; }
+            set
+            {
+                PreviewPlayer.DeviceNumber = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int DeviceCount { get { return WaveOut.DeviceCount - 1; } }
+
         public ListCollectionView DisplayedSongs
         {
             get { return _displayedSongs; }
@@ -365,6 +244,7 @@ namespace Musagetes
             }
         }
 
+        #region Menu Commands
         public ICommand QuitCmd
         {
             get
@@ -372,6 +252,7 @@ namespace Musagetes
                 return new RelayCommand(() => Environment.Exit(0));
             }
         }
+
         public ICommand AddDirCmd
         {
             get
@@ -429,69 +310,19 @@ namespace Musagetes
             }
         }
 
-        private Song _selectedSong;
-        public Song SelectedSong
-        {
-            get { return _selectedSong; }
-            set
-            {
-                _selectedSong = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private IList _selectedSongs;
-        public IList SelectedSongs
-        {
-            get { return _selectedSongs; }
-            set
-            {
-                _selectedSongs = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private TagEditorVm _tagEditorVm;
-        private ColumnManager _columnManager;
-
-        public TagEditorVm TagEditorVm
-        {
-            get { return _tagEditorVm; }
-            set
-            {
-                _tagEditorVm = value;
-                OnPropertyChanged();
-            }
-        }
-        public ICommand OpenContextMenu
-        {
-            get
-            {
-                return new RelayCommand(() =>
-                {
-                    var tagEditor = new TagEditorWindow
-                        {
-                            DataContext = TagEditorVm
-                        };
-                    tagEditor.ShowDialog();
-                }
-                );
-            }
-        }
-
         public ICommand RefreshTagsCmd
         {
             get
             {
                 return new RelayCommand(() =>
                 {
-
                     lock (_displayedSongs) DisplayedSongs.Refresh();
-
                 });
             }
         }
+        #endregion
 
+        #region Queue Commands
         public ICommand QueueDropCmd
         {
             get
@@ -512,81 +343,145 @@ namespace Musagetes
             }
         }
 
-        public int PreviewDevice
-        {
-            get { return _previewDevice; }
-            set
-            {
-                _previewDevice = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public Song PreviewSong
-        {
-            get { return _previewSong; }
-            set
-            {
-                _previewSong = value;
-                PopupOpen = value != null;
-            }
-        }
-
-
-        public bool PopupOpen
-        {
-            get { return _popupOpen; }
-            set
-            {
-                _popupOpen = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private WaveOut _previewWaveOut;
-        private AudioFileReader _previewReader;
-        public ICommand PreviewSongCmd
+        public ICommand RemoveFromQueueCmd
         {
             get
             {
                 return new RelayCommand(() =>
                 {
-                    if (_selectedInGrid == null) return;
-
-                    try
-                    {
-                        StopPreviewCmd.Execute(null);
-                        _previewWaveOut = new WaveOut { DeviceNumber = PreviewDevice };
-                        _previewReader = new AudioFileReader(PreviewSong.Location);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
-                        return;
-                    }
-
-                    _previewWaveOut.Init(_previewReader);
-                    _previewWaveOut.Play();
+                    SongQueue.Remove(SelectedInQueue);
                 });
             }
         }
+        #endregion
 
-        public ICommand StopPreviewCmd
+        #region Playback Commands
+        public ICommand TogglePlayCmd
         {
             get
             {
                 return new RelayCommand(() =>
                 {
-                    if (_previewWaveOut != null)
-                    {
-                        _previewWaveOut.Stop();
-                        _previewWaveOut.Dispose();
-                    }
-                    if(_previewReader != null)
-                        _previewReader.Dispose();
-                    _previewReader = null;
-                    _previewWaveOut = null;
+                    if (MainPlayer.Song == null) return;
+
+                    MainPlayer.PlaybackState = 
+                        MainPlayer.IsPlaying
+                            ? MediaState.Pause
+                            : MediaState.Play;
                 });
+            }
+        }
+
+        public ICommand StopCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    MainPlayer.PlaybackState = MediaState.Stop;
+                });
+            }
+        }
+
+        bool _restartMainPlayer; 
+        public ICommand TogglePreviewCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    if (PreviewPlayer.Song == null) return;
+
+                    if (_restartMainPlayer)
+                    {
+                        TogglePlayCmd.Execute(null);
+                        _restartMainPlayer = false;
+                    }
+                    else if (PreviewPlayer.DeviceNumber == MainPlayer.DeviceNumber
+                        && MainPlayer.IsPlaying)
+                    {
+                        _restartMainPlayer = true;
+                        TogglePlayCmd.Execute(null);
+                    }
+
+                    PreviewPlayer.PlaybackState =
+                        PreviewPlayer.IsPlaying
+                            ? MediaState.Stop
+                            : MediaState.Play;
+                });
+            }
+        }
+
+        public ICommand NextCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    var songIdx = SongQueue.IndexOf(MainPlayer.Song);
+                    if (songIdx >= SongQueue.Count-1 || songIdx < 0)
+                    {
+                        StopCmd.Execute(null);
+                    }
+                    else
+                    {
+                        SelectedInQueue = SongQueue.ElementAt(songIdx + 1);
+                        SwitchToSongCmd.Execute(null);
+                    }
+                });
+            }
+        }
+
+        public ICommand PrevCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    var songIdx = SongQueue.IndexOf(MainPlayer.Song);
+                    if (songIdx > SongQueue.Count || songIdx <= 0)
+                    {
+                        StopCmd.Execute(null);
+                    }
+                    else
+                    {
+                        SelectedInQueue = SongQueue.ElementAt(songIdx - 1);
+                        SwitchToSongCmd.Execute(null);
+                    }
+                });
+            }
+        }
+
+        public ICommand SwitchToSongCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    MainPlayer.Song = SelectedInQueue;
+                    MainPlayer.PlaybackState = MediaState.Play;
+                });
+            }
+        }
+        #endregion
+
+        public IList SelectedSongs
+        {
+            get { return _selectedSongs; }
+            set
+            {
+                _selectedSongs = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public TagEditorVm TagEditorVm
+        {
+            get { return _tagEditorVm; }
+            set
+            {
+                _tagEditorVm = value;
+                OnPropertyChanged();
             }
         }
 
@@ -600,13 +495,6 @@ namespace Musagetes
             }
         }
 
-        private Song _selectedInQueue;
-        private int _deviceChoice;
-        private Song _selectedInGrid;
-        private int _previewDevice;
-        private Song _previewSong;
-        private bool _popupOpen;
-
         public Song SelectedInQueue
         {
             get { return _selectedInQueue; }
@@ -614,30 +502,6 @@ namespace Musagetes
             {
                 _selectedInQueue = value;
                 OnPropertyChanged();
-            }
-        }
-
-        public ICommand SwitchToSongCmd
-        {
-            get
-            {
-                return new RelayCommand(() =>
-                {
-                    CurrentSong = SelectedInQueue;
-                    PlaybackState = MediaState.Play;
-                    CurrentTime = 0;
-                });
-            }
-        }
-
-        public ICommand RemoveFromQueueCmd
-        {
-            get
-            {
-                return new RelayCommand(() =>
-                {
-                    SongQueue.Remove(SelectedInQueue);
-                });
             }
         }
 

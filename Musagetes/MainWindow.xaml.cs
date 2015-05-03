@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Musagetes
@@ -12,7 +11,10 @@ namespace Musagetes
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainWindowVm();
+            var vm = new MainWindowVm();
+            DataContext = vm;
+            Timeline.RegisterSoundPlayer(vm.MainPlayer);
+            PreviewTimeline.RegisterSoundPlayer(vm.PreviewPlayer);
         }
 
         private void TagPrefixBox_OnPreviewKeyDown(object sender, KeyEventArgs e)

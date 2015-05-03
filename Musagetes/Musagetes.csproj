@@ -102,6 +102,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WPFSoundVisualizationLib">
+      <HintPath>..\WPFSVL\Bin\WPFSoundVisualizationLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -119,12 +122,16 @@
     <Compile Include="CreateNewTagWindow.xaml.cs">
       <DependentUpon>CreateNewTagWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="NAudioPlayer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SampleAggregator.cs" />
     <Compile Include="Toolkit\UiHelper.cs" />
+    <Compile Include="WpfElements\BindingProxy.cs" />
+    <Compile Include="WpfElements\ObjectToSongConverter.cs" />
     <Compile Include="WpfElements\DataGridColumnsBehavior.cs" />
     <Compile Include="MainWindowVm.cs" />
     <Compile Include="WpfElements\DragAndDropBehavior.cs" />

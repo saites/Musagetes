@@ -1,10 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Runtime.Remoting.Channels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Musagetes.Toolkit;
 using System.Windows.Controls.Primitives;
-using System.Windows.Media;
 
 namespace Musagetes.WpfElements
 {
@@ -44,24 +45,44 @@ namespace Musagetes.WpfElements
 
         public static DependencyProperty ContextPopupProperty =
             DependencyProperty.Register("ContextPopup", typeof(Popup),
-            typeof(MusagetesDataGrid), new PropertyMetadata(null));
+            typeof(MusagetesDataGrid), new PropertyMetadata(null, OnContextPopupChanged));
 
-        public static DependencyProperty PreviewTargetProperty =
+        private static void OnContextPopupChanged(DependencyObject d, 
+            DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue == null) return;
+            var cp = ((Popup) e.NewValue);
+            /*
+            cp.LostFocus += OnContextPopupLostFocus;
+            cp.LostKeyboardFocus += OnContextPopupLostFocus;
+            cp.Focusable = true;
+            */
+            var grid = (MusagetesDataGrid) d;
+            cp.Closed += (sender, ev) => { grid.PreviewTarget = null; };
+        }
+
+        private static void OnContextPopupLostFocus(object sender, RoutedEventArgs e)
+        {
+            var cp = sender as Popup;
+            if (cp == null) return;
+            cp.IsOpen = false;
+        }
+
+        public static readonly DependencyProperty PreviewTargetProperty =
             DependencyProperty.Register("PreviewTarget", typeof (object),
-                typeof (MusagetesDataGrid), new FrameworkPropertyMetadata(null, 
-                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+                typeof (MusagetesDataGrid), new FrameworkPropertyMetadata(null));
 
         protected bool IsSelecting { get; private set; }
         protected bool MouseMoved { get; private set; }
         protected bool IsLeftButtonPressed { get; private set; }
-        protected bool IsMiddleButtonPressed { get; private set; }
+        protected bool IsRightButtonPressed { get; private set; }
 
         protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
         {
             base.OnPreviewMouseDown(e);
 
-            if (e.MiddleButton == MouseButtonState.Pressed)
-                IsMiddleButtonPressed = true;
+            if (e.RightButton == MouseButtonState.Pressed)
+                IsRightButtonPressed = true;
 
             if (e.LeftButton == MouseButtonState.Pressed)
             {
@@ -73,8 +94,6 @@ namespace Musagetes.WpfElements
         {
             IsLeftButtonPressed = true;
             MouseMoved = false;
-
-            if (ContextPopup != null) ContextPopup.IsOpen = false;
 
             var row = ((UIElement) e.OriginalSource).TryFindParent<DataGridRow>();
             if (row == null
@@ -97,16 +116,14 @@ namespace Musagetes.WpfElements
         {
             base.OnPreviewMouseUp(e);
 
-            if (e.ChangedButton == MouseButton.Middle 
-                && e.MiddleButton == MouseButtonState.Released
-                && IsMiddleButtonPressed)
+            if (e.ChangedButton == MouseButton.Right 
+                && e.RightButton == MouseButtonState.Released)
             {
-                HandleMiddleButtonUp(e);
+                HandleRightButtonUp(e);
             }
 
             if (e.ChangedButton == MouseButton.Left
-                && e.LeftButton == MouseButtonState.Released
-                && IsLeftButtonPressed)
+                && e.LeftButton == MouseButtonState.Released)
             {
                 HandleLeftButtonUp(e);
             }
@@ -126,7 +143,7 @@ namespace Musagetes.WpfElements
             e.Handled = true;
         }
 
-        private void HandleMiddleButtonUp(MouseButtonEventArgs e)
+        private void HandleRightButtonUp(MouseButtonEventArgs e)
         {
             PreviewTarget = ((UIElement)e.OriginalSource).TryFindParent<DataGridRow>();
             if (PreviewTarget != null && ContextPopup != null)
@@ -134,8 +151,13 @@ namespace Musagetes.WpfElements
                 ContextPopup.PlacementTarget = (DataGridRow)PreviewTarget;
                 ContextPopup.IsOpen = true;
                 PreviewTarget = ((DataGridRow)PreviewTarget).Item;
+                ContextPopup.Focus();
             }
-            IsMiddleButtonPressed = false;
+            else if(ContextPopup != null)
+            {
+                ContextPopup.IsOpen = false;
+            }
+            IsRightButtonPressed = false;
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
