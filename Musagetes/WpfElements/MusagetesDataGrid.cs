@@ -52,20 +52,8 @@ namespace Musagetes.WpfElements
         {
             if (e.NewValue == null) return;
             var cp = ((Popup) e.NewValue);
-            /*
-            cp.LostFocus += OnContextPopupLostFocus;
-            cp.LostKeyboardFocus += OnContextPopupLostFocus;
-            cp.Focusable = true;
-            */
             var grid = (MusagetesDataGrid) d;
             cp.Closed += (sender, ev) => { grid.PreviewTarget = null; };
-        }
-
-        private static void OnContextPopupLostFocus(object sender, RoutedEventArgs e)
-        {
-            var cp = sender as Popup;
-            if (cp == null) return;
-            cp.IsOpen = false;
         }
 
         public static readonly DependencyProperty PreviewTargetProperty =
@@ -74,15 +62,10 @@ namespace Musagetes.WpfElements
 
         protected bool IsSelecting { get; private set; }
         protected bool MouseMoved { get; private set; }
-        protected bool IsLeftButtonPressed { get; private set; }
-        protected bool IsRightButtonPressed { get; private set; }
 
         protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
         {
             base.OnPreviewMouseDown(e);
-
-            if (e.RightButton == MouseButtonState.Pressed)
-                IsRightButtonPressed = true;
 
             if (e.LeftButton == MouseButtonState.Pressed)
             {
@@ -92,7 +75,6 @@ namespace Musagetes.WpfElements
 
         private void HandleLeftButtonDown(MouseButtonEventArgs e)
         {
-            IsLeftButtonPressed = true;
             MouseMoved = false;
 
             var row = ((UIElement) e.OriginalSource).TryFindParent<DataGridRow>();
@@ -131,7 +113,6 @@ namespace Musagetes.WpfElements
 
         private void HandleLeftButtonUp(MouseButtonEventArgs e)
         {
-            IsLeftButtonPressed = false;
             IsSelecting = false;
             if (Keyboard.IsKeyDown(Key.LeftCtrl)
                 || Keyboard.IsKeyDown(Key.RightCtrl)
@@ -145,19 +126,20 @@ namespace Musagetes.WpfElements
 
         private void HandleRightButtonUp(MouseButtonEventArgs e)
         {
+            if (ContextPopup == null) return;
+
             PreviewTarget = ((UIElement)e.OriginalSource).TryFindParent<DataGridRow>();
-            if (PreviewTarget != null && ContextPopup != null)
-            {
-                ContextPopup.PlacementTarget = (DataGridRow)PreviewTarget;
-                ContextPopup.IsOpen = true;
-                PreviewTarget = ((DataGridRow)PreviewTarget).Item;
-                ContextPopup.Focus();
-            }
-            else if(ContextPopup != null)
+            if (PreviewTarget == null)
             {
                 ContextPopup.IsOpen = false;
             }
-            IsRightButtonPressed = false;
+            else
+            {
+                ContextPopup.PlacementTarget = (DataGridRow) PreviewTarget;
+                ContextPopup.IsOpen = true;
+                PreviewTarget = ((DataGridRow) PreviewTarget).Item;
+                ContextPopup.Focus();
+            }
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -167,10 +149,10 @@ namespace Musagetes.WpfElements
             if (e.LeftButton != MouseButtonState.Pressed
                 || IsSelecting) return;
             
-            var data = new DataObject();
+            var data = new DataObject(SelectedItems);
             data.SetData(typeof(IList), SelectedItems);
 
-            DragDrop.DoDragDrop(this, data, DragDropEffects.Copy | DragDropEffects.Move);
+            DragDrop.DoDragDrop(this, data, DragDropEffects.Copy);
         }
     }
 }

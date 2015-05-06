@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 using Musagetes.DataObjects;
@@ -172,6 +171,15 @@ namespace Musagetes.DataAccess
             while (reader.LocalName.Equals(Constants.Db.Song))
             {
                 Logger.Debug("Reading a song");
+
+                UInt32 id;
+                if (!UInt32.TryParse(reader.GetAttribute(Constants.Db.Id), out id))
+                {
+                    Logger.Debug("Could not read song id");
+                    await reader.ReadAsync();
+                    continue;
+                }
+
                 if (reader.IsEmptyElement)
                 {
                     Logger.Debug("Song element is empty");
@@ -209,7 +217,8 @@ namespace Musagetes.DataAccess
                 if(!int.TryParse(await reader.TryGetContentAsync(), out bpmValue))
                     Logger.Error("Song {0} has a missing or unreadable BPM value", title);
 
-                var song = new Song(title, location, milliseconds, new BPM(bpmValue, guess), SongDb, playCount);
+                var song = new Song(title, location, milliseconds, new BPM(bpmValue, guess), 
+                    SongDb, playCount, id);
                 SongDb.AddSong(song);
 
                 reader.ConfirmElement(Constants.Db.Tags);
@@ -232,8 +241,8 @@ namespace Musagetes.DataAccess
             await reader.ReadAsync();
             while (reader.LocalName.Equals(Constants.Db.Tag))
             {
-                Int32 id;
-                if (!Int32.TryParse(await reader.TryGetContentAsync(), out id))
+                UInt32 id;
+                if (!UInt32.TryParse(await reader.TryGetContentAsync(), out id))
                 {
                     Logger.Error("Song {0} has empty or unreadable tag id", song.SongTitle);
                     continue;
@@ -294,8 +303,8 @@ namespace Musagetes.DataAccess
             {
                 Logger.Debug("Reading tag");
 
-                Int32 id;
-                if (!Int32.TryParse(reader.GetAttribute(Constants.Db.Id), out id))
+                UInt32 id;
+                if (!UInt32.TryParse(reader.GetAttribute(Constants.Db.Id), out id))
                 {
                     Logger.Debug("Could not read tag id");
                     await reader.ReadAsync();

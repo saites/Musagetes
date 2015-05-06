@@ -8,21 +8,54 @@
         <wpfElements:VisibilityToBooleanConverter x:Key="V2B"/>
     </Window.Resources>
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
         <ListBox 
-             ItemsSource ="{Binding Columns, Mode=OneWay}"
-             SelectedItem="{Binding SelectedCategory}"
+            Grid.Column="0"
+             ItemsSource ="{Binding DisplayColumns, Mode=OneWay}"
+             SelectedItem="{Binding SelectedColumn}"
              Margin="5">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox IsChecked="{Binding Visibility, Converter={StaticResource V2B}}" Margin="3"/>
+                        <CheckBox IsChecked="{Binding Visibility, 
+                            Converter={StaticResource V2B}}" Margin="3"/>
                         <TextBlock Text="{Binding Header}"/>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
             <ListBox.InputBindings>
-                <KeyBinding Key="Enter" Command="{Binding ToggleCmd}"/>
+                <KeyBinding Key="Enter" Command="{Binding ToggleVisibleCmd}"/>
             </ListBox.InputBindings>
         </ListBox>
+        <wpfElements:DropEnabledListBox
+            Grid.Column="1"
+            ItemsSource="{Binding AllCategories}"
+            SelectedItem="{Binding SelectedCategory}"
+            DropCommand="{Binding MoveCategoriesCmd}"
+            AllowDrop="True"
+            Margin="5"
+            x:Name="GroupBox"
+            >
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox Margin="3"
+                            IsChecked="{Binding IsGrouping,
+                            UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                        <TextBlock Text="{Binding}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+
+            <wpfElements:DropEnabledListBox.HighlightStyle>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="BorderBrush" Value="LightSeaGreen"/>
+                    <Setter Property="BorderThickness" Value="0 2 0 0" />
+                </Style>
+            </wpfElements:DropEnabledListBox.HighlightStyle>
+        </wpfElements:DropEnabledListBox>
     </Grid>
 </Window>

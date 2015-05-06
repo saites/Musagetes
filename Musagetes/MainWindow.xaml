@@ -3,8 +3,6 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
     xmlns:wpfElements="clr-namespace:Musagetes.WpfElements"
-    xmlns:svl="clr-namespace:WPFSoundVisualizationLib;assembly=WPFSoundVisualizationLib"
-    xmlns:nad="clr-namespace:NAudio.Gui;assembly=NAudio"
     x:Class="Musagetes.MainWindow"
 	x:Name="Window"
 	Title="Musagetes"
@@ -19,19 +17,25 @@
     </Window.Resources>
 
     <DockPanel>
-        <Menu DockPanel.Dock="Top">
-            <MenuItem x:Name="FileMenu" Header="File">
-                <MenuItem x:Name="AddDirMenuItem" Header="Add Directory" Command="{Binding AddDirCmd}"/>
-                <MenuItem x:Name="SaveMenuItem" Header="Save Database" Command="{Binding SaveCmd}"/>
-                <MenuItem x:Name="QuitMenuItem" Header="Quit" Command="{Binding QuitCmd}"/>
-                <MenuItem x:Name="UpdateMenutItem" Header="Update" Command="{Binding UpdateCmd}"/>
-            </MenuItem>
-            <MenuItem x:Name="TagMenu" Header="Tags">
-                <MenuItem Header="Refresh Tags" Command="{Binding RefreshTagsCmd}"/>
-                <MenuItem Header="Change Category Display..." Command="{Binding ChangeGroupingCmd}"/>
-            </MenuItem>
-        </Menu>
-        <Grid x:Name="PlaybackControls"  DockPanel.Dock="Bottom" Height="100">
+        <DockPanel DockPanel.Dock="Top">
+            <TextBox DockPanel.Dock="Right"
+                     Width="200"
+                     Padding="5"
+                     Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"/>
+            <Menu DockPanel.Dock="Left">
+                <MenuItem x:Name="FileMenu" Header="File">
+                    <MenuItem x:Name="AddDirMenuItem" Header="Add Directory" Command="{Binding AddDirCmd}"/>
+                    <MenuItem x:Name="SaveMenuItem" Header="Save Database" Command="{Binding SaveCmd}"/>
+                    <MenuItem x:Name="QuitMenuItem" Header="Quit" Command="{Binding QuitCmd}"/>
+                    <MenuItem x:Name="UpdateMenutItem" Header="Update" Command="{Binding UpdateCmd}"/>
+                </MenuItem>
+                <MenuItem x:Name="TagMenu" Header="Tags">
+                    <MenuItem Header="Refresh Tags" Command="{Binding RefreshTagsCmd}"/>
+                    <MenuItem Header="Change Category Display..." Command="{Binding ChangeGroupingCmd}"/>
+                </MenuItem>
+            </Menu>
+        </DockPanel>
+        <Grid x:Name="PlaybackControls"  DockPanel.Dock="Bottom" Height="25">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -62,23 +66,25 @@
                     Grid.Column="2" 
                     Maximum="1" 
                     Minimum="0" 
-                    Value=".5" 
+                    Value="{Binding MainPlayer.Volume}" 
                     SmallChange="0.01" 
                     LargeChange=".1" />
             <Button Grid.Column="3" Content="{StaticResource BackButton}" 
                     Command="{Binding PrevCmd}"/>
-            <svl:WaveformTimeline x:Name="Timeline"
+            <Slider x:Name="Timeline" Minimum="0"
+                    Maximum="{Binding MainPlayer.ChannelLength}"
+                    SmallChange="1"
+                    LargeChange="10"
+                    Value="{Binding MainPlayer.ChannelPosition}"
                     Grid.Column="4" />
             <Button Grid.Column="5" 
                     Content="{StaticResource NextButton}" 
                     Command="{Binding NextCmd}"/>
-            <Slider x:Name="DeviceSlider"
-                    Grid.Column="6"
-                    Maximum="{Binding DeviceCount}"
-                    Minimum="0"
-                    Value="{Binding MainPlayer.DeviceNumber}"
-                    SmallChange="1"
-                    LargeChange="1" />
+            <StackPanel Grid.Column="6" Orientation="Horizontal">
+                <TextBlock Text="{Binding MainPlayer.Position}"/>
+                <TextBlock Text="/"/>
+                <TextBlock Text="{Binding MainPlayer.Length}"/>
+            </StackPanel>
         </Grid>
         <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
@@ -88,12 +94,35 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <ListBox Grid.Column="0" 
+            <wpfElements:DropEnabledListBox
+                x:Name="PlayQueue"
+                Grid.Column="0" 
                  ItemsSource="{Binding SongQueue, Mode=TwoWay}"
-                 wpfElements:DragAndDropBehavior.DragAndDropBehaviour="{Binding QueueDropCmd}"
+                 DropCommand="{Binding QueueDropCmd}"
                  AllowDrop="True"
                  SelectedItem="{Binding SelectedInQueue, Mode=TwoWay}"
+                 SelectedIndex="{Binding QueueSelectionIndex, Mode=TwoWay}"
+                 InUseIndex="{Binding CurrentSongIndex, Mode=OneWay}"
                  >
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <TextBlock Text="{Binding SongTitle}"/>
+                            <TextBlock Text="{Binding Length}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <wpfElements:DropEnabledListBox.HighlightStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="BorderBrush" Value="LightSeaGreen"/>
+                        <Setter Property="BorderThickness" Value="0 2 0 0" />
+                    </Style>
+                </wpfElements:DropEnabledListBox.HighlightStyle>
+                <wpfElements:DropEnabledListBox.InUseStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="Background" Value="LightSalmon"/>
+                    </Style>
+                </wpfElements:DropEnabledListBox.InUseStyle>
                 <ListBox.InputBindings>
                     <KeyBinding Key="Delete" Command="{Binding RemoveFromQueueCmd}"/>
                 </ListBox.InputBindings>
@@ -101,8 +130,11 @@
                     <i:EventTrigger EventName="MouseDoubleClick">
                         <i:InvokeCommandAction Command="{Binding SwitchToSongCmd}"/>
                     </i:EventTrigger>
+                    <i:EventTrigger EventName="LostKeyboardFocus">
+                        <i:InvokeCommandAction Command="{Binding ClearQueueSelectionCmd}"/>
+                    </i:EventTrigger>
                 </i:Interaction.Triggers>
-            </ListBox>
+            </wpfElements:DropEnabledListBox>
             <GridSplitter Grid.Column ="1" Background="LightGray" Width="3"
                 HorizontalAlignment="Center" VerticalAlignment="Stretch"
                           ShowsPreview="True"/>
@@ -149,13 +181,57 @@
                                     <TextBlock Text="{Binding SongTitle}" />
                                     <TextBlock Text="{Binding CategoryTags[Artist]}" />
                                     <TextBlock Text="{Binding CategoryTags[Album]}" />
-                                    <StackPanel>
-                                        <Button Content="Play" Command="{Binding Data.TogglePreviewCmd,
-                                            Source={StaticResource DataGridProxy}}"/>
-                                    </StackPanel>
+                                    <Button Command="{Binding Data.TogglePreviewCmd,
+                                            Source={StaticResource DataGridProxy}}">
+                                        <Button.Style>
+                                            <Style TargetType="{x:Type Button}">
+                                                <Setter Property="Content" Value="Preview"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger 
+                                                            Binding="{Binding Data.PreviewPlayer.PlaybackState,
+                                                            Source={StaticResource DataGridProxy}}" 
+                                                             Value="{x:Static MediaState.Play}">
+                                                        <Setter Property="Content" Value="Pause Preview"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                    <Slider 
+                                        Maximum="1" 
+                                        Minimum="0" 
+                                        Value="{Binding Data.PreviewPlayer.Volume,
+                                        Source={StaticResource DataGridProxy}}" 
+                                        SmallChange="0.01" 
+                                        LargeChange=".1" />
                                 </StackPanel>
                             </Grid>
-                            <svl:WaveformTimeline x:Name="PreviewTimeline" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" />
+                            <Grid Grid.Column="0" Grid.Row="1"
+                                        Grid.ColumnSpan="2" 
+                                        Margin="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" 
+                                       Margin="2"
+                                       Text="{Binding Data.PreviewPlayer.Position,
+                                    Source={StaticResource DataGridProxy}}"/>
+                                <TextBlock Grid.Column="2" 
+                                       Margin="2"
+                                       Text="{Binding Data.PreviewPlayer.Length,
+                                    Source={StaticResource DataGridProxy}}"/>
+                                <Slider Grid.Column="1" x:Name="PreviewTimeline" 
+                                    Minimum="0"
+                                    Maximum="{Binding Data.PreviewPlayer.ChannelLength,
+                                Source={StaticResource DataGridProxy}}"
+                                    Value="{Binding Data.PreviewPlayer.ChannelPosition,
+                                Source={StaticResource DataGridProxy}}"
+                                    SmallChange="1"
+                                    LargeChange="10"
+                                    />
+                            </Grid>
                         </Grid>
                     </Popup>
                 </wpfElements:MusagetesDataGrid.ContextPopup>

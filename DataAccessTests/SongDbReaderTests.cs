@@ -130,5 +130,45 @@ namespace DataAccessTests
             Assert.IsFalse(reader.ReadSuccessful,
                 "Reading was successful, though it shouldn't have been");
         }
+
+        [TestMethod]
+        public void ReadWriteTest()
+        {
+            const string filename = "../../../Musagetes/Collaterals/Testing/ReadWriteTest.xml";
+            var songDbWrite = new SongDb(null);
+            songDbWrite.AddSong(
+                new Song("title", "location", 1234, new BPM(4321, false), songDbWrite, 321));
+            songDbWrite.AddSong(
+                new Song("title2", "location2", 7890, new BPM(987, true), songDbWrite, 654));
+            
+            var writer = new SongDbWriter(filename, songDbWrite);
+            writer.WriteDb().Wait();
+            Assert.IsTrue(writer.WriteSuccessful);
+
+            var songDbRead = new SongDb(null);
+            var reader = new SongDbReader(filename, songDbRead);
+            reader.ReadDb().Wait();
+            Assert.IsTrue(reader.ReadSuccessful);
+
+            Assert.AreEqual(songDbRead.Songs.Count, songDbWrite.Songs.Count,
+                "Reader/Writer song counts don't match");
+
+            foreach (var song in songDbWrite.Songs)
+            {
+                var localSong = song;
+                var match = songDbRead.Songs.First(s => s.SongTitle.Equals(localSong.SongTitle));
+                foreach (var tag in localSong.Tags)
+                {
+                    Assert.IsTrue(match.Tags.Count(t => t.TagName.Equals(tag.TagName)) == 1,
+                    "Read/Write dictionary have different tags");
+                }
+                Assert.AreEqual(localSong.Location, match.Location, "Locations don't match");
+                Assert.AreEqual(localSong.Milliseconds, match.Milliseconds, "Milliseconds don't match");
+                Assert.AreEqual(localSong.PlayCount, match.PlayCount, "Playcounts don't match");
+                Assert.AreEqual(localSong.Bpm.Guess, match.Bpm.Guess, "BPM Guesses don't match");
+                Assert.AreEqual(localSong.Bpm.Value, match.Bpm.Value, "BPM Values don't match");
+            }
+
+        }
     }
 }

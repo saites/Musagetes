@@ -13,8 +13,6 @@ namespace Musagetes
             InitializeComponent();
             var vm = new MainWindowVm();
             DataContext = vm;
-            Timeline.RegisterSoundPlayer(vm.MainPlayer);
-            PreviewTimeline.RegisterSoundPlayer(vm.PreviewPlayer);
         }
 
         private void TagPrefixBox_OnPreviewKeyDown(object sender, KeyEventArgs e)

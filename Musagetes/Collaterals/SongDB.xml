@@ -23,10 +23,9 @@
       <Tag id="6" name="Classical" />
       <Tag id="9" name="Jazz" />
     </Category>
-    <Category name="Uncategorized" display="False" order="8" />
   </CategoryTags>
   <Songs>
-    <Song>
+    <Song id="1">
       <SongTitle>Kalimba</SongTitle>
       <Location>C:\Users\Public\Music\Sample Music\Kalimba.mp3</Location>
       <Milliseconds>348590</Milliseconds>
@@ -38,7 +37,7 @@
         <Tag>4</Tag>
       </Tags>
     </Song>
-    <Song>
+    <Song id="2">
       <SongTitle>Maid with the Flaxen Hair</SongTitle>
       <Location>C:\Users\Public\Music\Sample Music\Maid with the Flaxen Hair.mp3</Location>
       <Milliseconds>170234</Milliseconds>
@@ -50,7 +49,7 @@
         <Tag>7</Tag>
       </Tags>
     </Song>
-    <Song>
+    <Song id="3">
       <SongTitle>Sleep Away</SongTitle>
       <Location>C:\Users\Public\Music\Sample Music\Sleep Away.mp3</Location>
       <Milliseconds>100796</Milliseconds>
@@ -63,4 +62,9 @@
       </Tags>
     </Song>
   </Songs>
+  <Playlists>
+	<Playlist name="My playlist">
+		1,2,3,1,1,2,1,3
+	</Playlist>
+  </Playlists>
 </MusagetesSongDb>

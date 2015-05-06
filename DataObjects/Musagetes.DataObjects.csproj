@@ -42,17 +42,22 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
     <Reference Include="taglib-sharp">
       <HintPath>..\taglib-sharp-2.1.0.0-windows\Libraries\taglib-sharp.dll</HintPath>
     </Reference>
+    <Reference Include="Westwind.Utilities.Configuration">
+      <HintPath>..\packages\Westwind.Utilities.Configuration.2.25\lib\net40\Westwind.Utilities.Configuration.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BPM.cs" />
     <Compile Include="Category.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="GridColumn.cs" />
     <Compile Include="OrderedObservableCollection.cs" />

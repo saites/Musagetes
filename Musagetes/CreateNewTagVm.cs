@@ -50,8 +50,7 @@ namespace Musagetes
 
         private void CreateTag()
         {
-            NewTag = new Tag(TagName.Trim(),
-                AssignedCategory, App.SongDb.GetNextTagId());
+            NewTag = new Tag(TagName.Trim(), AssignedCategory);
             App.SongDb.AddTag(NewTag);
         }
 

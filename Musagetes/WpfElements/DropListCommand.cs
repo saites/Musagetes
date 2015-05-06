@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
 
@@ -7,9 +8,9 @@ namespace Musagetes.WpfElements
 {
     public class DropListCommand<T> : ICommand
     {
-        private readonly IList _list;
+        private readonly IList<T> _list;
 
-        public DropListCommand(IList list)
+        public DropListCommand(IList<T> list)
         {
             _list = list;
         }
@@ -24,10 +25,24 @@ namespace Musagetes.WpfElements
             var dataObj = parameter as IDataObject;
             if (dataObj == null) return;
 
+            var selectedIndex = dataObj.GetData("SelectedIndex") as int? ?? -1;
+            var dropIndex = dataObj.GetData("DropIndex") as int? ?? -1;
+
+            if (selectedIndex != -1 && selectedIndex == dropIndex) return;
+
+            if (selectedIndex >= 0 && selectedIndex < _list.Count)
+            {
+                _list.RemoveAt(selectedIndex);
+                if(selectedIndex < dropIndex) dropIndex--;
+            }
+
+            if(dropIndex < 0 || dropIndex > _list.Count) 
+                dropIndex = Math.Max(_list.Count, 0); 
+
             var l = dataObj.GetData(typeof(IList));
             if (l == null) return;
             foreach (T s in (IList)l)
-                _list.Add(s);
+                _list.Insert(dropIndex++, s);
         }
 
         public event EventHandler CanExecuteChanged;

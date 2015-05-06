@@ -17,7 +17,7 @@ namespace Musagetes.DataObjects
         public ReadOnlyObservableCollection<Category> Categories { get { return _categoriesReadOnly; } }
         public ReadOnlyObservableCollection<Song> Songs { get { return _songsReadOnly; } }
         public ReadOnlyDictionary<string, Category> CategoryDictionary { get { return _categoryDictionaryReadOnly; } }
-        public ReadOnlyDictionary<int, Tag> TagIds { get { return _tagIdsReadOnly; } }
+        public ReadOnlyDictionary<uint, Tag> TagIds { get { return _tagIdsReadOnly; } }
         public ManualResetEvent CategoriesRead { get; private set; }
 
         private readonly ObservableCollection<Song> _songs;
@@ -26,8 +26,8 @@ namespace Musagetes.DataObjects
         private readonly ReadOnlyObservableCollection<Category> _categoriesReadOnly;
         private readonly Dictionary<string, Category> _categoryDictionary;
         private readonly ReadOnlyDictionary<string, Category> _categoryDictionaryReadOnly;
-        private readonly Dictionary<int, Tag> _tagIds;
-        private readonly ReadOnlyDictionary<int, Tag> _tagIdsReadOnly;
+        private readonly Dictionary<uint, Tag> _tagIds;
+        private readonly ReadOnlyDictionary<uint, Tag> _tagIdsReadOnly;
         private readonly OrderedObservableCollection<Category> _groupCategories;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -61,8 +61,8 @@ namespace Musagetes.DataObjects
             _categoryDictionary = new Dictionary<string, Category>();
             _categoryDictionaryReadOnly =
                 new ReadOnlyDictionary<string, Category>(_categoryDictionary);
-            _tagIds = new Dictionary<int, Tag>();
-            _tagIdsReadOnly = new ReadOnlyDictionary<int, Tag>(_tagIds);
+            _tagIds = new Dictionary<uint, Tag>();
+            _tagIdsReadOnly = new ReadOnlyDictionary<uint, Tag>(_tagIds);
             _groupCategories = new OrderedObservableCollection<Category>();
 
             CategoriesRead = new ManualResetEvent(false);
@@ -96,16 +96,11 @@ namespace Musagetes.DataObjects
 
         public bool AddTag(Tag tag)
         {
-            if (tag == null || _tagIds.ContainsKey(tag.TagId))
+            if (tag == null || _tagIds.ContainsKey(tag.Id))
                 return false;
             lock ((_tagIds as ICollection).SyncRoot)
             {
-                _tagIds.Add(tag.TagId, tag);
-            }
-            lock (_tagIdLock)
-            {
-                if (tag.TagId >= _nextTagId)
-                    _nextTagId = tag.TagId + 1;
+                _tagIds.Add(tag.Id, tag);
             }
             return true;
         }
@@ -150,17 +145,6 @@ namespace Musagetes.DataObjects
             }
         }
 
-        private readonly Object _tagIdLock = new object();
-        private int _nextTagId = 1;
-        public int GetNextTagId()
-        {
-            lock (_tagIdLock)
-            {
-                _nextTagId++;
-                return _nextTagId;
-            }
-        }
-
         public void InsertFromFile(string filename)
         {
             CategoriesRead.WaitOne();
@@ -183,7 +167,7 @@ namespace Musagetes.DataObjects
                     if (file.Tag.Album != null)
                     {
                         var albumTag = AlbumCategory[file.Tag.Album]
-                            ?? new Tag(file.Tag.Album, AlbumCategory, GetNextTagId());
+                               ?? new Tag(file.Tag.Album, AlbumCategory); 
                         song.TagSong(albumTag);
                     }
                     if(file.Tag.BeatsPerMinute > 0 && file.Tag.BeatsPerMinute < int.MaxValue)
@@ -203,8 +187,7 @@ namespace Musagetes.DataObjects
         {
             foreach (var tag in tagList
                 .Select(tagName =>
-                    category[tagName]
-                    ?? new Tag(tagName, category, GetNextTagId())))
+                    category[tagName] ?? new Tag(tagName, category)))
             {
                 song.TagSong(tag);
             }

@@ -1,13 +1,39 @@
 using System.Collections.Generic;
+
 namespace Musagetes.DataObjects
 {
     public class Tag
     {
-        public Tag(string tagName, Category category, int tagId)
+        public static class TagId
+        {
+            private static uint _nextTagId;
+            private static readonly object TagIdLock = new object();
+
+            public static uint GetNextTagId()
+            {
+                uint retval;
+                lock (TagIdLock) retval = _nextTagId++;
+                return retval;
+            }
+
+            public static bool UpdateTagId(uint value)
+            {
+                lock (TagIdLock)
+                {
+                    if (_nextTagId >= value) 
+                        return false;
+                    _nextTagId = value + 1;
+                    return true;
+                }
+            }
+        }
+
+        public Tag(string tagName, Category category, uint? tagId = null)
         {
             TagName = tagName;
             Category = category;
-            TagId = tagId;
+            if (tagId != null) TagId.UpdateTagId(tagId.Value);
+            Id = tagId ?? TagId.GetNextTagId();
             Songs = new HashSet<Song>();
         }
 
@@ -20,10 +46,11 @@ namespace Musagetes.DataObjects
                        : string.Empty);
         }
 
-        public int TagId { get; set; }
+        public uint Id { get; private set; }
 
         public string TagName { get; set; }
 
+        private readonly object _categoryLock = new object();
         Category _category;
         public Category Category
         {
@@ -31,15 +58,11 @@ namespace Musagetes.DataObjects
             set
             {
                 if (_category != null)
-                {
-                    lock (_category)
-                    {
+                    lock (_categoryLock)
                         _category.RemoveTag(this);
-                    }
-                }
-                _category = value;
-                lock (_category)
+                lock (_categoryLock)
                 {
+                    _category = value;
                     _category.AddTag(this);
                 }
             }

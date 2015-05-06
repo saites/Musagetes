@@ -15,6 +15,11 @@ namespace Musagetes.DataObjects
         private readonly Dictionary<string, Tag> _tagDictionary
             = new Dictionary<string,Tag>();
 
+        public override string ToString()
+        {
+            return CategoryName;
+        }
+
         public Category(string cateogryName)
         {
             CategoryName = cateogryName;

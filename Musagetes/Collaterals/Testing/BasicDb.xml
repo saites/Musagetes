@@ -1,36 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <MusagetesSongDb>
   <Columns>
-    <Column header="Title" type="BasicText" display="True" order="1" />
-    <Column header="Length" type="BasicText" display="True" order="2" />
-    <Column header="Location" type="BasicText" display="False" order="3" />
-    <Column header="BPM" type="Bpm" display="True" order="4" />
-    <Column header="Tags" type="BasicText" display="False" order="6" />
+    <Column header="Title" type="BasicText" display="True" order="0" binding="SongTitle" />
+    <Column header="Location" type="BasicText" display="True" order="1" binding="Location" />
+    <Column header="Length" type="BasicText" display="True" order="2" binding="Length" />
+    <Column header="BPM" type="Bpm" display="True" order="3" binding="" />
+    <Column header="Tags" type="BasicText" display="False" order="4" binding="SongTags" />
   </Columns>
   <CategoryTags>
-    <Category name="Artist" display="True" order="0">
+    <Category name="Artist" display="True" order="5">
       <Tag id="1" name="Brad Paisley" />
       <Tag id="2" name="Kenny Chesney" />
-      <Tag id="6" name="Mr. Scruff" />
-      <Tag id="9" name="Richard Stoltzman" />
-      <Tag id="12" name="Bob Acri" />
     </Category>
-    <Category name="Genre" display="True" order="5">
+    <Category name="Genre" display="True" order="6">
       <Tag id="3" name="Country" />
       <Tag id="4" name="Rock" />
-      <Tag id="7" name="Electronic" />
-      <Tag id="10" name="Classical" />
-      <Tag id="13" name="Jazz" />
-    </Category>
-    <Category name="Album" display="False" order="7">
-      <Tag id="8" name="Ninja Tuna" />
-      <Tag id="11" name="Fine Music, Vol. 1" />
-      <Tag id="14" name="Bob Acri" />
     </Category>
     <Category name="Uncategorized" display="False" order="8" />
   </CategoryTags>
   <Songs>
-    <Song>
+    <Song id="0">
       <SongTitle>Mud on the Tires</SongTitle>
       <Location>E:\Music\Brad Paisley\Brad Paisley - Mud on The Tires\Brad Paisley - 01 - Mud On The Tires.mp3</Location>
       <Milliseconds>140000</Milliseconds>
@@ -41,7 +30,7 @@
         <Tag>3</Tag>
       </Tags>
     </Song>
-    <Song>
+    <Song id="1">
       <SongTitle>Throttleneck</SongTitle>
       <Location>E:\Music\Brad Paisley\Brad Paisley - 5th Gear\16-brad_paisley-throttleneck.mp3</Location>
       <Milliseconds>1000</Milliseconds>
@@ -52,7 +41,7 @@
         <Tag>3</Tag>
       </Tags>
     </Song>
-    <Song>
+    <Song id="2">
       <SongTitle>When We All Get To Heaven</SongTitle>
       <Location>E:\Music\Brad Paisley\Brad Paisley - 5th Gear\15-brad_paisley-when_we_all_get_to_heaven.mp3</Location>
       <Milliseconds>1000</Milliseconds>
@@ -62,42 +51,6 @@
         <Tag>1</Tag>
         <Tag>2</Tag>
         <Tag>4</Tag>
-      </Tags>
-    </Song>
-    <Song>
-      <SongTitle>Kalimba</SongTitle>
-      <Location>C:\Users\Public\Music\Sample Music\Kalimba.mp3</Location>
-      <Milliseconds>348590</Milliseconds>
-      <PlayCount>0</PlayCount>
-      <BPM Guess="False">0</BPM>
-      <Tags>
-        <Tag>6</Tag>
-        <Tag>7</Tag>
-        <Tag>8</Tag>
-      </Tags>
-    </Song>
-    <Song>
-      <SongTitle>Maid with the Flaxen Hair</SongTitle>
-      <Location>C:\Users\Public\Music\Sample Music\Maid with the Flaxen Hair.mp3</Location>
-      <Milliseconds>170234</Milliseconds>
-      <PlayCount>0</PlayCount>
-      <BPM Guess="False">0</BPM>
-      <Tags>
-        <Tag>9</Tag>
-        <Tag>10</Tag>
-        <Tag>11</Tag>
-      </Tags>
-    </Song>
-    <Song>
-      <SongTitle>Sleep Away</SongTitle>
-      <Location>C:\Users\Public\Music\Sample Music\Sleep Away.mp3</Location>
-      <Milliseconds>100796</Milliseconds>
-      <PlayCount>0</PlayCount>
-      <BPM Guess="False">0</BPM>
-      <Tags>
-        <Tag>12</Tag>
-        <Tag>13</Tag>
-        <Tag>14</Tag>
       </Tags>
     </Song>
   </Songs>

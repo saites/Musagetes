@@ -9,6 +9,28 @@ namespace Musagetes.DataObjects
 {
     public class Song : INotifyPropertyChanged
     {
+        public static class SongId
+        {
+            private static uint _nextSongId;
+            private static readonly object _songIdLock = new object();
+            public static uint GetNextSongId()
+            {
+                lock (_songIdLock) _nextSongId++;
+                return _nextSongId;
+            }
+
+            public static bool UpdateTagId(uint value)
+            {
+                lock (_songIdLock)
+                {
+                    if (_nextSongId >= value)
+                        return false;
+                    _nextSongId = value + 1;
+                    return true;
+                }
+            }
+        }
+
         public string SongTitle { get; set; }
         public int Milliseconds { get; set; }
         public string Location { get; set; }
@@ -16,6 +38,8 @@ namespace Musagetes.DataObjects
         public CategoryTag CategoryTags { get; set; }
         public SongDb SongDb { get; private set; }
         public uint PlayCount { get; set; }
+        public uint Id { get; private set; }
+
         public IEnumerable<Tag> Tags
         {
             get { return _categoryToTag.Values.SelectMany(tagSet => tagSet); }
@@ -78,7 +102,8 @@ namespace Musagetes.DataObjects
             }
         }
 
-        public Song(string title, string location, int milliseconds, BPM bpm, SongDb songDb, uint playCount)
+        public Song(string title, string location, int milliseconds, BPM bpm, SongDb songDb, 
+            uint playCount, uint? songId = null)
         {
             SongTitle = title;
             Location = location;
@@ -87,6 +112,8 @@ namespace Musagetes.DataObjects
             SongDb = songDb;
             PlayCount = playCount;
             CategoryTags = new CategoryTag(this);
+            if (songId != null) SongId.UpdateTagId(songId.Value);
+            Id = songId ?? SongId.GetNextSongId();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -152,8 +179,7 @@ namespace Musagetes.DataObjects
         {
             get
             {
-                var ts = new TimeSpan(0, 0, 0, 0, Milliseconds);
-                return ts.ToString();
+                return TimeSpan.FromMilliseconds(Milliseconds).ToString(@"mm\:ss");
             }
         }
 
@@ -172,11 +198,11 @@ namespace Musagetes.DataObjects
                     {
                         if (file.Tag.Pictures.Length > 0)
                         {
-                            BitmapImage AlbumArt = new BitmapImage();
-                            AlbumArt.BeginInit();
-                            AlbumArt.StreamSource = new MemoryStream(file.Tag.Pictures[0].Data.Data);
-                            AlbumArt.EndInit();
-                            retval = AlbumArt;
+                            var albumArt = new BitmapImage();
+                            albumArt.BeginInit();
+                            albumArt.StreamSource = new MemoryStream(file.Tag.Pictures[0].Data.Data);
+                            albumArt.EndInit();
+                            retval = albumArt;
                         }
                     }
                 }

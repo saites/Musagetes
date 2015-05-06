@@ -11,6 +11,7 @@ namespace Musagetes.DataAccess
     {
         public string Filename { get; private set; }
         public SongDb SongDb { get; private set; }
+        public bool WriteSuccessful { get; private set; }
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public SongDbWriter(string filename, SongDb songDb)
         {
@@ -20,6 +21,7 @@ namespace Musagetes.DataAccess
 
         public async Task WriteDb()
         {
+            WriteSuccessful = false;
             var settings = new XmlWriterSettings
             {
                 Indent = true,
@@ -39,6 +41,7 @@ namespace Musagetes.DataAccess
                 await writer.WriteEndDocumentAsync();
                 await writer.FlushAsync();
             }
+            WriteSuccessful = true;
         }
 
         private async Task WriteColumnsAsync(XmlWriter writer)
@@ -66,6 +69,8 @@ namespace Musagetes.DataAccess
             foreach (var song in SongDb.Songs)
             {
                 await writer.WriteStartElementAsync(null, Constants.Db.Song, null);
+                await writer.WriteAttributeStringAsync(null, Constants.Db.Id, null,
+                    song.Id.ToString(CultureInfo.InvariantCulture));
                 await writer.WriteElementStringAsync(null, Constants.Db.SongTitle, null, 
                     song.SongTitle);
                 await writer.WriteElementStringAsync(null, Constants.Db.Location, null, 
@@ -94,7 +99,7 @@ namespace Musagetes.DataAccess
             foreach (var tag in song.Tags)
             {
                 await writer.WriteElementStringAsync(null, Constants.Db.Tag, null, 
-                    tag.TagId.ToString(CultureInfo.InvariantCulture));
+                    tag.Id.ToString(CultureInfo.InvariantCulture));
             }
             await writer.WriteEndElementAsync(); //</Tags>
         }
@@ -130,7 +135,7 @@ namespace Musagetes.DataAccess
             foreach (var tag in cat.Tags)
             {
                 await writer.WriteStartElementAsync(null, Constants.Db.Tag, null);
-                await writer.WriteAttributeStringAsync(null, Constants.Db.Id, null, tag.TagId.ToString(CultureInfo.InvariantCulture));
+                await writer.WriteAttributeStringAsync(null, Constants.Db.Id, null, tag.Id.ToString(CultureInfo.InvariantCulture));
                 await writer.WriteAttributeStringAsync(null, Constants.Db.Name, null, tag.TagName);
                 await writer.WriteEndElementAsync(); //</Tag>
             }

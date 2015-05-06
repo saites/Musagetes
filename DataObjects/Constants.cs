@@ -6,26 +6,24 @@ namespace Musagetes.DataObjects
     {
         public const string Album = "Album";
         public const string Artist = "Artist";
-        public const string CategoryTagsBinding = "CategoryTags[{0}]";
-        //public const string DbLocation = @"C:\Users\ajsaites\Documents\Mine\Musagetes\Musagetes\Collaterals\SongDBEmpty.xml";
-
-        public const string DbLocation = "../../../Musagetes/Collaterals/SongDB.xml";
-        //public const string DbLocation = @"C:\Users\ajsaites\Documents\Mine\Musagetes\Musagetes\Collaterals\SongDB.xml";
         public const string DisplayedSongs = "DisplayedSongs";
         public const string Genre = "Genre";
         public const string SongQueue = "SongQueue";
         public const string SongTags = "SongTags";
         public const string Uncategorized = "Uncategorized";
-        public const string SaveLoc = DbLocation;//@"C:\Users\ajsaites\Documents\Mine\Musagetes\Musagetes\Collaterals\SongDBNewlySaved.xml";
+        public const string CategoryTagsBinding = "CategoryTags[{0}]";
 
+        public const string DbLocation = "../../../Musagetes/Collaterals/SongDB.xml";
+        public const string SaveLoc = DbLocation;
+        
+        //@"C:\Users\ajsaites\Documents\Mine\Musagetes\Musagetes\Collaterals\SongDBNewlySaved.xml";
         //public const string saveLoc = @"C:\Users\ajsaites\Documents\Musagetes\DB\SongDBTesting.xml";
         //public const string DBLocation = @"C:\Users\saites\Documents\Visual Studio 2012\Projects\Musagetes\DB\SongDBTesting.xml";
         //public const string DBLocation = @"C:\Users\ajsaites\Documents\Musagetes\Musagetes\Musagetes\Collaterals\SongDB.xml";
-
-        public const int DataGridColumnOffset = 5;
+        //public const string DbLocation = @"C:\Users\ajsaites\Documents\Mine\Musagetes\Musagetes\Collaterals\SongDBEmpty.xml";
+        //public const string DbLocation = @"C:\Users\ajsaites\Documents\Mine\Musagetes\Musagetes\Collaterals\SongDB.xml";
 
         /* Supported File Types */
-
         public static readonly string[] SupportedFileTypes = 
         {
             /* mpeg-4 */
@@ -44,7 +42,6 @@ namespace Musagetes.DataObjects
         };
 
         /* DB Constants */
-
         public static class Db
         {
             public const string MusagetesSongDb = "MusagetesSongDb";

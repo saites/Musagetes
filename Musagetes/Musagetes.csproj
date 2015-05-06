@@ -99,6 +99,9 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="Westwind.Utilities.Configuration">
+      <HintPath>..\packages\Westwind.Utilities.Configuration.2.25\lib\net40\Westwind.Utilities.Configuration.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -131,6 +134,9 @@
     <Compile Include="SampleAggregator.cs" />
     <Compile Include="Toolkit\UiHelper.cs" />
     <Compile Include="WpfElements\BindingProxy.cs" />
+    <Compile Include="WpfElements\DropEnabledListBox.cs" />
+    <Compile Include="WpfElements\GroupCategoriesConverter.cs" />
+    <Compile Include="WpfElements\ItemIndexEqualityConverter.cs" />
     <Compile Include="WpfElements\ObjectToSongConverter.cs" />
     <Compile Include="WpfElements\DataGridColumnsBehavior.cs" />
     <Compile Include="MainWindowVm.cs" />

@@ -10,12 +10,15 @@ namespace Musagetes
 	public partial class App : SongDb.IDbReaderWriter
 	{
         public static SongDb SongDb { get; private set; }
+        public static Configuration Configuration { get; private set; }
 
         public App()
         {
             InitializeComponent();
+            Configuration = new Configuration();
+            Configuration.Initialize();
             SongDb = new SongDb(this);
-            Task.Run(() => SongDb.ReadDbAsync(Constants.DbLocation));
+            Task.Run(() => SongDb.ReadDbAsync(Configuration.DbLocation));
         }
 
         public async Task WriteDbAsync(string filename, SongDb songDb)
@@ -29,5 +32,10 @@ namespace Musagetes
             var reader = new SongDbReader(filename, songDb);
             await reader.ReadDb();
         }
-    }
+
+	    public void WriteConfiguration()
+	    {
+	        Configuration.Write();
+	    }
+	}
 }
