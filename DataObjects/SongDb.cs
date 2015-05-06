@@ -14,16 +14,14 @@ namespace Musagetes.DataObjects
     {
         public ObservableCollection<GridColumn> Columns { get; private set; }
         public OrderedObservableCollection<Category> GroupCategories { get { return _groupCategories; } }
-        public ReadOnlyObservableCollection<Category> Categories { get { return _categoriesReadOnly; } }
-        public ReadOnlyObservableCollection<Song> Songs { get { return _songsReadOnly; } }
+        public ObservableCollection<Category> Categories { get { return _categories; } }
+        public ObservableCollection<Song> Songs { get { return _songs; } }
         public ReadOnlyDictionary<string, Category> CategoryDictionary { get { return _categoryDictionaryReadOnly; } }
         public ReadOnlyDictionary<uint, Tag> TagIds { get { return _tagIdsReadOnly; } }
         public ManualResetEvent CategoriesRead { get; private set; }
 
         private readonly ObservableCollection<Song> _songs;
-        private readonly ReadOnlyObservableCollection<Song> _songsReadOnly;
         private readonly ObservableCollection<Category> _categories;
-        private readonly ReadOnlyObservableCollection<Category> _categoriesReadOnly;
         private readonly Dictionary<string, Category> _categoryDictionary;
         private readonly ReadOnlyDictionary<string, Category> _categoryDictionaryReadOnly;
         private readonly Dictionary<uint, Tag> _tagIds;
@@ -55,9 +53,7 @@ namespace Musagetes.DataObjects
 
             _dataAccess = dataAccess;
             _categories = new ObservableCollection<Category>();
-            _categoriesReadOnly = new ReadOnlyObservableCollection<Category>(_categories);
             _songs = new ObservableCollection<Song>();
-            _songsReadOnly = new ReadOnlyObservableCollection<Song>(_songs);
             _categoryDictionary = new Dictionary<string, Category>();
             _categoryDictionaryReadOnly =
                 new ReadOnlyDictionary<string, Category>(_categoryDictionary);

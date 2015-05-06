@@ -4,6 +4,8 @@ using Musagetes.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -18,14 +20,13 @@ namespace Musagetes
     public class CategoryDisplayOptionsVm : INotifyPropertyChanged
     {
         public ListCollectionView DisplayColumns { get; private set; }
-        public IList<CategoryWrapper> AllCategories { get; private set; }
+        public ObservableCollection<CategoryWrapper> AllCategories { get; private set; }
         public DataGridColumn SelectedColumn { get; set; }
-        public Category SelectedCategory { get; set; }
 
         public IList<Category> DbGroupCategories { get; set; }
-        public IList<Category> DbAllCategories { get; set; } 
+        public ObservableCollection<Category> DbAllCategories { get; set; }
         public CategoryDisplayOptionsVm(IList<DataGridColumn> columns,
-            IList<Category> categories, IList<Category> groupCategories)
+            ObservableCollection<Category> categories, IList<Category> groupCategories)
         {
             DisplayColumns = new ListCollectionView((IList)columns);
             DisplayColumns.SortDescriptions.Add(new SortDescription("Visibility", ListSortDirection.Ascending));
@@ -33,17 +34,42 @@ namespace Musagetes
             DbGroupCategories = groupCategories;
             DbAllCategories = categories;
 
-            AllCategories = new List<CategoryWrapper>();
-            foreach(var cat in categories)
+            AllCategories = new ObservableCollection<CategoryWrapper>();
+            foreach (var cat in categories)
                 AllCategories.Add(new CategoryWrapper(cat, this));
+            AllCategories.CollectionChanged += AllCategoriesCollectionChanged;
+        }
+
+        private bool _reinsert;
+        private void AllCategoriesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            Category cat;
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    if (e.NewItems == null) return;
+                    cat = ((CategoryWrapper) e.NewItems[0]).Category;
+                    DbAllCategories.Insert(e.NewStartingIndex, cat);
+                    if(_reinsert) AddGroupCategory(cat);
+                    _reinsert = false;
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    if (e.OldItems == null) return;
+                    var catWrap = ((CategoryWrapper) e.OldItems[0]);
+                    cat = ((CategoryWrapper) e.OldItems[0]).Category;
+                    DbAllCategories.RemoveAt(e.OldStartingIndex);
+                    if (catWrap.IsGrouping)
+                    {
+                        _reinsert = true;
+                        DbGroupCategories.Remove(cat);
+                    }
+                    break;
+            }
         }
 
         public ICommand MoveCategoriesCmd
         {
-            get
-            {
-                return new DropListCommand<CategoryWrapper>(AllCategories); 
-            }
+            get { return new DropListCommand<CategoryWrapper>(AllCategories); }
         }
 
         public class CategoryWrapper : INotifyPropertyChanged
@@ -92,11 +118,13 @@ namespace Musagetes
             if (insertionPoint == null)
                 DbGroupCategories.Add(category);
             else
-                DbGroupCategories.Insert((int) insertionPoint, category);
+                DbGroupCategories.Insert((int)insertionPoint, category);
         }
 
         private static readonly VisibilityToBooleanConverter V2B =
             new VisibilityToBooleanConverter();
+
+
         public ICommand ToggleVisibleCmd
         {
             get

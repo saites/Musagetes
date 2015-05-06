@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<MusagetesSongDb>
+  <Columns />
+  <CategoryTags />
+  <Songs>
+    <Song id="3">
+      <SongTitle>title</SongTitle>
+      <Location>location</Location>
+      <Milliseconds>1234</Milliseconds>
+      <PlayCount>321</PlayCount>
+      <BPM Guess="False">4321</BPM>
+      <Tags />
+    </Song>
+    <Song id="4">
+      <SongTitle>title2</SongTitle>
+      <Location>location2</Location>
+      <Milliseconds>7890</Milliseconds>
+      <PlayCount>654</PlayCount>
+      <BPM Guess="True">987</BPM>
+      <Tags />
+    </Song>
+  </Songs>
+</MusagetesSongDb>

@@ -150,7 +150,8 @@
                   SelectedItem="{Binding SelectedInGrid}"
                   wpfElements:DataGridColumnsBehavior.BindableColumns=
                                      "{Binding ColumnManager.Columns, Mode=OneWay}"
-                  PreviewTarget="{Binding PreviewPlayer.Song, Mode=OneWayToSource, Converter={StaticResource ToSong}}"
+                  PreviewTarget="{Binding PreviewPlayer.Song, Mode=OneWayToSource, 
+                    Converter={StaticResource ToSong}}"
                 >
                 <wpfElements:MusagetesDataGrid.Resources>
                     <wpfElements:BindingProxy x:Key="DataGridProxy" Data="{Binding}"/>

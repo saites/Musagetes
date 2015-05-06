@@ -33,7 +33,6 @@
         <wpfElements:DropEnabledListBox
             Grid.Column="1"
             ItemsSource="{Binding AllCategories}"
-            SelectedItem="{Binding SelectedCategory}"
             DropCommand="{Binding MoveCategoriesCmd}"
             AllowDrop="True"
             Margin="5"

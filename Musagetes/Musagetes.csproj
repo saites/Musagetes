@@ -136,7 +136,6 @@
     <Compile Include="WpfElements\BindingProxy.cs" />
     <Compile Include="WpfElements\DropEnabledListBox.cs" />
     <Compile Include="WpfElements\GroupCategoriesConverter.cs" />
-    <Compile Include="WpfElements\ItemIndexEqualityConverter.cs" />
     <Compile Include="WpfElements\ObjectToSongConverter.cs" />
     <Compile Include="WpfElements\DataGridColumnsBehavior.cs" />
     <Compile Include="MainWindowVm.cs" />

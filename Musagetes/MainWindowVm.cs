@@ -155,7 +155,7 @@ namespace Musagetes
 
             lock ((App.SongDb.GroupCategories as ICollection).SyncRoot)
             {
-                AddGroupDescriptions(App.SongDb.GroupCategories);
+                AddGroupDescriptions(0, App.SongDb.GroupCategories);
                 App.SongDb.GroupCategories.CollectionChanged +=
                     GroupCategoriesCollectionChanged;
                 lock (_displayedSongs)
@@ -243,10 +243,10 @@ namespace Musagetes
             {
                 case NotifyCollectionChangedAction.Add:
                     if (e.NewItems == null) return;
-                    AddGroupDescriptions(e.NewItems.Cast<Category>());
+                    AddGroupDescriptions(e.NewStartingIndex, e.NewItems.Cast<Category>());
                     break;
                 case NotifyCollectionChangedAction.Move:
-                    if (e.NewItems == null || e.OldItems == null) return;
+                    if (e.OldItems == null) return;
                     lock (_displayedSongs)
                         DisplayedSongs.GroupDescriptions.
                             Move(e.OldStartingIndex, e.NewStartingIndex);
@@ -264,13 +264,13 @@ namespace Musagetes
                     lock (_displayedSongs)
                         DisplayedSongs.GroupDescriptions.Clear();
                     if (e.NewItems == null) return;
-                    AddGroupDescriptions(e.NewItems.Cast<Category>());
+                    AddGroupDescriptions(e.NewStartingIndex, e.NewItems.Cast<Category>());
                     break;
             }
             lock (_displayedSongs) DisplayedSongs.Refresh();
         }
 
-        private void AddGroupDescriptions(IEnumerable<Category> categories)
+        private void AddGroupDescriptions(int index, IEnumerable<Category> categories)
         {
             lock (_displayedSongs)
             {
@@ -289,7 +289,7 @@ namespace Musagetes
                                 string.Format(Constants.CategoryTagsBinding, cat.CategoryName));
                             _groupDescriptionDictionary.Add(cat, groupDesc);
                         }
-                        DisplayedSongs.GroupDescriptions.Add(groupDesc);
+                        DisplayedSongs.GroupDescriptions.Insert(index, groupDesc);
                     }
                 }
             }
