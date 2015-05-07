@@ -1,6 +1,8 @@
 ﻿using Musagetes.DataObjects;
 using System.Threading.Tasks;
+using System.Windows;
 using Musagetes.DataAccess;
+using Musagetes.Properties;
 
 namespace Musagetes
 {
@@ -10,18 +12,24 @@ namespace Musagetes
 	public partial class App : SongDb.IDbReaderWriter
 	{
         public static SongDb SongDb { get; private set; }
-        public static Configuration Configuration { get; private set; }
+        public static Settings Configuration { get; private set; }
 
         public App()
         {
+            Configuration = Settings.Default;
             InitializeComponent();
-            Configuration = new Configuration();
-            Configuration.Initialize();
             SongDb = new SongDb(this);
             Task.Run(() => SongDb.ReadDbAsync(Configuration.DbLocation));
         }
 
-        public async Task WriteDbAsync(string filename, SongDb songDb)
+	    protected override void OnExit(ExitEventArgs e)
+	    {
+	        Task.WaitAll(Task.Run(() => SongDb.SaveDbAsync(Configuration.DbLocation)));
+            WriteConfiguration();
+	        base.OnExit(e);
+	    }
+
+	    public async Task WriteDbAsync(string filename, SongDb songDb)
         {
             var writer = new SongDbWriter(filename, songDb);
             await writer.WriteDb();
@@ -35,7 +43,7 @@ namespace Musagetes
 
 	    public void WriteConfiguration()
 	    {
-	        Configuration.Write();
+	        Configuration.Save();
 	    }
 	}
 }

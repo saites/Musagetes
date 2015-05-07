@@ -137,9 +137,9 @@ namespace DataAccessTests
             const string filename = "../../../Musagetes/Collaterals/Testing/ReadWriteTest.xml";
             var songDbWrite = new SongDb(null);
             songDbWrite.AddSong(
-                new Song("title", "location", 1234, new BPM(4321, false), songDbWrite, 321));
+                new Song("title", "location", 1234, new Bpm(4321, false), songDbWrite, 321));
             songDbWrite.AddSong(
-                new Song("title2", "location2", 7890, new BPM(987, true), songDbWrite, 654));
+                new Song("title2", "location2", 7890, new Bpm(987, true), songDbWrite, 654));
             
             var writer = new SongDbWriter(filename, songDbWrite);
             writer.WriteDb().Wait();

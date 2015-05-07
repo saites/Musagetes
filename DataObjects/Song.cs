@@ -34,7 +34,7 @@ namespace Musagetes.DataObjects
         public string SongTitle { get; set; }
         public int Milliseconds { get; set; }
         public string Location { get; set; }
-        public BPM Bpm { get; set; }
+        public Bpm Bpm { get; set; }
         public CategoryTag CategoryTags { get; set; }
         public SongDb SongDb { get; private set; }
         public uint PlayCount { get; set; }
@@ -102,7 +102,7 @@ namespace Musagetes.DataObjects
             }
         }
 
-        public Song(string title, string location, int milliseconds, BPM bpm, SongDb songDb, 
+        public Song(string title, string location, int milliseconds, Bpm bpm, SongDb songDb, 
             uint playCount, uint? songId = null)
         {
             SongTitle = title;

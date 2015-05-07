@@ -8,7 +8,6 @@
 	<Column header="Tags" type="BasicText" display="False" order="4" binding="SongTags" />
   </Columns>
   <CategoryTags>
-    <Category name="Artist" display="True" order="5" />
   </CategoryTags>
   <Songs/>
 </MusagetesSongDb>

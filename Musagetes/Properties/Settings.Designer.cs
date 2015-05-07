@@ -13,7 +13,7 @@ namespace Musagetes.Properties {
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "11.0.0.0")]
-    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
+    public sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
         
@@ -23,14 +23,75 @@ namespace Musagetes.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=(LocalDB)\\v11.0;AttachDbFilename=|DataDirectory|\\MDB.mdf;Integrated S" +
-            "ecurity=True")]
-        public string MDBConnectionString {
+        [global::System.Configuration.DefaultSettingValueAttribute("../../../Musagetes/Collaterals/SongDB.xml")]
+        public string DbLocation {
             get {
-                return ((string)(this["MDBConnectionString"]));
+                return ((string)(this["DbLocation"]));
+            }
+            set {
+                this["DbLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int MainPlayerDeviceNum {
+            get {
+                return ((int)(this["MainPlayerDeviceNum"]));
+            }
+            set {
+                this["MainPlayerDeviceNum"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int SecondaryPlayerDeviceNum {
+            get {
+                return ((int)(this["SecondaryPlayerDeviceNum"]));
+            }
+            set {
+                this["SecondaryPlayerDeviceNum"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UpdatePlaycountOnPreview {
+            get {
+                return ((bool)(this["UpdatePlaycountOnPreview"]));
+            }
+            set {
+                this["UpdatePlaycountOnPreview"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public float MainPlayerVolume {
+            get {
+                return ((float)(this["MainPlayerVolume"]));
+            }
+            set {
+                this["MainPlayerVolume"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public float SecondaryPlayerVolume {
+            get {
+                return ((float)(this["SecondaryPlayerVolume"]));
+            }
+            set {
+                this["SecondaryPlayerVolume"] = value;
             }
         }
     }

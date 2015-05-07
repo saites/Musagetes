@@ -94,13 +94,13 @@ namespace Musagetes
 
                 if (value >= 0 && value < SongQueue.Count)
                 {
-                    var playState = MainPlayer.PlaybackState;
                     MainPlayer.Song = SongQueue.ElementAt(value);
-                    MainPlayer.PlaybackState = playState;
+                    MainPlayer.PlaybackState = MediaState.Play;
                 }
                 else
                 {
                     StopCmd.Execute(null);
+                    MainPlayer.Song = null;
                     value = -1;
                 }
 
@@ -116,28 +116,16 @@ namespace Musagetes
             MainPlayer = new NAudioPlayer(App.Configuration.MainPlayerDeviceNum, true);
             PreviewPlayer = new NAudioPlayer(App.Configuration.SecondaryPlayerDeviceNum,
                 App.Configuration.UpdatePlaycountOnPreview);
+            MainPlayer.Volume = App.Configuration.MainPlayerVolume;
+            PreviewPlayer.Volume = App.Configuration.SecondaryPlayerVolume;
 
             MainPlayer.SongCompletedEvent += (sender, args) =>
             {
                 NextCmd.Execute(null);
             };
 
-            PreviewPlayer.PropertyChanged += (sender, args) =>
-            {
-                if (!args.PropertyName.Equals("PlaybackState")) return;
-                if (PreviewPlayer.PlaybackState == MediaState.Play
-                    && MainPlayer.DeviceNumber == PreviewPlayer.DeviceNumber
-                    && MainPlayer.IsPlaying)
-                {
-                    MainPlayer.PlaybackState = MediaState.Pause;
-                    _restartMainPlayer = true;
-                }
-                else if (_restartMainPlayer)
-                {
-                    MainPlayer.PlaybackState = MediaState.Play;
-                    _restartMainPlayer = false;
-                }
-            };
+            MainPlayer.PropertyChanged += MainPlayerPropertyChanged;
+            PreviewPlayer.PropertyChanged += PreviewPlayerPropertyChanged;
 
             _columnManager = new ColumnManager();
 
@@ -173,6 +161,41 @@ namespace Musagetes
             }
 
             SongQueue = new OrderedObservableCollection<Song>();
+        }
+
+        private void PreviewPlayerPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case "PlaybackState":
+                    PreviewPlaybackChanged();
+                    break;
+                case "Volume":
+                    App.Configuration.SecondaryPlayerVolume = PreviewPlayer.Volume;
+                    break;
+            }
+        }
+
+        private void PreviewPlaybackChanged()
+        {
+            if (PreviewPlayer.PlaybackState == MediaState.Play
+                && MainPlayer.DeviceNumber == PreviewPlayer.DeviceNumber
+                && MainPlayer.IsPlaying)
+            {
+                MainPlayer.PlaybackState = MediaState.Pause;
+                _restartMainPlayer = true;
+            }
+            else if (_restartMainPlayer)
+            {
+                MainPlayer.PlaybackState = MediaState.Play;
+                _restartMainPlayer = false;
+            }
+        }
+
+        private void MainPlayerPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName.Equals("Volume"))
+                App.Configuration.MainPlayerVolume = MainPlayer.Volume; 
         }
 
         #region Column Management
@@ -450,7 +473,9 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
-                    SongQueue.Remove(SelectedInQueue);
+                    SongQueue.RemoveAt(QueueSelectionIndex);
+                    if (CurrentSongIndex == QueueSelectionIndex)
+                        CurrentSongIndex = -1;
                 });
             }
         }

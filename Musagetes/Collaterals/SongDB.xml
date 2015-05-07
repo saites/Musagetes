@@ -9,62 +9,58 @@
   </Columns>
   <CategoryTags>
     <Category name="Artist" display="False" order="5">
-      <Tag id="2" name="Mr. Scruff" />
-      <Tag id="5" name="Richard Stoltzman" />
-      <Tag id="8" name="Bob Acri" />
+      <Tag id="0" name="Mr. Scruff" />
+      <Tag id="3" name="Richard Stoltzman" />
+      <Tag id="6" name="Bob Acri" />
     </Category>
     <Category name="Album" display="False" order="6">
-      <Tag id="4" name="Ninja Tuna" />
-      <Tag id="7" name="Fine Music, Vol. 1" />
-      <Tag id="10" name="Bob Acri" />
+      <Tag id="2" name="Ninja Tuna" />
+      <Tag id="5" name="Fine Music, Vol. 1" />
+      <Tag id="8" name="Bob Acri" />
     </Category>
     <Category name="Genre" display="False" order="7">
-      <Tag id="3" name="Electronic" />
-      <Tag id="6" name="Classical" />
-      <Tag id="9" name="Jazz" />
+      <Tag id="1" name="Electronic" />
+      <Tag id="4" name="Classical" />
+      <Tag id="7" name="Jazz" />
     </Category>
+    <Category name="Uncategorized" display="False" order="8" />
   </CategoryTags>
   <Songs>
     <Song id="1">
       <SongTitle>Kalimba</SongTitle>
       <Location>C:\Users\Public\Music\Sample Music\Kalimba.mp3</Location>
       <Milliseconds>348590</Milliseconds>
-      <PlayCount>0</PlayCount>
+      <PlayCount>9</PlayCount>
       <BPM Guess="False">0</BPM>
       <Tags>
+        <Tag>0</Tag>
+        <Tag>1</Tag>
         <Tag>2</Tag>
-        <Tag>3</Tag>
-        <Tag>4</Tag>
       </Tags>
     </Song>
     <Song id="2">
       <SongTitle>Maid with the Flaxen Hair</SongTitle>
       <Location>C:\Users\Public\Music\Sample Music\Maid with the Flaxen Hair.mp3</Location>
       <Milliseconds>170234</Milliseconds>
-      <PlayCount>0</PlayCount>
+      <PlayCount>10</PlayCount>
       <BPM Guess="False">0</BPM>
       <Tags>
+        <Tag>3</Tag>
+        <Tag>4</Tag>
         <Tag>5</Tag>
-        <Tag>6</Tag>
-        <Tag>7</Tag>
       </Tags>
     </Song>
     <Song id="3">
       <SongTitle>Sleep Away</SongTitle>
       <Location>C:\Users\Public\Music\Sample Music\Sleep Away.mp3</Location>
       <Milliseconds>100796</Milliseconds>
-      <PlayCount>0</PlayCount>
+      <PlayCount>10</PlayCount>
       <BPM Guess="False">0</BPM>
       <Tags>
+        <Tag>6</Tag>
+        <Tag>7</Tag>
         <Tag>8</Tag>
-        <Tag>9</Tag>
-        <Tag>10</Tag>
       </Tags>
     </Song>
   </Songs>
-  <Playlists>
-	<Playlist name="My playlist">
-		1,2,3,1,1,2,1,3
-	</Playlist>
-  </Playlists>
 </MusagetesSongDb>

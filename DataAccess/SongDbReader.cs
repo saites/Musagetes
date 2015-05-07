@@ -217,7 +217,7 @@ namespace Musagetes.DataAccess
                 if(!int.TryParse(await reader.TryGetContentAsync(), out bpmValue))
                     Logger.Error("Song {0} has a missing or unreadable BPM value", title);
 
-                var song = new Song(title, location, milliseconds, new BPM(bpmValue, guess), 
+                var song = new Song(title, location, milliseconds, new Bpm(bpmValue, guess), 
                     SongDb, playCount, id);
                 SongDb.AddSong(song);
 

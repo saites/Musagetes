@@ -36,7 +36,8 @@ namespace Musagetes
             get { return _volume; }
             set
             {
-                if (value < 0 || value > 1) return;
+                if (value < 0) value = 0;
+                if (value > 1) value = 1;
                 _volume = value;
                 if (_waveOutDevice != null)
                     _waveOutDevice.Volume = _volume;

@@ -1,8 +1,8 @@
 ﻿namespace Musagetes.DataObjects
 {
-    public class BPM
+    public class Bpm
     {
-        public BPM(int value, bool guess)
+        public Bpm(int value, bool guess)
         {
             Value = value;
             Guess = guess;
