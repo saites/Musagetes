@@ -64,12 +64,14 @@ namespace Musagetes
             }
         }
 
+        private int _oldQueueSelection = -1;
         public ICommand ClearQueueSelectionCmd
         {
             get
             {
                 return new RelayCommand(() =>
                 {
+                    _oldQueueSelection = QueueSelectionIndex;
                     SelectedInQueue = null;
                 });
             }
@@ -86,21 +88,12 @@ namespace Musagetes
                     return;
                 }
 
-                if (_currentSongIndex == -1)
-                {
-                    if (value < -1) value = SongQueue.Count - 1;
-                    else value = 0;
-                }
-
                 if (value >= 0 && value < SongQueue.Count)
                 {
                     MainPlayer.Song = SongQueue.ElementAt(value);
-                    MainPlayer.PlaybackState = MediaState.Play;
                 }
                 else
                 {
-                    StopCmd.Execute(null);
-                    MainPlayer.Song = null;
                     value = -1;
                 }
 
@@ -160,7 +153,7 @@ namespace Musagetes
                 foreach (var col in App.SongDb.Columns) AddColumn(col);
             }
 
-            SongQueue = new OrderedObservableCollection<Song>();
+            SongQueue = new ObservableCollection<Song>();
         }
 
         private void PreviewPlayerPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -176,26 +169,40 @@ namespace Musagetes
             }
         }
 
+        public Song PreviewSong
+        {
+            get { return _previewSong; }
+            set
+            {
+                _previewSong = value;
+                if (value == null)
+                    PreviewPlayer.PlaybackState = MediaState.Stop;
+                else
+                    PreviewPlayer.Song = value;
+                OnPropertyChanged();
+            }
+        }
+
         private void PreviewPlaybackChanged()
         {
-            if (PreviewPlayer.PlaybackState == MediaState.Play
+            if (_restartMainPlayer)
+            {
+                MainPlayer.PlaybackState = MediaState.Play;
+                _restartMainPlayer = false;
+            }
+            else if (PreviewPlayer.PlaybackState == MediaState.Play
                 && MainPlayer.DeviceNumber == PreviewPlayer.DeviceNumber
                 && MainPlayer.IsPlaying)
             {
                 MainPlayer.PlaybackState = MediaState.Pause;
                 _restartMainPlayer = true;
             }
-            else if (_restartMainPlayer)
-            {
-                MainPlayer.PlaybackState = MediaState.Play;
-                _restartMainPlayer = false;
-            }
         }
 
         private void MainPlayerPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName.Equals("Volume"))
-                App.Configuration.MainPlayerVolume = MainPlayer.Volume; 
+                App.Configuration.MainPlayerVolume = MainPlayer.Volume;
         }
 
         #region Column Management
@@ -473,13 +480,40 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
-                    SongQueue.RemoveAt(QueueSelectionIndex);
-                    if (CurrentSongIndex == QueueSelectionIndex)
-                        CurrentSongIndex = -1;
+                    var tempSelect = QueueSelectionIndex;
+                    if (QueueSelectionIndex >= 0
+                        && QueueSelectionIndex < SongQueue.Count)
+                        SongQueue.RemoveAt(QueueSelectionIndex);
+
+                    if (CurrentSongIndex > tempSelect)
+                        CurrentSongIndex--;
+                    else if (CurrentSongIndex == tempSelect)
+                        PlaySongAtIndex(CurrentSongIndex);
+                    if (tempSelect >= SongQueue.Count) tempSelect--;
+                    QueueSelectionIndex = tempSelect;
                 });
             }
         }
         #endregion
+
+        private void PlaySongAtIndex(int index)
+        {
+            MainPlayer.PlaybackState = MediaState.Stop;
+
+            if (index == -1 || index >= SongQueue.Count || index < -2)
+            {
+                CurrentSongIndex = -1;
+                return;
+            }
+
+            if (CurrentSongIndex < 0 || CurrentSongIndex >= SongQueue.Count)
+            {
+                if (index >= 0) CurrentSongIndex = 0;
+                else CurrentSongIndex = SongQueue.Count - 1;
+            }
+            else CurrentSongIndex = index;
+            MainPlayer.PlaybackState = MediaState.Play;
+        }
 
         #region Playback Commands
         public ICommand TogglePlayCmd
@@ -488,7 +522,18 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
-                    if (MainPlayer.Song == null) return;
+                    if (!SongQueue.Any()) return;
+
+                    if (MainPlayer.PlaybackState == MediaState.Stop)
+                    {
+                        if (_oldQueueSelection >= 0
+                            && _oldQueueSelection < SongQueue.Count)
+                            CurrentSongIndex = _oldQueueSelection;
+                        else
+                            CurrentSongIndex = 0;
+                        MainPlayer.PlaybackState = MediaState.Play;
+                        return;
+                    }
 
                     MainPlayer.PlaybackState =
                         MainPlayer.IsPlaying
@@ -505,6 +550,7 @@ namespace Musagetes
                 return new RelayCommand(() =>
                 {
                     MainPlayer.PlaybackState = MediaState.Stop;
+                    CurrentSongIndex = -1;
                 });
             }
         }
@@ -512,6 +558,8 @@ namespace Musagetes
         bool _restartMainPlayer;
         private int _currentSongIndex = -1;
         private string _filterText;
+        private int _queueSelectionIndex;
+        private Song _previewSong;
 
         public ICommand TogglePreviewCmd
         {
@@ -519,7 +567,9 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
-                    if (PreviewPlayer.Song == null) return;
+                    if (PreviewSong == null) return;
+                    if (PreviewPlayer.Song == null)
+                        PreviewPlayer.Song = PreviewSong;
 
                     PreviewPlayer.PlaybackState =
                         PreviewPlayer.IsPlaying
@@ -535,7 +585,7 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
-                    CurrentSongIndex++;
+                    PlaySongAtIndex(CurrentSongIndex + 1);
                 });
             }
         }
@@ -546,7 +596,7 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
-                    CurrentSongIndex--;
+                    PlaySongAtIndex(CurrentSongIndex - 1);
                 });
             }
         }
@@ -557,13 +607,24 @@ namespace Musagetes
             {
                 return new RelayCommand(() =>
                 {
+                    if (CurrentSongIndex == QueueSelectionIndex) return;
+                    MainPlayer.PlaybackState = MediaState.Stop;
                     CurrentSongIndex = QueueSelectionIndex;
+                    MainPlayer.PlaybackState = MediaState.Play;
                 });
             }
         }
         #endregion
 
-        public int QueueSelectionIndex { get; set; }
+        public int QueueSelectionIndex
+        {
+            get { return _queueSelectionIndex; }
+            set
+            {
+                _queueSelectionIndex = value;
+                OnPropertyChanged();
+            }
+        }
 
         public IList SelectedSongs
         {

@@ -13,7 +13,7 @@ namespace Musagetes.DataObjects
     public class SongDb
     {
         public ObservableCollection<GridColumn> Columns { get; private set; }
-        public OrderedObservableCollection<Category> GroupCategories { get { return _groupCategories; } }
+        public ObservableCollection<Category> GroupCategories { get { return _groupCategories; } }
         public ObservableCollection<Category> Categories { get { return _categories; } }
         public ObservableCollection<Song> Songs { get { return _songs; } }
         public ReadOnlyDictionary<string, Category> CategoryDictionary { get { return _categoryDictionaryReadOnly; } }
@@ -26,7 +26,7 @@ namespace Musagetes.DataObjects
         private readonly ReadOnlyDictionary<string, Category> _categoryDictionaryReadOnly;
         private readonly Dictionary<uint, Tag> _tagIds;
         private readonly ReadOnlyDictionary<uint, Tag> _tagIdsReadOnly;
-        private readonly OrderedObservableCollection<Category> _groupCategories;
+        private readonly ObservableCollection<Category> _groupCategories;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public Category ArtistCategory
@@ -59,7 +59,7 @@ namespace Musagetes.DataObjects
                 new ReadOnlyDictionary<string, Category>(_categoryDictionary);
             _tagIds = new Dictionary<uint, Tag>();
             _tagIdsReadOnly = new ReadOnlyDictionary<uint, Tag>(_tagIds);
-            _groupCategories = new OrderedObservableCollection<Category>();
+            _groupCategories = new ObservableCollection<Category>();
 
             CategoriesRead = new ManualResetEvent(false);
             new Task(AddDefaultCategories).Start();

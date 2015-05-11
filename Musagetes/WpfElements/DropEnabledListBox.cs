@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -71,6 +72,18 @@ namespace Musagetes.WpfElements
             lb._oldInUseItem.Style = lb.InUseStyle;
         }
 
+        public DropEnabledListBox()
+        {
+            //need to update this whenever the layout updates,
+            //since, if you the InUseItem, its containers isn't
+            //generated immediately
+            LayoutUpdated += (sender, args) =>
+            {
+                OnInUseIndexChanged(this, new DependencyPropertyChangedEventArgs(
+                    InUseIndexProperty, -1, InUseIndex));
+            };
+        }
+
         private bool _isDragging;
         protected override void OnMouseMove(MouseEventArgs e)
         {
@@ -135,13 +148,38 @@ namespace Musagetes.WpfElements
                 e.Data.SetData("SelectedIndex", SelectedIndex);
                 e.Effects = DragDropEffects.Move;
             }
-            _isDragging = false;
 
             var dropIndex = _highlightedItem == null 
-                ? -1 : ItemContainerGenerator.IndexFromContainer(_highlightedItem);
+                ? Items.Count : ItemContainerGenerator.IndexFromContainer(_highlightedItem);
             e.Data.SetData("DropIndex", dropIndex);
+
+            var saveSelected = SelectedIndex;
+
             if(DropCommand.CanExecute(e.Data))
                 DropCommand.Execute(e.Data);
+
+            var rearrange = _isDragging;
+                _isDragging = false;
+
+            if (InUseIndex < 0 || InUseIndex >= Items.Count) return;
+
+            if (rearrange)
+            {
+                if (saveSelected > InUseIndex && dropIndex <= InUseIndex)
+                    InUseIndex++;
+                else if (saveSelected < InUseIndex && dropIndex > InUseIndex)
+                    InUseIndex--;
+                else if (saveSelected == InUseIndex)
+                {
+                    if (dropIndex > saveSelected) InUseIndex = dropIndex - 1;
+                    else InUseIndex = dropIndex;
+                }
+            }
+            else if (InUseIndex >= dropIndex)
+            {
+                var newItems = (IList) e.Data.GetData(typeof (IList));
+                InUseIndex += newItems.Count;
+            }
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Musagetes
         private double _channelPosition;
         private Song _song;
         private MediaState _playbackState = MediaState.Stop;
-        private readonly DispatcherTimer _positionTimer = new DispatcherTimer(DispatcherPriority.ApplicationIdle);
+        private readonly DispatcherTimer _positionTimer = new DispatcherTimer(DispatcherPriority.Normal);
         private bool _updatingTimer;
         private float _volume;
 
@@ -52,15 +52,12 @@ namespace Musagetes
 
             _positionTimer.Interval = TimeSpan.FromMilliseconds(100);
             _positionTimer.Tick += positionTimer_Tick;
-            _positionTimer.Start();
-            _positionTimer.IsEnabled = false;
         }
 
         public string Length
         {
             get
             {
-                //return string.Format("{0:00}:{1:00}", ChannelLength / 60, ChannelLength % 60);
                 return TimeSpan.FromSeconds(ChannelLength).ToString(@"mm\:ss");
             }
         }
@@ -70,7 +67,6 @@ namespace Musagetes
             get
             {
                 return TimeSpan.FromSeconds(ChannelPosition).ToString(@"mm\:ss");
-                //return string.Format("{0:00}:{1:00}", ChannelPosition / 60, ChannelPosition % 60);
             }
         }
 
@@ -124,7 +120,7 @@ namespace Musagetes
                 Song.SongTitle));
             _waveOutDevice.Pause();
             _playbackState = MediaState.Pause;
-            _positionTimer.IsEnabled = false;
+            _positionTimer.Stop();
         }
 
         private void StopPlayback()
@@ -137,9 +133,10 @@ namespace Musagetes
                 _waveOutDevice.Dispose();
             }
 
+            _song = null;
             _waveOutDevice = null;
             _playbackState = MediaState.Stop;
-            _positionTimer.IsEnabled = false;
+            _positionTimer.Stop();
             ChannelPosition = 0;
         }
 
@@ -154,7 +151,7 @@ namespace Musagetes
                 _waveOutDevice.Volume = Volume;
                 _waveOutDevice.Play();
                 _playbackState = MediaState.Play;
-                _positionTimer.IsEnabled = true;
+                _positionTimer.Start();
                 return;
             }
 
@@ -177,7 +174,7 @@ namespace Musagetes
                 _playbackState = MediaState.Play;
                 if (IncrementsPlayCounter)
                     Song.PlayCount++;
-                _positionTimer.IsEnabled = true;
+                _positionTimer.Start();
             }
             catch (Exception e)
             {
@@ -190,7 +187,7 @@ namespace Musagetes
                     _waveOutDevice.Dispose();
                 _audioFileReader = null;
                 _waveOutDevice = null;
-                _positionTimer.IsEnabled = false;
+                _positionTimer.Stop();
             }
         }
 
