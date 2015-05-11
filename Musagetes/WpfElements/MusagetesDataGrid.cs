@@ -136,8 +136,8 @@ namespace Musagetes.WpfElements
             else
             {
                 ContextPopup.PlacementTarget = (DataGridRow) PreviewTarget;
-                ContextPopup.IsOpen = true;
                 PreviewTarget = ((DataGridRow) PreviewTarget).Item;
+                ContextPopup.IsOpen = true;
                 ContextPopup.Focus();
             }
         }
