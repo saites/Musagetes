@@ -1,26 +1,28 @@
-﻿using System.Collections.Specialized;
-using System.Linq;
-using MvvmFoundation.Wpf;
-using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows.Data;
-using Forms = System.Windows.Forms;
-using System.Windows.Input;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Windows;
+using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Input;
 using Musagetes.Annotations;
 using Musagetes.DataObjects;
+using Musagetes.Toolkit;
+using Musagetes.Windows;
 using Musagetes.WpfElements;
+using MvvmFoundation.Wpf;
 using NAudio.Wave;
 using NLog;
+using Application = System.Windows.Application;
+using Forms = System.Windows.Forms;
 
-namespace Musagetes
+namespace Musagetes.ViewModels
 {
     class MainWindowVm : INotifyPropertyChanged
     {
@@ -35,6 +37,8 @@ namespace Musagetes
         private ColumnManager _columnManager;
         private Song _selectedInQueue;
         private Song _selectedInGrid;
+
+        public BpmTapper BpmCalc { get; set; }
 
         public NAudioPlayer MainPlayer { get; private set; }
         public NAudioPlayer PreviewPlayer { get; private set; }
@@ -105,6 +109,7 @@ namespace Musagetes
         public MainWindowVm()
         {
             TagEditorVm = new TagEditorVm();
+            BpmCalc = new BpmTapper();
             CurrentSongIndex = 0;
             MainPlayer = new NAudioPlayer(App.Configuration.MainPlayerDeviceNum, true);
             PreviewPlayer = new NAudioPlayer(App.Configuration.SecondaryPlayerDeviceNum,
@@ -176,7 +181,10 @@ namespace Musagetes
             {
                 _previewSong = value;
                 if (value == null)
+                {
                     PreviewPlayer.PlaybackState = MediaState.Stop;
+                    BpmCalc.StopTapping.Execute(null);
+                }
                 else
                     PreviewPlayer.Song = value;
                 OnPropertyChanged();
@@ -616,6 +624,20 @@ namespace Musagetes
         }
         #endregion
 
+
+        public ICommand SaveBpmCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    PreviewSong.Bpm.Value = (int)BpmCalc.Value;
+                    PreviewSong.Bpm.Guess = false;
+                    BpmCalc.StopTapping.Execute(null);
+                });
+            }
+        }
+
         public int QueueSelectionIndex
         {
             get { return _queueSelectionIndex; }
@@ -663,6 +685,34 @@ namespace Musagetes
             {
                 _selectedInQueue = value;
                 OnPropertyChanged();
+            }
+        }
+
+        public ICommand IncrementPlayCountCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    if (PreviewSong == null
+                        || PreviewSong.PlayCount == UInt32.MaxValue) 
+                        return;
+                    PreviewSong.PlayCount++;
+                });
+            }
+        }
+
+        public ICommand DecrementPlayCountCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    if (PreviewSong == null
+                        || PreviewSong.PlayCount == 0) 
+                        return;
+                    PreviewSong.PlayCount--;
+                });
             }
         }
 

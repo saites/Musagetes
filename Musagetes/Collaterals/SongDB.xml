@@ -6,6 +6,7 @@
     <Column header="Length" type="BasicText" display="True" order="2" binding="Length" />
     <Column header="BPM" type="Bpm" display="True" order="3" binding="" />
     <Column header="Tags" type="BasicText" display="False" order="4" binding="SongTags" />
+    <Column header="Play Count" type="BasicText" display="True" order="8" binding="PlayCount" />
   </Columns>
   <CategoryTags>
     <Category name="Artist" display="False" order="5">
@@ -23,15 +24,15 @@
       <Tag id="4" name="Classical" />
       <Tag id="7" name="Jazz" />
     </Category>
-    <Category name="Uncategorized" display="False" order="8" />
+    <Category name="Uncategorized" display="False" order="9" />
   </CategoryTags>
   <Songs>
     <Song id="1">
       <SongTitle>Kalimba</SongTitle>
       <Location>C:\Users\Public\Music\Sample Music\Kalimba.mp3</Location>
-      <Milliseconds>348590</Milliseconds>
-      <PlayCount>74</PlayCount>
-      <BPM Guess="False">0</BPM>
+      <Milliseconds>348056</Milliseconds>
+      <PlayCount>76</PlayCount>
+      <BPM Guess="False">242</BPM>
       <Tags>
         <Tag>0</Tag>
         <Tag>1</Tag>
@@ -41,9 +42,9 @@
     <Song id="2">
       <SongTitle>Maid with the Flaxen Hair</SongTitle>
       <Location>C:\Users\Public\Music\Sample Music\Maid with the Flaxen Hair.mp3</Location>
-      <Milliseconds>170234</Milliseconds>
-      <PlayCount>74</PlayCount>
-      <BPM Guess="False">0</BPM>
+      <Milliseconds>169691</Milliseconds>
+      <PlayCount>76</PlayCount>
+      <BPM Guess="False">98</BPM>
       <Tags>
         <Tag>3</Tag>
         <Tag>4</Tag>
@@ -53,12 +54,11 @@
     <Song id="3">
       <SongTitle>Sleep Away</SongTitle>
       <Location>C:\Users\Public\Music\Sample Music\Sleep Away.mp3</Location>
-      <Milliseconds>100796</Milliseconds>
-      <PlayCount>92</PlayCount>
-      <BPM Guess="False">0</BPM>
+      <Milliseconds>200568</Milliseconds>
+      <PlayCount>0</PlayCount>
+      <BPM Guess="False">103</BPM>
       <Tags>
         <Tag>6</Tag>
-        <Tag>7</Tag>
         <Tag>8</Tag>
       </Tags>
     </Song>

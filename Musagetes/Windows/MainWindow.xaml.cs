@@ -1,7 +1,8 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Input;
+using Musagetes.ViewModels;
 
-namespace Musagetes
+namespace Musagetes.Windows
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

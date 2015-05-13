@@ -3,10 +3,11 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using Musagetes.Annotations;
 using Musagetes.DataObjects;
 using NAudio.Wave;
 using NLog;
-using Musagetes.Annotations;
+
 // ReSharper disable CompareOfFloatsByEqualityOperator
 
 namespace Musagetes
@@ -196,6 +197,7 @@ namespace Musagetes
         {
             _audioFileReader = new AudioFileReader(Song.Location);
             ChannelLength = _audioFileReader.TotalTime.TotalSeconds;
+            Song.Milliseconds = (int)_audioFileReader.TotalTime.TotalMilliseconds;
             ChannelPosition = 0;
         }
 

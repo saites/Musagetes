@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace Musagetes
+namespace Musagetes.Toolkit
 {
     public class ColumnManager
     {
@@ -36,6 +36,7 @@ namespace Musagetes
                     Mode = mode,
                     NotifyOnTargetUpdated = notifyOnTargetUpdated,
                 },
+                IsReadOnly = false
             };
             Columns.Add(textColumn);
         }
@@ -68,7 +69,8 @@ namespace Musagetes
                             {"", "http://schemas.microsoft.com/winfx/2006/xaml/presentation"},
                             {"x", "http://schemas.microsoft.com/winfx/2006/xaml"}
                         }
-                    })
+                    }),
+                SortMemberPath = "Bpm.Value"
             };
             Columns.Add(col);
         }

@@ -9,7 +9,7 @@ using Musagetes.Annotations;
 using Musagetes.DataObjects;
 using MvvmFoundation.Wpf;
 
-namespace Musagetes
+namespace Musagetes.ViewModels
 {
     class CreateNewTagVm : INotifyPropertyChanged
     {

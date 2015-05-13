@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 
-
-namespace Musagetes
+namespace Musagetes.Windows
 {
     /// <summary>
     /// Interaction logic for CategoryDisplayOptions.xaml

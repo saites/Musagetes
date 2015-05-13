@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -9,9 +8,10 @@ using System.Text.RegularExpressions;
 using System.Windows.Input;
 using Musagetes.Annotations;
 using Musagetes.DataObjects;
+using Musagetes.Windows;
 using MvvmFoundation.Wpf;
 
-namespace Musagetes
+namespace Musagetes.ViewModels
 {
     class TagEditorVm : INotifyPropertyChanged
     {

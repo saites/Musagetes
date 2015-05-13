@@ -3,7 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
     xmlns:wpfElements="clr-namespace:Musagetes.WpfElements"
-    x:Class="Musagetes.MainWindow"
+    x:Class="Musagetes.Windows.MainWindow"
 	x:Name="Window"
 	Title="Musagetes"
 	Width="640" Height="480">
@@ -22,6 +22,7 @@
                      Width="200"
                      Padding="5"
                      Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"/>
+
             <Menu DockPanel.Dock="Left">
                 <MenuItem x:Name="FileMenu" Header="File">
                     <MenuItem x:Name="AddDirMenuItem" Header="Add Directory" Command="{Binding AddDirCmd}"/>
@@ -152,13 +153,15 @@
                                      "{Binding ColumnManager.Columns, Mode=OneWay}"
                   PreviewTarget="{Binding PreviewSong, Mode=OneWayToSource, 
                     Converter={StaticResource ToSong}}"
-                    HeadersVisibility="Column"
+                    HeadersVisibility="Column" Padding="0"
+                    IsReadOnly="False"
+                 
                 >
                 <DataGrid.Resources>
                     <wpfElements:BindingProxy x:Key="DataGridProxy" Data="{Binding}"/>
                 </DataGrid.Resources>
                 <wpfElements:MusagetesDataGrid.ContextPopup>
-                    <Popup Height="Auto" Width="250" 
+                    <Popup Height="Auto" Width="275" 
                            IsOpen="False" StaysOpen="False">
                         <Grid Background="White">
                             <Grid.ColumnDefinitions>
@@ -180,7 +183,18 @@
                                             <Setter Property="TextWrapping" Value="Wrap"/>
                                         </Style>
                                     </StackPanel.Resources>
-                                    <TextBlock Text="{Binding SongTitle}" />
+                                    <TextBox Text="{Binding SongTitle,
+                                        UpdateSourceTrigger=PropertyChanged}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Play Count: "/>
+                                        <RepeatButton Content="&lt;" 
+                                                Command="{Binding Data.DecrementPlayCountCmd,
+                                            Source={StaticResource DataGridProxy}}"/>
+                                        <TextBlock Text="{Binding PlayCount}"/>
+                                        <RepeatButton Content="&gt;" 
+                                                Command="{Binding Data.IncrementPlayCountCmd,
+                                            Source={StaticResource DataGridProxy}}"/>
+                                    </StackPanel>
                                     <TextBlock Text="{Binding CategoryTags[Artist]}" />
                                     <TextBlock Text="{Binding CategoryTags[Album]}" />
                                     <Button Command="{Binding Data.TogglePreviewCmd,
@@ -206,6 +220,33 @@
                                         Source={StaticResource DataGridProxy}}" 
                                         SmallChange="0.01" 
                                         LargeChange=".1" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button DataContext="{Binding Data.BpmCalc, 
+                                            Source={StaticResource DataGridProxy}}" 
+                                            Command="{Binding RegisterTap}"
+                                            Margin="2"
+                                            Content="Tap Beats"/>
+                                        <TextBlock Text="{Binding Data.BpmCalc.Value,
+                                            Source={StaticResource DataGridProxy}}"
+                                                   Margin="2"/>
+                                        <Button Content="Save" 
+                                                Margin="2"
+                                                Command="{Binding Data.SaveBpmCmd, 
+                                                    Source={StaticResource DataGridProxy}}" >
+                                            <Button.Style>
+                                                <Style TargetType="{x:Type Button}">
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Data.BpmCalc.IsTapping,
+                                                                    Source={StaticResource DataGridProxy}}" 
+                                                             Value="True">
+                                                            <Setter Property="IsEnabled" Value="True"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </StackPanel>
                                 </StackPanel>
                             </Grid>
                             <Grid Grid.Column="0" Grid.Row="1"
@@ -241,7 +282,7 @@
                     <Style TargetType="DataGridRow">
                         <Setter Property="Margin" Value="0"/>
                         <Setter Property="Template">
-                            <!-- set all this control template nonsense to work around WPF bug -->
+                            <!--set all this control template nonsense to work around WPF bug -->
                             <Setter.Value>
                                 <ControlTemplate TargetType="DataGridRow">
                                     <Border 
@@ -266,40 +307,40 @@
                             </Trigger>
                         </Style.Triggers>
                     </Style>
-                    </DataGrid.RowStyle>
-                    <DataGrid.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.Panel>
-                                <ItemsPanelTemplate>
-                                    <DataGridRowsPresenter/>
-                                </ItemsPanelTemplate>
-                            </GroupStyle.Panel>
-                            <GroupStyle.ContainerStyle>
-                                <Style TargetType="{x:Type GroupItem}">
-                                    <Setter Property="Margin" Value="0,0,0,5"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="{x:Type GroupItem}">
-                                                <Expander IsExpanded="True">
-                                                    <Expander.Header>
-                                                        <DockPanel>
-                                                            <TextBlock Text="{Binding Path=Name}"/>
-                                                            <TextBlock Text=" ("/>
-                                                            <TextBlock Text="{Binding Path=ItemCount}"/>
-                                                            <TextBlock Text=" songs)"/>
-                                                        </DockPanel>
-                                                    </Expander.Header>
-                                                    <Expander.Content>
-                                                        <ItemsPresenter />
-                                                    </Expander.Content>
-                                                </Expander>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </GroupStyle.ContainerStyle>
-                        </GroupStyle>
-                    </DataGrid.GroupStyle>
+                </DataGrid.RowStyle>
+                <DataGrid.GroupStyle>
+                    <GroupStyle>
+                        <GroupStyle.Panel>
+                            <ItemsPanelTemplate>
+                                <DataGridRowsPresenter/>
+                            </ItemsPanelTemplate>
+                        </GroupStyle.Panel>
+                        <GroupStyle.ContainerStyle>
+                            <Style TargetType="{x:Type GroupItem}">
+                                <Setter Property="Margin" Value="0,0,0,5"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type GroupItem}">
+                                            <Expander IsExpanded="True">
+                                                <Expander.Header>
+                                                    <DockPanel>
+                                                        <TextBlock Text="{Binding Path=Name}"/>
+                                                        <TextBlock Text=" ("/>
+                                                        <TextBlock Text="{Binding Path=ItemCount}"/>
+                                                        <TextBlock Text=" songs)"/>
+                                                    </DockPanel>
+                                                </Expander.Header>
+                                                <Expander.Content>
+                                                    <ItemsPresenter />
+                                                </Expander.Content>
+                                            </Expander>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </GroupStyle.ContainerStyle>
+                    </GroupStyle>
+                </DataGrid.GroupStyle>
             </wpfElements:MusagetesDataGrid>
             <GridSplitter Grid.Column ="3" Background="LightGray" Width="3"
                 HorizontalAlignment="Center" VerticalAlignment="Stretch"

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Windows.Media.Imaging;
 using System.IO;
 using System.Linq;
+using NLog;
 
 namespace Musagetes.DataObjects
 {
@@ -31,13 +32,75 @@ namespace Musagetes.DataObjects
             }
         }
 
-        public string SongTitle { get; set; }
-        public int Milliseconds { get; set; }
-        public string Location { get; set; }
-        public Bpm Bpm { get; set; }
-        public CategoryTag CategoryTags { get; set; }
+        public string SongTitle
+        {
+            get { return _songTitle; }
+            set
+            {
+                _songTitle = value;
+                OnPropertyChanged("SongTitle");
+            }
+        }
+
+        public int Milliseconds
+        {
+            get { return _milliseconds; }
+            set
+            {
+                _milliseconds = value;
+                OnPropertyChanged("Milliseconds");
+                OnPropertyChanged("Length");
+            }
+
+        }
+
+        public string Location
+        {
+            get { return _location; }
+            set
+            {
+                _location = value;
+                OnPropertyChanged("Location");
+                OnPropertyChanged("Art");
+            }
+        }
+
+        public Bpm Bpm
+        {
+            get { return _bpm; }
+            set
+            {
+                _bpm = value;
+                _bpm.PropertyChanged += (sender, args) =>
+                {
+                    OnPropertyChanged("Bpm");
+                };
+                OnPropertyChanged("Bpm");
+            }
+        }
+
+        public CategoryTag CategoryTags
+        {
+            get { return _categoryTags; }
+            set
+            {
+                _categoryTags = value;
+                OnPropertyChanged("CategoryTags");
+            }
+        }
+
+        public uint PlayCount
+        {
+            get { return _playCount; }
+            set
+            {
+                _playCount = value;
+                OnPropertyChanged("PlayCount");
+            }
+
+        }
+
         public SongDb SongDb { get; private set; }
-        public uint PlayCount { get; set; }
         public uint Id { get; private set; }
 
         public IEnumerable<Tag> Tags
@@ -102,7 +165,7 @@ namespace Musagetes.DataObjects
             }
         }
 
-        public Song(string title, string location, int milliseconds, Bpm bpm, SongDb songDb, 
+        public Song(string title, string location, int milliseconds, Bpm bpm, SongDb songDb,
             uint playCount, uint? songId = null)
         {
             SongTitle = title;
@@ -185,6 +248,14 @@ namespace Musagetes.DataObjects
 
         private bool _imageTried;
         private BitmapImage _cachedImage;
+        private string _songTitle;
+        private int _milliseconds;
+        private string _location;
+        private Bpm _bpm;
+        private CategoryTag _categoryTags;
+        private uint _playCount;
+
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public BitmapImage Art
         {
             get
@@ -192,24 +263,24 @@ namespace Musagetes.DataObjects
                 if (_imageTried) return _cachedImage;
 
                 BitmapImage retval = null;
-                try
+                if (!File.Exists(Location))
                 {
-                    using (var file = TagLib.File.Create(Location))
-                    {
-                        if (file.Tag.Pictures.Length > 0)
-                        {
-                            var albumArt = new BitmapImage();
-                            albumArt.BeginInit();
-                            albumArt.StreamSource = new MemoryStream(file.Tag.Pictures[0].Data.Data);
-                            albumArt.EndInit();
-                            retval = albumArt;
-                        }
-                    }
+                    Logger.Error("{0} does not exist -- unable to load art", Location);
+                    _cachedImage = null;
+                    _imageTried = true;
+                    return null;
                 }
-                catch (Exception ex)
+
+                using (var file = TagLib.File.Create(Location))
                 {
-                    if (!(ex is FileNotFoundException || ex is DirectoryNotFoundException))
-                        throw;
+                    if (file.Tag.Pictures.Length > 0)
+                    {
+                        var albumArt = new BitmapImage();
+                        albumArt.BeginInit();
+                        albumArt.StreamSource = new MemoryStream(file.Tag.Pictures[0].Data.Data);
+                        albumArt.EndInit();
+                        retval = albumArt;
+                    }
                 }
 
                 _cachedImage = retval;

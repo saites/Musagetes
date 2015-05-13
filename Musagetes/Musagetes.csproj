@@ -113,16 +113,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="CategoryDisplayOptions.xaml.cs">
+    <Compile Include="Toolkit\BpmTapper.cs" />
+    <Compile Include="Windows\CategoryDisplayOptions.xaml.cs">
       <DependentUpon>CategoryDisplayOptions.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CategoryDisplayOptionsVm.cs" />
-    <Compile Include="ColumnManager.cs" />
-    <Compile Include="CreateNewTagVm.cs" />
-    <Compile Include="CreateNewTagWindow.xaml.cs">
+    <Compile Include="ViewModels\CategoryDisplayOptionsVm.cs" />
+    <Compile Include="Toolkit\ColumnManager.cs" />
+    <Compile Include="ViewModels\CreateNewTagVm.cs" />
+    <Compile Include="Windows\CreateNewTagWindow.xaml.cs">
       <DependentUpon>CreateNewTagWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="NAudioPlayer.cs" />
+    <Compile Include="Toolkit\NAudioPlayer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -134,11 +135,11 @@
     <Compile Include="WpfElements\GroupCategoriesConverter.cs" />
     <Compile Include="WpfElements\ObjectToSongConverter.cs" />
     <Compile Include="WpfElements\DataGridColumnsBehavior.cs" />
-    <Compile Include="MainWindowVm.cs" />
+    <Compile Include="ViewModels\MainWindowVm.cs" />
     <Compile Include="WpfElements\DragAndDropBehavior.cs" />
     <Compile Include="WpfElements\DropListCommand.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="TagEditorVm.cs" />
+    <Compile Include="ViewModels\TagEditorVm.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -150,19 +151,19 @@
     <Compile Include="WpfElements\PlaybackStateToImageConverter.cs" />
     <Compile Include="WpfElements\VisibilityToBooleanConverter.cs" />
     <Compile Include="WpfElements\MusagetesDataGrid.cs" />
-    <Page Include="CategoryDisplayOptions.xaml">
+    <Page Include="Windows\CategoryDisplayOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="CreateNewTagWindow.xaml">
+    <Page Include="Windows\CreateNewTagWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -172,7 +173,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>

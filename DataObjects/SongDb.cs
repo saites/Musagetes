@@ -156,7 +156,7 @@ namespace Musagetes.DataObjects
                 using (var file = TagLib.File.Create(filename))
                 {
                     var song = new Song(file.Tag.Title, filename,
-                        (int)file.Properties.Duration.TotalMilliseconds, new Bpm(0, false), 
+                        (int)file.Properties.Duration.TotalMilliseconds, new Bpm(0, true), 
                         this, 0);
                     AddBaseTags(song, ArtistCategory, file.Tag.AlbumArtists);
                     AddBaseTags(song, GenreCategory, file.Tag.Genres);
@@ -167,7 +167,7 @@ namespace Musagetes.DataObjects
                         song.TagSong(albumTag);
                     }
                     if(file.Tag.BeatsPerMinute > 0 && file.Tag.BeatsPerMinute < int.MaxValue)
-                        song.Bpm = new Bpm((int)file.Tag.BeatsPerMinute, true);
+                        song.Bpm = new Bpm((int)file.Tag.BeatsPerMinute, false);
                     AddSong(song);
                     //SaveChanges();
                 }
