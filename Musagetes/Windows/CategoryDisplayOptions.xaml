@@ -3,58 +3,137 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:musagetes="clr-namespace:Musagetes"
         xmlns:wpfElements="clr-namespace:Musagetes.WpfElements"
-        Title="CategoryDisplayOptions" Height="300" Width="300">
+        Title="Options" Height="447" Width="330">
     <Window.Resources>
         <wpfElements:VisibilityToBooleanConverter x:Key="V2B"/>
     </Window.Resources>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <ListBox 
-            Grid.Column="0"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="2*"/>
+        </Grid.RowDefinitions>
+        <Grid Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Margin="5"
+                Grid.Column="0" Grid.Row="0" 
+                       Text="Play songs using:"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Right"/>
+            <ComboBox Grid.Column="1" Grid.Row="0"
+                        Margin="5"
+                      SelectedItem="{Binding MainPlayerDevice}"
+                      ItemsSource="{Binding Devices.Values}"
+                      VerticalAlignment="Center"/>
+
+            <TextBlock Grid.Column="0" Grid.Row="1" 
+                        Margin="5"
+                       Text="Preview songs using:"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Right"/>
+            <ComboBox Grid.Column="1" Grid.Row="1"
+                        Margin="5"
+                      SelectedItem="{Binding PreviewPlayerDevice}"
+                      ItemsSource="{Binding Devices.Values}"
+                      VerticalAlignment="Center"/>
+
+            <CheckBox Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2"
+                        IsChecked="{Binding UpdatePlaycountOnPreview}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                       Content="Increase playcount when previewing"/>
+
+            <TextBlock Grid.Column="0" Grid.Row="3" 
+                       Text="Update playcount after "
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Right"/>
+            <Grid Grid.Column="1" Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center" 
+                            Orientation="Horizontal">
+                    <TextBlock Text="{Binding Path=Value, ElementName=TimeSlider}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="s" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Slider Grid.Column="1" 
+                        Maximum="100" Minimum="0"
+                        Name="TimeSlider"
+                        VerticalAlignment="Center" 
+                        Value="{Binding UpdateTime}"
+                        />
+            </Grid>
+        </Grid>
+        <Grid Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Column="0" Grid.Row="0" 
+                       Text="Display Columns:"
+                       TextAlignment="Center"/>
+            <TextBlock Grid.Column="1" Grid.Row="0" 
+                       Text="Group Categories (drag to reorder):"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"/>
+            <ListBox 
+            Grid.Column="0" Grid.Row="1"
              ItemsSource ="{Binding DisplayColumns, Mode=OneWay}"
              SelectedItem="{Binding SelectedColumn}"
              Margin="5">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox IsChecked="{Binding Visibility, 
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox IsChecked="{Binding Visibility, 
                             Converter={StaticResource V2B}}" Margin="3"/>
-                        <TextBlock Text="{Binding Header}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-            <ListBox.InputBindings>
-                <KeyBinding Key="Enter" Command="{Binding ToggleVisibleCmd}"/>
-            </ListBox.InputBindings>
-        </ListBox>
-        <wpfElements:DropEnabledListBox
-            Grid.Column="1"
+                            <TextBlock Text="{Binding Header}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.InputBindings>
+                    <KeyBinding Key="Enter" Command="{Binding ToggleVisibleCmd}"/>
+                </ListBox.InputBindings>
+            </ListBox>
+            <wpfElements:DropEnabledListBox
+            Grid.Column="1" Grid.Row="1"
             ItemsSource="{Binding AllCategories}"
             DropCommand="{Binding MoveCategoriesCmd}"
             AllowDrop="True"
             Margin="5"
             x:Name="GroupBox"
             >
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox Margin="3"
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox Margin="3"
                             IsChecked="{Binding IsGrouping,
                             UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
-                        <TextBlock Text="{Binding}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
+                            <TextBlock Text="{Binding}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
 
-            <wpfElements:DropEnabledListBox.HighlightStyle>
-                <Style TargetType="{x:Type ListBoxItem}">
-                    <Setter Property="BorderBrush" Value="LightSeaGreen"/>
-                    <Setter Property="BorderThickness" Value="0 2 0 0" />
-                </Style>
-            </wpfElements:DropEnabledListBox.HighlightStyle>
-        </wpfElements:DropEnabledListBox>
+                <wpfElements:DropEnabledListBox.HighlightStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="BorderBrush" Value="LightSeaGreen"/>
+                        <Setter Property="BorderThickness" Value="0 2 0 0" />
+                    </Style>
+                </wpfElements:DropEnabledListBox.HighlightStyle>
+            </wpfElements:DropEnabledListBox>
+        </Grid>
     </Grid>
 </Window>

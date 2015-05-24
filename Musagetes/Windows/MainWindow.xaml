@@ -8,11 +8,11 @@
 	Title="Musagetes"
 	Width="640" Height="480">
     <Window.Resources>
-        <Image Source="Collaterals/Images/PlayButton.png" x:Key="PlayButton"/>
-        <Image Source="Collaterals/Images/StopButton.png" x:Key="StopButton"/>
-        <Image Source="Collaterals/Images/PauseButton.png" x:Key="PauseButton"/>
-        <Image Source="Collaterals/Images/NextButton.png" x:Key="NextButton"/>
-        <Image Source="Collaterals/Images/BackButton.png" x:Key="BackButton"/>
+        <Image Source="../Collaterals/Images/PlayButton.png" x:Key="PlayButton"/>
+        <Image Source="../Collaterals/Images/StopButton.png" x:Key="StopButton"/>
+        <Image Source="../Collaterals/Images/PauseButton.png" x:Key="PauseButton"/>
+        <Image Source="../Collaterals/Images/NextButton.png" x:Key="NextButton"/>
+        <Image Source="../Collaterals/Images/BackButton.png" x:Key="BackButton"/>
         <wpfElements:ObjectToSongConverter x:Key="ToSong"/>
     </Window.Resources>
 

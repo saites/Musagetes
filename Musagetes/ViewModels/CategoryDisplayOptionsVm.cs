@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +15,7 @@ using Musagetes.DataAccess;
 using Musagetes.DataObjects;
 using Musagetes.WpfElements;
 using MvvmFoundation.Wpf;
+using NAudio.Wave;
 
 namespace Musagetes.ViewModels
 {
@@ -22,6 +24,24 @@ namespace Musagetes.ViewModels
         public ListCollectionView DisplayColumns { get; private set; }
         public ObservableCollection<CategoryWrapper> AllCategories { get; private set; }
         public DataGridColumn SelectedColumn { get; set; }
+        public Dictionary<int,string> Devices { get; private set; }
+        public bool UpdatePlaycountOnPreview { get; set; }
+        public int UpdateTime { get; set; }
+        public string MainPlayerDevice {
+            get { return Devices[App.Configuration.MainPlayerDeviceNum]; }
+            set
+            {
+                App.Configuration.MainPlayerDeviceNum =
+                    Devices.First(d => d.Value.Equals(value)).Key;
+            }}
+
+        public string PreviewPlayerDevice {
+            get { return Devices[App.Configuration.SecondaryPlayerDeviceNum]; }
+            set
+            {
+                App.Configuration.SecondaryPlayerDeviceNum =
+                    Devices.First(d => d.Value.Equals(value)).Key;
+            }}
 
         public IList<Category> DbGroupCategories { get; set; }
         public ObservableCollection<Category> DbAllCategories { get; set; }
@@ -38,6 +58,13 @@ namespace Musagetes.ViewModels
             foreach (var cat in categories)
                 AllCategories.Add(new CategoryWrapper(cat, this));
             AllCategories.CollectionChanged += AllCategoriesCollectionChanged;
+
+            Devices = new Dictionary<int, string> {{-1, "Default Audio Device"}};
+            for (var device = 0; device < WaveOut.DeviceCount; device++)
+            {
+                var info = WaveOut.GetCapabilities(device);
+                Devices.Add(device, info.ProductName);
+            }
         }
 
         private bool _reinsert;

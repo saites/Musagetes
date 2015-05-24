@@ -14,15 +14,15 @@
       <Tag id="3" name="Richard Stoltzman" />
       <Tag id="6" name="Bob Acri" />
     </Category>
-    <Category name="Album" display="False" order="6">
-      <Tag id="2" name="Ninja Tuna" />
-      <Tag id="5" name="Fine Music, Vol. 1" />
-      <Tag id="8" name="Bob Acri" />
-    </Category>
     <Category name="Genre" display="False" order="7">
       <Tag id="1" name="Electronic" />
       <Tag id="4" name="Classical" />
       <Tag id="7" name="Jazz" />
+    </Category>
+    <Category name="Album" display="False" order="6">
+      <Tag id="2" name="Ninja Tuna" />
+      <Tag id="5" name="Fine Music, Vol. 1" />
+      <Tag id="8" name="Bob Acri" />
     </Category>
     <Category name="Uncategorized" display="False" order="9" />
   </CategoryTags>
