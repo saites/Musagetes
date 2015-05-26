@@ -19,7 +19,7 @@ using NAudio.Wave;
 
 namespace Musagetes.ViewModels
 {
-    public class CategoryDisplayOptionsVm : INotifyPropertyChanged
+    public class OptionsVm : INotifyPropertyChanged
     {
         public ListCollectionView DisplayColumns { get; private set; }
         public ObservableCollection<CategoryWrapper> AllCategories { get; private set; }
@@ -45,7 +45,7 @@ namespace Musagetes.ViewModels
 
         public IList<Category> DbGroupCategories { get; set; }
         public ObservableCollection<Category> DbAllCategories { get; set; }
-        public CategoryDisplayOptionsVm(IList<DataGridColumn> columns,
+        public OptionsVm(IList<DataGridColumn> columns,
             ObservableCollection<Category> categories, IList<Category> groupCategories)
         {
             DisplayColumns = new ListCollectionView((IList)columns);
@@ -102,8 +102,8 @@ namespace Musagetes.ViewModels
         public class CategoryWrapper : INotifyPropertyChanged
         {
             public Category Category { get; set; }
-            CategoryDisplayOptionsVm Vm { get; set; }
-            public CategoryWrapper(Category cat, CategoryDisplayOptionsVm vm)
+            OptionsVm Vm { get; set; }
+            public CategoryWrapper(Category cat, OptionsVm vm)
             {
                 Category = cat;
                 Vm = vm;

@@ -30,9 +30,11 @@
                     <MenuItem x:Name="QuitMenuItem" Header="Quit" Command="{Binding QuitCmd}"/>
                     <MenuItem x:Name="UpdateMenutItem" Header="Update" Command="{Binding UpdateCmd}"/>
                 </MenuItem>
-                <MenuItem x:Name="TagMenu" Header="Tags">
-                    <MenuItem Header="Refresh Tags" Command="{Binding RefreshTagsCmd}"/>
-                    <MenuItem Header="Change Category Display..." Command="{Binding ChangeGroupingCmd}"/>
+                <MenuItem x:Name="TagMenu" Header="Tools">
+                    <MenuItem Header="Edit Tags..." 
+                              Command="{Binding OpenTagEditorCmd}"/>
+                    <MenuItem Header="Options..." 
+                              Command="{Binding ChangeGroupingCmd}"/>
                 </MenuItem>
             </Menu>
         </DockPanel>
@@ -305,6 +307,11 @@
                                 <Setter Property="Background" Value="LightCyan"/>
                                 <Setter Property="Foreground" Value="Black"/>
                             </Trigger>
+                            <DataTrigger Binding="{Binding IsBadSong}" Value="True">
+                                <Setter Property="Background" Value="DarkRed"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="ToolTip" Value="{Binding SongError}"/>
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </DataGrid.RowStyle>

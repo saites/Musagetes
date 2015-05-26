@@ -100,6 +100,26 @@ namespace Musagetes.DataObjects
 
         }
 
+        public bool IsBadSong
+        {
+            get { return _isBadSong; }
+            set
+            {
+                _isBadSong = value;
+                OnPropertyChanged("IsBadSong");
+            }
+        }
+
+        public string SongError
+        {
+            get { return _songError; }
+            private set
+            {
+                _songError = value; 
+                OnPropertyChanged("SongError");
+            }
+        }
+
         public SongDb SongDb { get; private set; }
         public uint Id { get; private set; }
 
@@ -177,6 +197,15 @@ namespace Musagetes.DataObjects
             CategoryTags = new CategoryTag(this);
             if (songId != null) SongId.UpdateTagId(songId.Value);
             Id = songId ?? SongId.GetNextSongId();
+            IsBadSong = false;
+            SongError = string.Empty;
+
+            if (!File.Exists(Location))
+            {
+                SongError = string.Format("Cannot find file {0}", Location);
+                Logger.Error(SongError);
+                IsBadSong = true;
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -254,6 +283,8 @@ namespace Musagetes.DataObjects
         private Bpm _bpm;
         private CategoryTag _categoryTags;
         private uint _playCount;
+        private bool _isBadSong;
+        private string _songError;
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public BitmapImage Art

@@ -229,12 +229,12 @@ namespace Musagetes.ViewModels
             switch (column.ColumnType)
             {
                 case GridColumn.ColumnTypeEnum.BasicText:
-                    var width = column.Header.Equals("Title") ? 2.0 : 1.0;
                     ColumnManager.AddNewTextColumn(column.Header,
-                        column.Binding, column.IsVisible, width: width);
+                        column.Binding, column.IsVisible);
                     break;
                 case GridColumn.ColumnTypeEnum.Bpm:
-                    ColumnManager.AddBpmColumn();
+                    ColumnManager.AddBpmColumn(column.Header,
+                        column.Binding, column.IsVisible);
                     break;
                 case GridColumn.ColumnTypeEnum.Category:
                     ColumnManager.AddNewTextColumn(column.Category.CategoryName,
@@ -416,7 +416,7 @@ namespace Musagetes.ViewModels
                 return new RelayCommand(() =>
                 {
                     var categoryOptions = new CategoryDisplayOptions();
-                    var categoryOptionsVm = new CategoryDisplayOptionsVm(ColumnManager.Columns,
+                    var categoryOptionsVm = new OptionsVm(ColumnManager.Columns,
                         App.SongDb.Categories, App.SongDb.GroupCategories)
                     {
                         CloseAction = categoryOptions.Close
@@ -712,6 +712,30 @@ namespace Musagetes.ViewModels
                         || PreviewSong.PlayCount == 0) 
                         return;
                     PreviewSong.PlayCount--;
+                });
+            }
+        }
+
+        private AllTagEditor _allTagEditor = null;
+        public ICommand OpenTagEditorCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    if (_allTagEditor == null)
+                    {
+                        _allTagEditor = new AllTagEditor
+                        {
+                            DataContext = new AllTagEditorVm(App.SongDb.Categories)
+                        };
+                        _allTagEditor.Closed += (sender, args) => _allTagEditor = null;
+                        _allTagEditor.Show();
+                    }
+                    else
+                    {
+                        _allTagEditor.Focus();
+                    }
                 });
             }
         }

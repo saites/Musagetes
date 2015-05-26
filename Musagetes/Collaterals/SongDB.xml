@@ -4,7 +4,7 @@
     <Column header="Title" type="BasicText" display="True" order="0" binding="SongTitle" />
     <Column header="Location" type="BasicText" display="True" order="1" binding="Location" />
     <Column header="Length" type="BasicText" display="True" order="2" binding="Length" />
-    <Column header="BPM" type="Bpm" display="True" order="3" binding="" />
+    <Column header="BPM" type="Bpm" display="False" order="3" binding="Bpm.Value" />
     <Column header="Tags" type="BasicText" display="False" order="4" binding="SongTags" />
     <Column header="Play Count" type="BasicText" display="True" order="8" binding="PlayCount" />
   </Columns>
@@ -60,6 +60,18 @@
       <Tags>
         <Tag>6</Tag>
         <Tag>8</Tag>
+      </Tags>
+    </Song>
+    <Song id="4">
+      <SongTitle>asdf</SongTitle>
+      <Location>C:\Users\Public\Music\Sample Music\fefafe.mp3</Location>
+      <Milliseconds>348056</Milliseconds>
+      <PlayCount>76</PlayCount>
+      <BPM Guess="False">242</BPM>
+      <Tags>
+        <Tag>0</Tag>
+        <Tag>1</Tag>
+        <Tag>2</Tag>
       </Tags>
     </Song>
   </Songs>

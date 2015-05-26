@@ -146,10 +146,10 @@ namespace Musagetes.DataAccess
                     continue;
                 }
 
+                var binding = reader.GetAttribute(Constants.Db.Binding);
                 switch (cType)
                 {
                     case GridColumn.ColumnTypeEnum.BasicText:
-                        var binding = reader.GetAttribute(Constants.Db.Binding);
                         _columns.Add(order,
                             new GridColumn(header: header, binding: binding,
                                 isVisible: display));
@@ -157,7 +157,7 @@ namespace Musagetes.DataAccess
                     case GridColumn.ColumnTypeEnum.Bpm:
                         _columns.Add(order,
                             new GridColumn(GridColumn.ColumnTypeEnum.Bpm, header: header,
-                                isVisible: display));
+                                isVisible: display, binding: binding));
                         break;
                 }
 

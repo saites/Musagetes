@@ -114,10 +114,14 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Toolkit\BpmTapper.cs" />
-    <Compile Include="Windows\CategoryDisplayOptions.xaml.cs">
-      <DependentUpon>CategoryDisplayOptions.xaml</DependentUpon>
+    <Compile Include="ViewModels\AllTagEditorVm.cs" />
+    <Compile Include="Windows\AllTagEditor.xaml.cs">
+      <DependentUpon>AllTagEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModels\CategoryDisplayOptionsVm.cs" />
+    <Compile Include="Windows\Options.xaml.cs">
+      <DependentUpon>Options.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\OptionsVm.cs" />
     <Compile Include="Toolkit\ColumnManager.cs" />
     <Compile Include="ViewModels\CreateNewTagVm.cs" />
     <Compile Include="Windows\CreateNewTagWindow.xaml.cs">
@@ -149,9 +153,14 @@
       <DependentUpon>TagEditorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="WpfElements\PlaybackStateToImageConverter.cs" />
+    <Compile Include="WpfElements\TextToColorConverter.cs" />
     <Compile Include="WpfElements\VisibilityToBooleanConverter.cs" />
     <Compile Include="WpfElements\MusagetesDataGrid.cs" />
-    <Page Include="Windows\CategoryDisplayOptions.xaml">
+    <Page Include="Windows\AllTagEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\Options.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>

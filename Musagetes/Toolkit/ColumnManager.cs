@@ -18,7 +18,7 @@ namespace Musagetes.Toolkit
         {
             Columns = new ObservableCollection<DataGridColumn>();
             BindingOperations.EnableCollectionSynchronization(Columns,
-                ((ICollection) Columns).SyncRoot);
+                ((ICollection)Columns).SyncRoot);
         }
 
         public void AddNewTextColumn(string header, string binding,
@@ -26,7 +26,15 @@ namespace Musagetes.Toolkit
             bool notifyOnTargetUpdated = true, double width = 1.0,
             DataGridLengthUnitType widthType = DataGridLengthUnitType.Star)
         {
-            var textColumn = new DataGridTextColumn
+            var textColumn = DataGridTextColumn(header, binding, isVisible,
+                mode, notifyOnTargetUpdated, width, widthType);
+            Columns.Add(textColumn);
+        }
+
+        private static DataGridTextColumn DataGridTextColumn(string header, string binding, bool isVisible, BindingMode mode,
+            bool notifyOnTargetUpdated, double width, DataGridLengthUnitType widthType)
+        {
+            return new DataGridTextColumn
             {
                 Header = header,
                 Width = new DataGridLength(width, widthType),
@@ -38,7 +46,6 @@ namespace Musagetes.Toolkit
                 },
                 IsReadOnly = false
             };
-            Columns.Add(textColumn);
         }
 
         public bool RemoveColumn(string categoryName)
@@ -51,17 +58,17 @@ namespace Musagetes.Toolkit
             return true;
         }
 
-        const string Xaml = "<DataTemplate><TextBlock Text=\"{Binding Bpm.Value}\" "
+        const string BpmXaml = "<DataTemplate><TextBlock Text=\"{Binding Bpm.Value}\" "
                             + "Style=\"{StaticResource BPMStyle}\"/></DataTemplate>";
-        public void AddBpmColumn()
+        public void AddBpmColumn(string header="BPM", string binding="Bpm.Value", 
+            bool display=false)
         {
-
             var col = new DataGridTemplateColumn
             {
-                Header = "BPM",
+                Header = header,
                 Width = new DataGridLength(1.0, DataGridLengthUnitType.Auto),
                 CellTemplate = (DataTemplate)XamlReader.Load(
-                    new MemoryStream(Encoding.ASCII.GetBytes(Xaml)),
+                    new MemoryStream(Encoding.ASCII.GetBytes(BpmXaml)),
                     new ParserContext
                     {
                         XmlnsDictionary =
@@ -70,7 +77,8 @@ namespace Musagetes.Toolkit
                             {"x", "http://schemas.microsoft.com/winfx/2006/xaml"}
                         }
                     }),
-                SortMemberPath = "Bpm.Value"
+                SortMemberPath = binding, 
+                Visibility = display ? Visibility.Visible : Visibility.Hidden
             };
             Columns.Add(col);
         }

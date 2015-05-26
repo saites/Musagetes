@@ -2,7 +2,8 @@
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	x:Class="Musagetes.App"
-	StartupUri="Windows/MainWindow.xaml">
+	StartupUri="Windows/MainWindow.xaml"
+    ShutdownMode="OnMainWindowClose">
 	<Application.Resources>
         <Style x:Key="BPMStyle" TargetType="TextBlock">
             <Style.Triggers>

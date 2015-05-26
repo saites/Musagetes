@@ -80,7 +80,7 @@ namespace Musagetes
                 PlaybackState = MediaState.Stop;
                 UnloadAudio();
                 _song = value;
-                if (_song != null) LoadAudio();
+                if (_song != null && !_song.IsBadSong) LoadAudio();
                 OnPropertyChanged();
             }
         }
