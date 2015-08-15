@@ -11,7 +11,8 @@ namespace Musagetes.DataObjects
         {
             BasicText,
             Bpm,
-            Category
+            Category,
+            Tags
         }
 
         public Category Category { get; private set; }

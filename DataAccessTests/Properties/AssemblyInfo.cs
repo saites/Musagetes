@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
@@ -8,9 +7,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("DataAccessTests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Intel Corporation")]
 [assembly: AssemblyProduct("DataAccessTests")]
-[assembly: AssemblyCopyright("Copyright © Intel Corporation 2015")]
+[assembly: AssemblyCopyright("Copyright © 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Markup;
+using Musagetes.WpfElements;
 
 namespace Musagetes.Toolkit
 {
@@ -21,7 +23,7 @@ namespace Musagetes.Toolkit
                 ((ICollection)Columns).SyncRoot);
         }
 
-        public void AddNewTextColumn(string header, string binding,
+        public DataGridTextColumn AddNewTextColumn(string header, string binding,
             bool isVisible = false, BindingMode mode = BindingMode.OneWay,
             bool notifyOnTargetUpdated = true, double width = 1.0,
             DataGridLengthUnitType widthType = DataGridLengthUnitType.Star)
@@ -29,6 +31,7 @@ namespace Musagetes.Toolkit
             var textColumn = DataGridTextColumn(header, binding, isVisible,
                 mode, notifyOnTargetUpdated, width, widthType);
             Columns.Add(textColumn);
+            return textColumn;
         }
 
         private static DataGridTextColumn DataGridTextColumn(string header, string binding, bool isVisible, BindingMode mode,

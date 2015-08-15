@@ -2,8 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
@@ -19,6 +21,9 @@ namespace Musagetes.DataObjects
         public ReadOnlyDictionary<string, Category> CategoryDictionary { get { return _categoryDictionaryReadOnly; } }
         public ReadOnlyDictionary<uint, Tag> TagIds { get { return _tagIdsReadOnly; } }
         public ManualResetEvent CategoriesRead { get; private set; }
+
+        public Dictionary<Song, HashSet<Tag>> SongTagDictionary 
+            = new Dictionary<Song, HashSet<Tag>>();
 
         private readonly ObservableCollection<Song> _songs;
         private readonly ObservableCollection<Category> _categories;
@@ -73,6 +78,10 @@ namespace Musagetes.DataObjects
             {
                 _songs.Add(s);
             }
+            lock ((SongTagDictionary as ICollection).SyncRoot)
+            {
+                SongTagDictionary.Add(s, new HashSet<Tag>());
+            }
             return true;
         }
 
@@ -86,6 +95,8 @@ namespace Musagetes.DataObjects
             {
                 _categories.Add(cat);
                 _categoryDictionary.Add(cat.CategoryName, cat);
+                var oldName = cat.CategoryName;
+                cat.PropertyChanged += OnCategoryPropertyChanged(cat, oldName);
             }
             return true;
         }
@@ -99,6 +110,39 @@ namespace Musagetes.DataObjects
                 _tagIds.Add(tag.Id, tag);
             }
             return true;
+        }
+
+        public void TagSong(Song song, Tag tag)
+        {
+            if (!_tagIds.ContainsKey(tag.Id))
+                AddTag(tag);
+            if (!_songs.Contains(song))
+                AddSong(song);
+            lock ((SongTagDictionary as ICollection).SyncRoot)
+            {
+                SongTagDictionary[song].Add(tag);
+                song.NotifyTagChanged();
+            }
+        }
+
+        public void UntagSong(Song song, Tag tag)
+        {
+            lock ((SongTagDictionary as ICollection).SyncRoot)
+            {
+                SongTagDictionary[song].Remove(tag);
+                song.NotifyTagChanged();
+            }
+        }
+
+        private PropertyChangedEventHandler OnCategoryPropertyChanged(Category cat,
+            string oldName)
+        {
+            return (sender, args) =>
+            {
+                if (args.PropertyName != "CategoryName") return;
+                _categoryDictionary.Remove(oldName);
+                _categoryDictionary.Add(cat.CategoryName, cat);
+            };
         }
 
         public interface IDbReaderWriter
@@ -156,15 +200,15 @@ namespace Musagetes.DataObjects
                 using (var file = TagLib.File.Create(filename))
                 {
                     var song = new Song(file.Tag.Title, filename,
-                        (int)file.Properties.Duration.TotalMilliseconds, new Bpm(0, true), 
-                        this, 0);
+                        (int)file.Properties.Duration.TotalMilliseconds, new Bpm(0, true), 0);
                     AddBaseTags(song, ArtistCategory, file.Tag.AlbumArtists);
                     AddBaseTags(song, GenreCategory, file.Tag.Genres);
                     if (file.Tag.Album != null)
                     {
                         var albumTag = AlbumCategory[file.Tag.Album]
                                ?? new Tag(file.Tag.Album, AlbumCategory); 
-                        song.TagSong(albumTag);
+                        TagSong(song, albumTag);
+                        //song.TagSong(albumTag);
                     }
                     if(file.Tag.BeatsPerMinute > 0 && file.Tag.BeatsPerMinute < int.MaxValue)
                         song.Bpm = new Bpm((int)file.Tag.BeatsPerMinute, false);
@@ -185,9 +229,11 @@ namespace Musagetes.DataObjects
                 .Select(tagName =>
                     category[tagName] ?? new Tag(tagName, category)))
             {
-                song.TagSong(tag);
+                //song.TagSong(tag);
+                TagSong(song, tag);
             }
         }
+
 
         public bool IsFiletypeSupported(string filename)
         {
@@ -195,5 +241,7 @@ namespace Musagetes.DataObjects
                 .Any(ext => filename.EndsWith(ext, 
                     StringComparison.InvariantCultureIgnoreCase));
         }
+
+        
     }
 }

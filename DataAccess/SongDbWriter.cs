@@ -96,7 +96,7 @@ namespace Musagetes.DataAccess
         private async Task WriteSongTagsAsync(XmlWriter writer, Song song)
         {
             await writer.WriteStartElementAsync(null, Constants.Db.Tags, null);
-            foreach (var tag in song.Tags)
+            foreach (var tag in SongDb.SongTagDictionary[song])// song.Tags)
             {
                 await writer.WriteElementStringAsync(null, Constants.Db.Tag, null, 
                     tag.Id.ToString(CultureInfo.InvariantCulture));

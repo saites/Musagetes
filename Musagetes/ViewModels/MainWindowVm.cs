@@ -48,10 +48,10 @@ namespace Musagetes.ViewModels
             var song = item as Song;
             if (_filterText == null) return true;
             if (song == null) return false;
+            var tags = App.SongDb.SongTagDictionary[song];
             var tempFilterText = _filterText.ToUpper();
             return song.SongTitle.ToUpper().Contains(tempFilterText)
-                   || song.Tags.Any(
-                       t => t.TagName.ToUpper().Contains(tempFilterText));
+               || tags.Any(t => t.TagName.ToUpper().Contains(tempFilterText));
         }
 
         public string FilterText
@@ -224,6 +224,8 @@ namespace Musagetes.ViewModels
             }
         }
 
+        private readonly SongToTagsConverter SttConverter = 
+            new SongToTagsConverter(App.SongDb);
         private void AddColumn(GridColumn column)
         {
             switch (column.ColumnType)
@@ -237,9 +239,38 @@ namespace Musagetes.ViewModels
                         column.Binding, column.IsVisible);
                     break;
                 case GridColumn.ColumnTypeEnum.Category:
-                    ColumnManager.AddNewTextColumn(column.Category.CategoryName,
+                    var catcol = ColumnManager.AddNewTextColumn(
+                        column.Category.CategoryName,
                         string.Format(Constants.CategoryTagsBinding,
                         column.Category.CategoryName), column.IsVisible);
+                    catcol.Binding = new Binding("Self")
+                    {
+                        Converter = SttConverter,
+                        ConverterParameter = column.Category.CategoryName,
+                        NotifyOnTargetUpdated = true
+                    };
+
+                    column.Category.PropertyChanged += (sender, args) =>
+                    {
+                        if (args.PropertyName != "CategoryName") return;
+                        catcol.Header = column.Category.CategoryName;
+                        catcol.Binding = new Binding("Self")
+                        {
+                            Converter = SttConverter,
+                            ConverterParameter = column.Category.CategoryName,
+                            NotifyOnTargetUpdated = true
+                        };
+                    };
+                    break;
+                case GridColumn.ColumnTypeEnum.Tags:
+                    var col = ColumnManager.AddNewTextColumn(column.Header, 
+                        string.Empty, column.IsVisible);
+                    col.Binding = new Binding("Self")
+                    {
+                        Converter = SttConverter,
+                        ConverterParameter = string.Empty,
+                        NotifyOnTargetUpdated = true
+                    };
                     break;
             }
         }
@@ -271,7 +302,8 @@ namespace Musagetes.ViewModels
             }
         }
 
-        private void GroupCategoriesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void GroupCategoriesCollectionChanged(object sender, 
+            NotifyCollectionChangedEventArgs e)
         {
             if (DisplayedSongs == null) return;
             lock (_displayedSongs)
@@ -328,6 +360,18 @@ namespace Musagetes.ViewModels
                             _groupDescriptionDictionary.Add(cat, groupDesc);
                         }
                         DisplayedSongs.GroupDescriptions.Insert(index, groupDesc);
+
+                        /* update binding if category name changes
+                         * uses local variable to prevent compiler
+                         * specific differences */
+                        var tempcat = cat;
+                        cat.PropertyChanged += (sender, args) =>
+                        {
+                            if (args.PropertyName == "CategoryName")
+                                groupDesc.PropertyName =
+                                    string.Format(Constants.CategoryTagsBinding,
+                                    tempcat.CategoryName);
+                        };
                     }
                 }
             }
@@ -716,7 +760,7 @@ namespace Musagetes.ViewModels
             }
         }
 
-        private AllTagEditor _allTagEditor = null;
+        private AllTagEditor _allTagEditor;
         public ICommand OpenTagEditorCmd
         {
             get
@@ -727,7 +771,7 @@ namespace Musagetes.ViewModels
                     {
                         _allTagEditor = new AllTagEditor
                         {
-                            DataContext = new AllTagEditorVm(App.SongDb.Categories)
+                            DataContext = new CategoryTagEditorVm(App.SongDb)
                         };
                         _allTagEditor.Closed += (sender, args) => _allTagEditor = null;
                         _allTagEditor.Show();

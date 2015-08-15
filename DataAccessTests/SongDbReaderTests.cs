@@ -63,20 +63,20 @@ namespace DataAccessTests
                 songDb.Columns.Count));
 
             var song = FindSong(songDb, "Mud on the Tires");
-            CheckSong(song, 140000, 2, 0, false, 140);
-            HasTag(song, "Brad Paisley", songDb.ArtistCategory);
-            HasTag(song, "Country", songDb.GenreCategory);
+            CheckSong(songDb, song, 140000, 2, 0, false, 140);
+            HasTag(songDb, song, "Brad Paisley", songDb.ArtistCategory);
+            HasTag(songDb, song, "Country", songDb.GenreCategory);
 
             song = FindSong(songDb, "Throttleneck");
-            CheckSong(song, 1000, 2, 0, true, 1);
-            HasTag(song, "Brad Paisley", songDb.ArtistCategory);
-            HasTag(song, "Country", songDb.GenreCategory);
+            CheckSong(songDb, song, 1000, 2, 0, true, 1);
+            HasTag(songDb, song, "Brad Paisley", songDb.ArtistCategory);
+            HasTag(songDb, song, "Country", songDb.GenreCategory);
 
             song = FindSong(songDb, "When We All Get To Heaven");
-            CheckSong(song, 1000, 3, 5, true, 1);
-            HasTag(song, "Brad Paisley", songDb.ArtistCategory);
-            HasTag(song, "Kenny Chesney", songDb.ArtistCategory);
-            HasTag(song, "Rock", songDb.GenreCategory);
+            CheckSong(songDb, song, 1000, 3, 5, true, 1);
+            HasTag(songDb, song, "Brad Paisley", songDb.ArtistCategory);
+            HasTag(songDb, song, "Kenny Chesney", songDb.ArtistCategory);
+            HasTag(songDb, song, "Rock", songDb.GenreCategory);
         }
 
         public Song FindSong(SongDb songDb, string title)
@@ -89,11 +89,11 @@ namespace DataAccessTests
             return song;
         }
 
-        public void CheckSong(Song song, int ms,
+        public void CheckSong(SongDb db, Song song, int ms,
             int tagCount, uint playCount, bool guess, int bpm)
         {
             CheckValue(song.Milliseconds, ms, "Milliseconds");
-            CheckValue(song.Tags.Count(), tagCount, "TagCount");
+            CheckValue(db.SongTagDictionary[song].Count(), tagCount, "TagCount");
             CheckValue(song.PlayCount, playCount, "PlayCount");
             CheckValue(song.Bpm.Guess, guess, "BPM guess");
             CheckValue(song.Bpm.Value, bpm, "BPM Value");
@@ -106,9 +106,10 @@ namespace DataAccessTests
                 name, o1, o2));
         }
 
-        public void HasTag(Song s, string tagName, Category c)
+        public void HasTag(SongDb db, Song s, string tagName, Category c)
         {
-            var tag = s.Tags.FirstOrDefault(t =>
+            var tags = db.SongTagDictionary[s];
+            var tag = tags.FirstOrDefault(t =>
                 t.TagName.Equals(tagName, 
                 StringComparison.InvariantCultureIgnoreCase));
             Assert.IsNotNull(tag, 
@@ -157,9 +158,11 @@ namespace DataAccessTests
             {
                 var localSong = song;
                 var match = songDbRead.Songs.First(s => s.SongTitle.Equals(localSong.SongTitle));
-                foreach (var tag in localSong.Tags)
+                var matchTags = songDbRead.SongTagDictionary[match];
+                var tags = songDbRead.SongTagDictionary[localSong];
+                foreach (var tag in tags)
                 {
-                    Assert.IsTrue(match.Tags.Count(t => t.TagName.Equals(tag.TagName)) == 1,
+                    Assert.IsTrue(matchTags.Count(t => t.TagName.Equals(tag.TagName)) == 1,
                     "Read/Write dictionary have different tags");
                 }
                 Assert.AreEqual(localSong.Location, match.Location, "Locations don't match");

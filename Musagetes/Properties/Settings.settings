@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="DbLocation" Type="System.String" Scope="User">
-      <Value Profile="(Default)">../../../Musagetes/Collaterals/SongDB.xml</Value>
+      <Value Profile="(Default)">C:\Users\ajsaites\Documents\Mine\Musagetes\Musagetes\Collaterals\SongDB.xml</Value>
     </Setting>
     <Setting Name="MainPlayerDeviceNum" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">-1</Value>

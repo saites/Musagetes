@@ -147,7 +147,9 @@ namespace Musagetes.WpfElements
             base.OnMouseMove(e);
             MouseMoved = true;
             if (e.LeftButton != MouseButtonState.Pressed
-                || IsSelecting) return;
+                || IsSelecting
+                || UiHelper.IsMouseOverScrollbar(this, e.GetPosition(this))) 
+                return;
             
             var data = new DataObject(SelectedItems);
             data.SetData(typeof(IList), SelectedItems);

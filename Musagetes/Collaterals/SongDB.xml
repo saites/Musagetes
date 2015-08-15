@@ -5,10 +5,15 @@
     <Column header="Location" type="BasicText" display="True" order="1" binding="Location" />
     <Column header="Length" type="BasicText" display="True" order="2" binding="Length" />
     <Column header="BPM" type="Bpm" display="False" order="3" binding="Bpm.Value" />
-    <Column header="Tags" type="BasicText" display="False" order="4" binding="SongTags" />
+    <Column header="Tags" type="Tags" display="True" order="4" binding="" />
     <Column header="Play Count" type="BasicText" display="True" order="8" binding="PlayCount" />
   </Columns>
   <CategoryTags>
+    <Category name="Albumers" display="False" order="6">
+      <Tag id="2" name="Ninja Tuna" />
+      <Tag id="5" name="Fine Music, Vol. 1" />
+      <Tag id="8" name="Bob Acri" />
+    </Category>
     <Category name="Artist" display="False" order="5">
       <Tag id="0" name="Mr. Scruff" />
       <Tag id="3" name="Richard Stoltzman" />
@@ -19,12 +24,8 @@
       <Tag id="4" name="Classical" />
       <Tag id="7" name="Jazz" />
     </Category>
-    <Category name="Album" display="False" order="6">
-      <Tag id="2" name="Ninja Tuna" />
-      <Tag id="5" name="Fine Music, Vol. 1" />
-      <Tag id="8" name="Bob Acri" />
-    </Category>
-    <Category name="Uncategorized" display="False" order="9" />
+    <Category name="Album" display="False" order="9" />
+    <Category name="Uncategorized" display="False" order="10" />
   </CategoryTags>
   <Songs>
     <Song id="1">
@@ -47,8 +48,11 @@
       <BPM Guess="False">98</BPM>
       <Tags>
         <Tag>3</Tag>
+        <Tag>2</Tag>
+        <Tag>8</Tag>
+        <Tag>6</Tag>
         <Tag>4</Tag>
-        <Tag>5</Tag>
+        <Tag>7</Tag>
       </Tags>
     </Song>
     <Song id="3">
@@ -58,7 +62,6 @@
       <PlayCount>0</PlayCount>
       <BPM Guess="False">103</BPM>
       <Tags>
-        <Tag>6</Tag>
         <Tag>8</Tag>
       </Tags>
     </Song>
@@ -69,8 +72,6 @@
       <PlayCount>76</PlayCount>
       <BPM Guess="False">242</BPM>
       <Tags>
-        <Tag>0</Tag>
-        <Tag>1</Tag>
         <Tag>2</Tag>
       </Tags>
     </Song>

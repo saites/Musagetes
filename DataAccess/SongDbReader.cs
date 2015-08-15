@@ -159,6 +159,11 @@ namespace Musagetes.DataAccess
                             new GridColumn(GridColumn.ColumnTypeEnum.Bpm, header: header,
                                 isVisible: display, binding: binding));
                         break;
+                    case GridColumn.ColumnTypeEnum.Tags:
+                        _columns.Add(order, 
+                            new GridColumn(GridColumn.ColumnTypeEnum.Tags, header: header,
+                                isVisible: display));
+                        break;
                 }
 
                 await reader.ReadAsync();
@@ -218,7 +223,7 @@ namespace Musagetes.DataAccess
                     Logger.Error("Song {0} has a missing or unreadable BPM value", title);
 
                 var song = new Song(title, location, milliseconds, new Bpm(bpmValue, guess), 
-                    SongDb, playCount, id);
+                    playCount, id);
                 SongDb.AddSong(song);
 
                 reader.ConfirmElement(Constants.Db.Tags);
@@ -248,7 +253,7 @@ namespace Musagetes.DataAccess
                     continue;
                 }
                 if (SongDb.TagIds.ContainsKey(id))
-                    song.TagSong(SongDb.TagIds[id]);
+                    SongDb.TagSong(song, SongDb.TagIds[id]);//song.TagSong(SongDb.TagIds[id]);
                 else
                     Logger.Error("Song {0} trying to add missing tag id {1}", song.SongTitle, id);
             } 

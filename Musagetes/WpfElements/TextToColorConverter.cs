@@ -6,14 +6,25 @@ using System.Windows.Media;
 
 namespace Musagetes.WpfElements
 {
-    class TextToColorConverter : IValueConverter
+    class TextToColorConverter : IValueConverter 
     {
+        public double Saturation { get; set; }
+        public double Value { get; set; }
+
+        public TextToColorConverter()
+        {
+            Saturation = .85;
+            Value = .70;
+        }
+
         public object Convert(object value, Type targetType, 
             object parameter, CultureInfo culture)
         {
-            var name = value as string ?? value.ToString();
+            var name = value != null
+                ? value as string ?? value.ToString()
+                : string.Empty;
              return new SolidColorBrush(
-                 ColorFromHsv(HashString(name) % 360, .70, .50)); 
+                 ColorFromHsv(HashString(name) % 360, Saturation, Value)); 
         }
 
         public object ConvertBack(object value, Type targetType, 

@@ -1,10 +1,21 @@
 using System.Collections.Generic;
+using System.ComponentModel;
+
 namespace Musagetes.DataObjects
 {
 
-    public class Category
+    public class Category : INotifyPropertyChanged, IEditableObject
     {
-        public string CategoryName { get; private set; }
+        public string CategoryName
+        {
+            get { return _categoryName; }
+            set
+            {
+                _categoryName = value;
+                OnPropertyChanged("CategoryName");
+            }
+        }
+
         public IReadOnlyCollection<Tag> Tags
         {
             get { return new List<Tag>(_tags).AsReadOnly(); }
@@ -14,6 +25,8 @@ namespace Musagetes.DataObjects
             new HashSet<Tag>();
         private readonly Dictionary<string, Tag> _tagDictionary
             = new Dictionary<string,Tag>();
+
+        private string _categoryName;
 
         public override string ToString()
         {
@@ -54,6 +67,29 @@ namespace Musagetes.DataObjects
                     ? _tagDictionary[s]
                     : null;
             }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName = null)
+        {
+            var handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private string _oldName;
+        public void BeginEdit()
+        {
+            _oldName = CategoryName;
+        }
+
+        public void EndEdit()
+        {
+        }
+
+        public void CancelEdit()
+        {
+            CategoryName = _oldName;
         }
     }
 }

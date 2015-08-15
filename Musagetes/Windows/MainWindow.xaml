@@ -17,6 +17,8 @@
     </Window.Resources>
 
     <DockPanel>
+        
+        <!-- Menu Header and Filter Bar -->
         <DockPanel DockPanel.Dock="Top">
             <TextBox DockPanel.Dock="Right"
                      Width="200"
@@ -38,6 +40,8 @@
                 </MenuItem>
             </Menu>
         </DockPanel>
+
+        <!-- Playback controls -->
         <Grid x:Name="PlaybackControls"  DockPanel.Dock="Bottom" Height="25">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -89,6 +93,9 @@
                 <TextBlock Text="{Binding MainPlayer.Length}"/>
             </StackPanel>
         </Grid>
+        
+        
+        
         <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -97,6 +104,8 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
+            
+            <!-- Song Queue -->
             <wpfElements:DropEnabledListBox
                 x:Name="PlayQueue"
                 Grid.Column="0" 
@@ -138,6 +147,9 @@
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </wpfElements:DropEnabledListBox>
+            
+            
+            <!-- Song Display -->
             <GridSplitter Grid.Column ="1" Background="LightGray" Width="3"
                 HorizontalAlignment="Center" VerticalAlignment="Stretch"
                           ShowsPreview="True"/>
@@ -162,6 +174,8 @@
                 <DataGrid.Resources>
                     <wpfElements:BindingProxy x:Key="DataGridProxy" Data="{Binding}"/>
                 </DataGrid.Resources>
+                
+                <!-- Song Preview Popup -->
                 <wpfElements:MusagetesDataGrid.ContextPopup>
                     <Popup Height="Auto" Width="275" 
                            IsOpen="False" StaysOpen="False">
@@ -251,6 +265,8 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
+                            
+                            <!-- Preview Player Controls -->
                             <Grid Grid.Column="0" Grid.Row="1"
                                         Grid.ColumnSpan="2" 
                                         Margin="5">
@@ -280,6 +296,9 @@
                         </Grid>
                     </Popup>
                 </wpfElements:MusagetesDataGrid.ContextPopup>
+                
+                
+                <!-- Song Row Styles -->
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Setter Property="Margin" Value="0"/>
@@ -315,6 +334,9 @@
                         </Style.Triggers>
                     </Style>
                 </DataGrid.RowStyle>
+                
+                
+                <!-- Song Grouping Styles -->
                 <DataGrid.GroupStyle>
                     <GroupStyle>
                         <GroupStyle.Panel>
@@ -352,6 +374,9 @@
             <GridSplitter Grid.Column ="3" Background="LightGray" Width="3"
                 HorizontalAlignment="Center" VerticalAlignment="Stretch"
                           ShowsPreview="True"/>
+            
+            
+            <!-- Song Tag Editor -->
             <Grid Grid.Column="4">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

@@ -10,6 +10,7 @@ using Musagetes.Annotations;
 using Musagetes.DataObjects;
 using Musagetes.Windows;
 using MvvmFoundation.Wpf;
+using NLog.LayoutRenderers.Wrappers;
 
 namespace Musagetes.ViewModels
 {
@@ -63,11 +64,17 @@ namespace Musagetes.ViewModels
                 _tagList.Clear();
                 if (_songs == null || _songs.Count == 0) return _tagList;
 
+                foreach(var tag in _songs.Cast<Song>()
+                    .Select(s => App.SongDb.SongTagDictionary[s])
+                    .Aggregate((tl, t) => (HashSet<Tag>) tl.Intersect(t)))
+                    _tagList.Add(tag);
+                /*
                 foreach (var tag in _songs
                     .Cast<Song>()
                     .Select(s => s.Tags)
                     .Aggregate((tl, t) => tl.Intersect(t)))
                     _tagList.Add(tag);
+                */
                 return _tagList;
             }
             set
@@ -90,7 +97,7 @@ namespace Musagetes.ViewModels
         {
             if (tag == null || songs.Count < 0) return;
             foreach (Song song in songs)
-                song.RemoveTag(tag);
+                App.SongDb.UntagSong(song, tag);
             OnPropertyChanged("TagList");
             OnPropertyChanged("Prediction");
             if (TagList.Any())
@@ -140,7 +147,7 @@ namespace Musagetes.ViewModels
         {
             if (tag == null || songs.Count <= 0) return;
             foreach (Song song in songs)
-                song.TagSong(tag);
+                App.SongDb.TagSong(song, tag);
             OnPropertyChanged("TagList");
             OnPropertyChanged("Prediction");
             if (Prediction.Any())

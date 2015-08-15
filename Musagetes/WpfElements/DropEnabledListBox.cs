@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,6 +12,11 @@ namespace Musagetes.WpfElements
 {
     public class DropEnabledListBox : ListBox
     {
+        public bool IsDragDropEnabled
+        {
+            get { return (bool) GetValue(IsDragDropEnabledProperty); }
+            set { SetValue(IsDragDropEnabledProperty, value); }
+        }
         public Style HighlightStyle
         {
             get { return (Style)GetValue(HighlightStyleProperty); }
@@ -50,6 +56,10 @@ namespace Musagetes.WpfElements
         public static DependencyProperty DropCommandProperty =
             DependencyProperty.Register("DropCommand", typeof(ICommand),
             typeof(DropEnabledListBox), new PropertyMetadata(null));
+        
+        public static readonly DependencyProperty IsDragDropEnabledProperty = 
+            DependencyProperty.Register("IsDragDropEnabled", typeof (bool), 
+            typeof (DropEnabledListBox), new PropertyMetadata(true));
 
         private Style _oldIndexStyle;
         private ListBoxItem _oldInUseItem;
@@ -75,25 +85,48 @@ namespace Musagetes.WpfElements
         public DropEnabledListBox()
         {
             //need to update this whenever the layout updates,
-            //since, if you the InUseItem, its containers isn't
+            //since, if you use the InUseItem, its container isn't
             //generated immediately
             LayoutUpdated += (sender, args) =>
             {
                 OnInUseIndexChanged(this, new DependencyPropertyChangedEventArgs(
                     InUseIndexProperty, -1, InUseIndex));
             };
+            AllowDrop = true;
         }
 
         private bool _isDragging;
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            if (SelectedItem == null
+            if (!IsDragDropEnabled 
+                || SelectedItem == null
                 || e.LeftButton != MouseButtonState.Pressed) return;
-            var data = new DataObject();
-            data.SetData(typeof(IList), new List<object>{SelectedItem});
+            if (UiHelper.IsMouseOverScrollbar(this, e.GetPosition(this))) return;
+
             _isDragging = true;
-            DragDrop.DoDragDrop(this, data, DragDropEffects.Move);
+
+            /* Use BeginInvoke to prevent InvalidSystemException
+             * from suspended Dispatcher processing.
+             */
+            Application.Current.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                var data = new DataObject();
+                var myList = new List<object>((IEnumerable<object>) SelectedItems);
+                data.SetData(typeof (IList), myList);//new List<object>{SelectedItem});
+                try
+                {
+                    DragDrop.DoDragDrop(this, data, DragDropEffects.Move);
+                }
+                catch (COMException ex)
+                {
+                    /* Occasionally causes COM exception 
+                     * Suspected bug in Win32.UnsafeNativeMethods.DoDragDrop
+                     * Seems not to have an issue if we eat the exception
+                     */
+                    Console.WriteLine(ex);
+                }
+            }));
         }
 
         protected override void OnPreviewMouseUp(MouseButtonEventArgs e)

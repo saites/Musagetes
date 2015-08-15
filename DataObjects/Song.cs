@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Media.Imaging;
 using System.IO;
-using System.Linq;
 using NLog;
 
 namespace Musagetes.DataObjects
@@ -32,6 +30,9 @@ namespace Musagetes.DataObjects
             }
         }
 
+        /* used to get around WPF's binding failure */
+        public object Self { get { return this;  } }
+
         public string SongTitle
         {
             get { return _songTitle; }
@@ -51,7 +52,6 @@ namespace Musagetes.DataObjects
                 OnPropertyChanged("Milliseconds");
                 OnPropertyChanged("Length");
             }
-
         }
 
         public string Location
@@ -76,16 +76,6 @@ namespace Musagetes.DataObjects
                     OnPropertyChanged("Bpm");
                 };
                 OnPropertyChanged("Bpm");
-            }
-        }
-
-        public CategoryTag CategoryTags
-        {
-            get { return _categoryTags; }
-            set
-            {
-                _categoryTags = value;
-                OnPropertyChanged("CategoryTags");
             }
         }
 
@@ -120,92 +110,31 @@ namespace Musagetes.DataObjects
             }
         }
 
-        public SongDb SongDb { get; private set; }
         public uint Id { get; private set; }
-
-        public IEnumerable<Tag> Tags
-        {
-            get { return _categoryToTag.Values.SelectMany(tagSet => tagSet); }
-        }
 
         public override string ToString()
         {
             return SongTitle;
         }
 
-        private readonly HashSet<Tag> _tags = new HashSet<Tag>();
-        private readonly Dictionary<Category, HashSet<Tag>> _categoryToTag
-            = new Dictionary<Category, HashSet<Tag>>();
-
-        public class CategoryTag : INotifyPropertyChanged
-        {
-            private readonly Song _song;
-
-            public CategoryTag(Song song)
-            {
-                _song = song;
-            }
-
-            public string this[Category cat]
-            {
-                get
-                {
-                    lock (_song._categoryToTag)
-                    {
-                        return _song._categoryToTag.ContainsKey(cat)
-                            ? string.Join(", ",
-                                _song._categoryToTag[cat].Select(t => t.TagName))
-                            : null;
-                    }
-                }
-            }
-
-            public string this[string s]
-            {
-                get
-                {
-                    lock (_song._categoryToTag)
-                    {
-                        var c = _song._categoryToTag.FirstOrDefault(pair => pair.Key.CategoryName.Equals(s));
-                        return c.Key != null ? string.Join(", ", c.Value.Select(t => t.TagName)) : null;
-                    }
-                }
-            }
-
-            public void TagsChanged()
-            {
-                OnPropertyChanged_CatTags("Item[]");
-            }
-
-            public event PropertyChangedEventHandler PropertyChanged;
-            protected virtual void OnPropertyChanged_CatTags(string propertyName = null)
-            {
-                var handler = PropertyChanged;
-                if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        public Song(string title, string location, int milliseconds, Bpm bpm, SongDb songDb,
+        public Song(string title, string location, int milliseconds, Bpm bpm, 
             uint playCount, uint? songId = null)
         {
             SongTitle = title;
             Location = location;
             Milliseconds = milliseconds;
             Bpm = bpm;
-            SongDb = songDb;
             PlayCount = playCount;
-            CategoryTags = new CategoryTag(this);
             if (songId != null) SongId.UpdateTagId(songId.Value);
             Id = songId ?? SongId.GetNextSongId();
             IsBadSong = false;
             SongError = string.Empty;
 
-            if (!File.Exists(Location))
-            {
-                SongError = string.Format("Cannot find file {0}", Location);
-                Logger.Error(SongError);
-                IsBadSong = true;
-            }
+            if (File.Exists(Location)) return;
+
+            SongError = string.Format("Cannot find file {0}", Location);
+            Logger.Error(SongError);
+            IsBadSong = true;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -217,56 +146,6 @@ namespace Musagetes.DataObjects
             }
         }
 
-        public void TagSong(Tag tag)
-        {
-            if (!_tags.Contains(tag))
-                _tags.Add(tag);
-            tag.Songs.Add(this);
-
-            HashSet<Tag> tagSet;
-            lock (_categoryToTag)
-            {
-                if (_categoryToTag.ContainsKey(tag.Category))
-                    tagSet = _categoryToTag[tag.Category];
-                else
-                {
-                    tagSet = new HashSet<Tag>();
-                    _categoryToTag.Add(tag.Category, tagSet);
-                }
-            }
-            tagSet.Add(tag);
-
-            _songTags = null;
-            OnPropertyChanged(Constants.SongTags);
-            CategoryTags.TagsChanged();
-        }
-
-        public void RemoveTag(Tag tag)
-        {
-            if (!_tags.Contains(tag)) return;
-            _tags.Remove(tag);
-            tag.Songs.Remove(this);
-            lock (_categoryToTag)
-            {
-                _categoryToTag[tag.Category].Remove(tag);
-                if (!_categoryToTag[tag.Category].Any())
-                    _categoryToTag.Remove(tag.Category);
-            }
-            _songTags = null;
-            OnPropertyChanged(Constants.SongTags);
-            CategoryTags.TagsChanged();
-        }
-
-        private string _songTags;
-        public string SongTags
-        {
-            get
-            {
-                _songTags = _songTags ?? string.Join(", ", _tags);
-                return _songTags;
-            }
-        }
-
         public string Length
         {
             get
@@ -275,13 +154,17 @@ namespace Musagetes.DataObjects
             }
         }
 
+        public void NotifyTagChanged()
+        {
+            OnPropertyChanged(null);
+        }
+
         private bool _imageTried;
         private BitmapImage _cachedImage;
         private string _songTitle;
         private int _milliseconds;
         private string _location;
         private Bpm _bpm;
-        private CategoryTag _categoryTags;
         private uint _playCount;
         private bool _isBadSong;
         private string _songError;

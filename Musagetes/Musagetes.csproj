@@ -48,6 +48,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet>MixedRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -79,7 +80,26 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MixedRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Expression.Interactions, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="MvvmFoundation.Wpf">
       <HintPath>..\packages\MvvmFoundation.Wpf.1.0.0\lib\net40\MvvmFoundation.Wpf.dll</HintPath>
     </Reference>
@@ -113,10 +133,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Settings.cs" />
     <Compile Include="Toolkit\BpmTapper.cs" />
-    <Compile Include="ViewModels\AllTagEditorVm.cs" />
-    <Compile Include="Windows\AllTagEditor.xaml.cs">
-      <DependentUpon>AllTagEditor.xaml</DependentUpon>
+    <Compile Include="ViewModels\CategoryTagEditorVm.cs" />
+    <Compile Include="Windows\CategoryTagEditor.xaml.cs">
+      <DependentUpon>CategoryTagEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\Options.xaml.cs">
       <DependentUpon>Options.xaml</DependentUpon>
@@ -136,6 +157,9 @@
     <Compile Include="Toolkit\UiHelper.cs" />
     <Compile Include="WpfElements\BindingProxy.cs" />
     <Compile Include="WpfElements\DropEnabledListBox.cs" />
+    <Compile Include="WpfElements\EditBox.xaml.cs">
+      <DependentUpon>EditBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WpfElements\GroupCategoriesConverter.cs" />
     <Compile Include="WpfElements\ObjectToSongConverter.cs" />
     <Compile Include="WpfElements\DataGridColumnsBehavior.cs" />
@@ -153,10 +177,11 @@
       <DependentUpon>TagEditorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="WpfElements\PlaybackStateToImageConverter.cs" />
+    <Compile Include="WpfElements\SongToTagsConverter.cs" />
     <Compile Include="WpfElements\TextToColorConverter.cs" />
     <Compile Include="WpfElements\VisibilityToBooleanConverter.cs" />
     <Compile Include="WpfElements\MusagetesDataGrid.cs" />
-    <Page Include="Windows\AllTagEditor.xaml">
+    <Page Include="Windows\CategoryTagEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -192,6 +217,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="WpfElements\EditBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -216,7 +245,7 @@
     </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>

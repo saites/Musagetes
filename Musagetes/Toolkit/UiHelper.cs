@@ -1,5 +1,7 @@
 ﻿using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Windows.Media.Media3D;
 
 namespace Musagetes.Toolkit
 {
@@ -52,6 +54,35 @@ namespace Musagetes.Toolkit
 
             var fce = contentElement as FrameworkContentElement;
             return fce != null ? fce.Parent : null;
+        }
+
+        /// <summary>
+        /// Determines if a mouse point is over a scrollbar,
+        /// in which case you probably don't want to start
+        /// drag and drop
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="mousePosition"></param>
+        /// <returns></returns>
+        public static bool IsMouseOverScrollbar(object sender, Point mousePosition)
+        {
+            if (!(sender is Visual)) return false;
+
+            var hit = VisualTreeHelper.HitTest((Visual) sender, mousePosition);
+
+            if (hit == null) return false;
+
+            var dObj = hit.VisualHit;
+            while (dObj != null)
+            {
+                if (dObj is ScrollBar) return true;
+
+                if ((dObj is Visual) || (dObj is Visual3D)) 
+                    dObj = VisualTreeHelper.GetParent(dObj);
+                else dObj = LogicalTreeHelper.GetParent(dObj);
+            }
+
+            return false;
         }
     }
 }
