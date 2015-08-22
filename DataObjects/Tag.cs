@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Musagetes.DataObjects
 {
-    public class Tag
+    public class Tag : INotifyPropertyChanged
     {
         public static class TagId
         {
@@ -11,16 +12,19 @@ namespace Musagetes.DataObjects
 
             public static uint GetNextTagId()
             {
-                uint retval;
-                lock (TagIdLock) retval = _nextTagId++;
-                return retval;
+                lock (TagIdLock)
+                {
+                    var retval = _nextTagId;
+                    _nextTagId++;
+                    return retval;
+                }
             }
 
             public static bool UpdateTagId(uint value)
             {
                 lock (TagIdLock)
                 {
-                    if (_nextTagId >= value) 
+                    if (_nextTagId > value) 
                         return false;
                     _nextTagId = value + 1;
                     return true;
@@ -34,7 +38,6 @@ namespace Musagetes.DataObjects
             Category = category;
             if (tagId != null) TagId.UpdateTagId(tagId.Value);
             Id = tagId ?? TagId.GetNextTagId();
-            Songs = new HashSet<Song>();
         }
 
         public override string ToString()
@@ -48,10 +51,20 @@ namespace Musagetes.DataObjects
 
         public uint Id { get; private set; }
 
-        public string TagName { get; set; }
+        public string TagName
+        {
+            get { return _tagName; }
+            set
+            {
+                _tagName = value;
+                OnPropertyChanged("TagName");
+            }
+        }
 
         private readonly object _categoryLock = new object();
         Category _category;
+        private string _tagName;
+
         public Category Category
         {
             get { return _category; }
@@ -65,9 +78,22 @@ namespace Musagetes.DataObjects
                     _category = value;
                     _category.AddTag(this);
                 }
+                OnPropertyChanged("Category");
             }
         }
 
-        public HashSet<Song> Songs { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            var handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public delegate void TagDeletedEventHandler(Tag deletedTag);
+        public event TagDeletedEventHandler TagDeleted;
+        public void TriggerTagDeleted()
+        {
+            if (TagDeleted != null) TagDeleted(this);
+        }
     }
 }

@@ -115,9 +115,7 @@ namespace Musagetes.ViewModels
             set
             {
                 _categoryName = value;
-                AssignedCategory = App.SongDb.CategoryDictionary.ContainsKey(_categoryName.Trim())
-                    ? App.SongDb.CategoryDictionary[_categoryName.Trim()]
-                    : null;
+                AssignedCategory = App.SongDb.Categories.FirstOrDefault(c => c.CategoryName == _categoryName.Trim());
                 OnPropertyChanged();
             }
         }

@@ -241,13 +241,13 @@ namespace Musagetes.ViewModels
                 case GridColumn.ColumnTypeEnum.Category:
                     var catcol = ColumnManager.AddNewTextColumn(
                         column.Category.CategoryName,
-                        string.Format(Constants.CategoryTagsBinding,
-                        column.Category.CategoryName), column.IsVisible);
+                        "Self",
+                        column.IsVisible);
                     catcol.Binding = new Binding("Self")
                     {
                         Converter = SttConverter,
-                        ConverterParameter = column.Category.CategoryName,
-                        NotifyOnTargetUpdated = true
+                        ConverterParameter = column.Category,
+                        NotifyOnTargetUpdated = true,
                     };
 
                     column.Category.PropertyChanged += (sender, args) =>
@@ -257,7 +257,7 @@ namespace Musagetes.ViewModels
                         catcol.Binding = new Binding("Self")
                         {
                             Converter = SttConverter,
-                            ConverterParameter = column.Category.CategoryName,
+                            ConverterParameter = column.Category,
                             NotifyOnTargetUpdated = true
                         };
                     };
@@ -268,7 +268,7 @@ namespace Musagetes.ViewModels
                     col.Binding = new Binding("Self")
                     {
                         Converter = SttConverter,
-                        ConverterParameter = string.Empty,
+                        ConverterParameter = null,
                         NotifyOnTargetUpdated = true
                     };
                     break;
@@ -356,22 +356,11 @@ namespace Musagetes.ViewModels
                         else
                         {
                             groupDesc = new PropertyGroupDescription(
-                                string.Format(Constants.CategoryTagsBinding, cat.CategoryName));
+                                Constants.CategoryTagsBinding, 
+                                new SongToTagsConverter(App.SongDb, cat));
                             _groupDescriptionDictionary.Add(cat, groupDesc);
                         }
                         DisplayedSongs.GroupDescriptions.Insert(index, groupDesc);
-
-                        /* update binding if category name changes
-                         * uses local variable to prevent compiler
-                         * specific differences */
-                        var tempcat = cat;
-                        cat.PropertyChanged += (sender, args) =>
-                        {
-                            if (args.PropertyName == "CategoryName")
-                                groupDesc.PropertyName =
-                                    string.Format(Constants.CategoryTagsBinding,
-                                    tempcat.CategoryName);
-                        };
                     }
                 }
             }
@@ -488,7 +477,6 @@ namespace Musagetes.ViewModels
             {
                 return new RelayCommand(() =>
                 {
-                    App.SongDb.GroupCategories.Add(App.SongDb.CategoryDictionary["Artist"]);
                 });
             }
         }

@@ -11,7 +11,7 @@ namespace Musagetes.DataObjects
         public const string SongQueue = "SongQueue";
         public const string SongTags = "SongTags";
         public const string Uncategorized = "Uncategorized";
-        public const string CategoryTagsBinding = "CategoryTags[{0}]";
+        public const string CategoryTagsBinding = "Self";
 
         public const string DbLocation = "../../../Musagetes/Collaterals/SongDB.xml";
         public const string SaveLoc = DbLocation;

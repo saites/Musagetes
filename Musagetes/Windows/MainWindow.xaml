@@ -169,7 +169,7 @@
                     Converter={StaticResource ToSong}}"
                     HeadersVisibility="Column" Padding="0"
                     IsReadOnly="False"
-                 
+                  wpfElements:DataGridSortingBehavior.UseBindingToSort="True"
                 >
                 <DataGrid.Resources>
                     <wpfElements:BindingProxy x:Key="DataGridProxy" Data="{Binding}"/>

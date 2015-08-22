@@ -24,7 +24,9 @@
       <Tag id="4" name="Classical" />
       <Tag id="7" name="Jazz" />
     </Category>
-    <Category name="Album" display="False" order="9" />
+    <Category name="Album" display="False" order="9">
+      <Tag id="9" name="Ninja Tuna" />
+    </Category>
     <Category name="Uncategorized" display="False" order="10" />
   </CategoryTags>
   <Songs>
@@ -38,6 +40,7 @@
         <Tag>0</Tag>
         <Tag>1</Tag>
         <Tag>2</Tag>
+        <Tag>9</Tag>
       </Tags>
     </Song>
     <Song id="2">

@@ -22,7 +22,7 @@ namespace Musagetes.DataObjects
             {
                 lock (_songIdLock)
                 {
-                    if (_nextSongId >= value)
+                    if (_nextSongId > value)
                         return false;
                     _nextSongId = value + 1;
                     return true;

@@ -10,7 +10,6 @@ using Musagetes.Annotations;
 using Musagetes.DataObjects;
 using Musagetes.Windows;
 using MvvmFoundation.Wpf;
-using NLog.LayoutRenderers.Wrappers;
 
 namespace Musagetes.ViewModels
 {
@@ -22,7 +21,7 @@ namespace Musagetes.ViewModels
             get
             {
                 return _songs != null
-                    && _songs.Cast<Song>().Skip(1).Any()
+                    && _songs.Cast<Song>().Skip(1).Any() //cheaper than _songs.Count() > 1? 
                     ? "Common Tags:"
                     : "Tags:";
             }
@@ -59,29 +58,56 @@ namespace Musagetes.ViewModels
         private ObservableCollection<Tag> _tagList;
         public ObservableCollection<Tag> TagList
         {
-            get
-            {
-                _tagList.Clear();
-                if (_songs == null || _songs.Count == 0) return _tagList;
-
-                foreach(var tag in _songs.Cast<Song>()
-                    .Select(s => App.SongDb.SongTagDictionary[s])
-                    .Aggregate((tl, t) => (HashSet<Tag>) tl.Intersect(t)))
-                    _tagList.Add(tag);
-                /*
-                foreach (var tag in _songs
-                    .Cast<Song>()
-                    .Select(s => s.Tags)
-                    .Aggregate((tl, t) => tl.Intersect(t)))
-                    _tagList.Add(tag);
-                */
-                return _tagList;
-            }
+            get { return _tagList; }
             set
             {
+                if (_tagList == value) return;
                 _tagList = value;
+                UpdateTags();
                 OnPropertyChanged();
             }
+        }
+
+        private bool _updatingTags;
+        private void TagChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (_updatingTags 
+                || !(e.PropertyName == "TagName"
+                    || e.PropertyName == "Category")) return;
+            _updatingTags = true;
+            UpdateTags();
+            _updatingTags = false;
+        }
+
+        private void UpdateTags()
+        {
+            foreach (var tag in _tagList)
+            {
+                tag.PropertyChanged -= TagChanged;
+                tag.TagDeleted -= TagDeleted;
+            }
+
+            _tagList.Clear();
+            if (_songs == null || _songs.Count == 0) return;
+
+            var commontags = new HashSet<Tag>(App.SongDb.SongTagDictionary[(Song)_songs[0]]);
+            foreach (var tags in _songs.Cast<Song>()
+                .Select(s => App.SongDb.SongTagDictionary[s]))
+                commontags.IntersectWith(tags);
+
+            foreach (var tag in commontags)
+            {
+                _tagList.Add(tag);
+                tag.PropertyChanged += TagChanged;
+                tag.TagDeleted += TagDeleted;
+            }
+            OnPropertyChanged("TagList");
+        }
+
+        private void TagDeleted(Tag deletedtag)
+        {
+            _tagList.Remove(deletedtag);
+            OnPropertyChanged("TagList");
         }
 
         public ICommand RemoveTagCmd
@@ -98,7 +124,6 @@ namespace Musagetes.ViewModels
             if (tag == null || songs.Count < 0) return;
             foreach (Song song in songs)
                 App.SongDb.UntagSong(song, tag);
-            OnPropertyChanged("TagList");
             OnPropertyChanged("Prediction");
             if (TagList.Any())
                 TagListIndex = 0;
@@ -148,7 +173,7 @@ namespace Musagetes.ViewModels
             if (tag == null || songs.Count <= 0) return;
             foreach (Song song in songs)
                 App.SongDb.TagSong(song, tag);
-            OnPropertyChanged("TagList");
+            UpdateTags();
             OnPropertyChanged("Prediction");
             if (Prediction.Any())
                 SelectedIndex = 0;
@@ -164,7 +189,7 @@ namespace Musagetes.ViewModels
             {
                 _songs = value;
                 OnPropertyChanged();
-                OnPropertyChanged("TagList");
+                UpdateTags();
                 OnPropertyChanged("TagHeader");
             }
         }

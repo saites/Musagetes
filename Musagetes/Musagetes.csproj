@@ -156,6 +156,8 @@
     </Compile>
     <Compile Include="Toolkit\UiHelper.cs" />
     <Compile Include="WpfElements\BindingProxy.cs" />
+    <Compile Include="WpfElements\ConverterComparer.cs" />
+    <Compile Include="WpfElements\DataGridSortingBehavior.cs" />
     <Compile Include="WpfElements\DropEnabledListBox.cs" />
     <Compile Include="WpfElements\EditBox.xaml.cs">
       <DependentUpon>EditBox.xaml</DependentUpon>
@@ -177,6 +179,7 @@
       <DependentUpon>TagEditorWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="WpfElements\PlaybackStateToImageConverter.cs" />
+    <Compile Include="WpfElements\ScrollIntoViewBehavior.cs" />
     <Compile Include="WpfElements\SongToTagsConverter.cs" />
     <Compile Include="WpfElements\TextToColorConverter.cs" />
     <Compile Include="WpfElements\VisibilityToBooleanConverter.cs" />

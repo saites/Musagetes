@@ -10,7 +10,7 @@ using NLog;
 
 // ReSharper disable CompareOfFloatsByEqualityOperator
 
-namespace Musagetes
+namespace Musagetes.Toolkit
 {
     class NAudioPlayer : INotifyPropertyChanged
     {

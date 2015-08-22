@@ -1,10 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 
 namespace Musagetes.DataObjects
 {
 
-    public class Category : INotifyPropertyChanged, IEditableObject
+    public class Category : INotifyPropertyChanged
     {
         public string CategoryName
         {
@@ -23,8 +25,8 @@ namespace Musagetes.DataObjects
 
         private readonly HashSet<Tag> _tags =
             new HashSet<Tag>();
-        private readonly Dictionary<string, Tag> _tagDictionary
-            = new Dictionary<string,Tag>();
+        //private readonly Dictionary<string, Tag> _tagDictionary
+        //    = new Dictionary<string, Tag>();
 
         private string _categoryName;
 
@@ -40,22 +42,26 @@ namespace Musagetes.DataObjects
 
         public bool AddTag(Tag t)
         {
-                if (_tags.Contains(t)
-                    || _tagDictionary.ContainsKey(t.TagName))
-                    return false;
-                _tags.Add(t);
-                _tagDictionary.Add(t.TagName, t);
-                return true;
+            if (_tags.Contains(t))
+                return false;
+                //|| _tagDictionary.ContainsKey(t.TagName))
+            _tags.Add(t);
+            //_tagDictionary.Add(t.TagName, t);
+
+            OnPropertyChanged("Tags");
+            return true;
         }
 
         public bool RemoveTag(Tag t)
         {
-                if (!_tags.Contains(t)
-                    || !_tagDictionary.ContainsKey(t.TagName))
-                    return false;
-                _tags.Remove(t);
-                _tagDictionary.Remove(t.TagName);
-                return true;
+            if (!_tags.Contains(t))
+                return false;
+           //     || !_tagDictionary.ContainsKey(t.TagName))
+            _tags.Remove(t);
+            //_tagDictionary.Remove(t.TagName);
+
+            OnPropertyChanged("Tags");
+            return true;
         }
 
         public Tag this[string s]
@@ -63,9 +69,12 @@ namespace Musagetes.DataObjects
             get
             {
                 if (s == null) return null;
+                return _tags.FirstOrDefault(t => t.TagName.Equals(s, StringComparison.CurrentCulture));
+                /*
                 return _tagDictionary.ContainsKey(s)
                     ? _tagDictionary[s]
                     : null;
+                */
             }
         }
 
@@ -75,21 +84,6 @@ namespace Musagetes.DataObjects
         {
             var handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private string _oldName;
-        public void BeginEdit()
-        {
-            _oldName = CategoryName;
-        }
-
-        public void EndEdit()
-        {
-        }
-
-        public void CancelEdit()
-        {
-            CategoryName = _oldName;
         }
     }
 }
