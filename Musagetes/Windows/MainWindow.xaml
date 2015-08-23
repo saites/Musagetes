@@ -14,6 +14,7 @@
         <Image Source="../Collaterals/Images/NextButton.png" x:Key="NextButton"/>
         <Image Source="../Collaterals/Images/BackButton.png" x:Key="BackButton"/>
         <wpfElements:ObjectToSongConverter x:Key="ToSong"/>
+        <wpfElements:SongToTagsMultiConverter x:Key="SongToTagsMultiConverter"/>
     </Window.Resources>
 
     <DockPanel>
@@ -212,6 +213,26 @@
                                             Source={StaticResource DataGridProxy}}"/>
                                     </StackPanel>
                                     <TextBlock>
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource SongToTagsMultiConverter}">
+                                                <Binding Path="Self"/>
+                                                <Binding Path="SongDb.ArtistCategory" 
+                                                         Source="{x:Static Application.Current}"/>
+                                                <Binding Path="SongDb" 
+                                                         Source="{x:Static Application.Current}"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                    <TextBlock>
+                                        <TextBlock.Text>
+                                            <MultiBinding Converter="{StaticResource SongToTagsMultiConverter}">
+                                                <Binding Path="Self"/>
+                                                <Binding Path="SongDb.AlbumCategory" 
+                                                         Source="{x:Static Application.Current}"/>
+                                                <Binding Path="SongDb" 
+                                                         Source="{x:Static Application.Current}"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
                                     </TextBlock>
                                     <Button Command="{Binding Data.TogglePreviewCmd,
                                             Source={StaticResource DataGridProxy}}">
