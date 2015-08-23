@@ -181,6 +181,7 @@
     <Compile Include="WpfElements\PlaybackStateToImageConverter.cs" />
     <Compile Include="WpfElements\ScrollIntoViewBehavior.cs" />
     <Compile Include="WpfElements\SongToTagsConverter.cs" />
+    <Compile Include="WpfElements\SongToTagsMultiConverter.cs" />
     <Compile Include="WpfElements\TextToColorConverter.cs" />
     <Compile Include="WpfElements\VisibilityToBooleanConverter.cs" />
     <Compile Include="WpfElements\MusagetesDataGrid.cs" />

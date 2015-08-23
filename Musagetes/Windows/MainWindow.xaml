@@ -211,8 +211,8 @@
                                                 Command="{Binding Data.IncrementPlayCountCmd,
                                             Source={StaticResource DataGridProxy}}"/>
                                     </StackPanel>
-                                    <TextBlock Text="{Binding CategoryTags[Artist]}" />
-                                    <TextBlock Text="{Binding CategoryTags[Album]}" />
+                                    <TextBlock>
+                                    </TextBlock>
                                     <Button Command="{Binding Data.TogglePreviewCmd,
                                             Source={StaticResource DataGridProxy}}">
                                         <Button.Style>
