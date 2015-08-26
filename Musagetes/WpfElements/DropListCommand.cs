@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -41,7 +42,7 @@ namespace Musagetes.WpfElements
 
             var l = dataObj.GetData(typeof(IList));
             if (l == null) return;
-            foreach (T s in (IList)l)
+            foreach (var s in ((IList) l).OfType<T>())
                 _list.Insert(dropIndex++, s);
         }
 

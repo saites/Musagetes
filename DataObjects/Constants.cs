@@ -11,10 +11,12 @@ namespace Musagetes.DataObjects
         public const string SongQueue = "SongQueue";
         public const string SongTags = "SongTags";
         public const string Uncategorized = "Uncategorized";
-        public const string CategoryTagsBinding = "Self";
+        public const string SongBinding = "Self";
 
         public const string DbLocation = "../../../Musagetes/Collaterals/SongDB.xml";
         public const string SaveLoc = DbLocation;
+
+        public const string TimeString = @"mm\:ss";
         
         //@"C:\Users\ajsaites\Documents\Mine\Musagetes\Musagetes\Collaterals\SongDBNewlySaved.xml";
         //public const string saveLoc = @"C:\Users\ajsaites\Documents\Musagetes\DB\SongDBTesting.xml";
@@ -72,5 +74,6 @@ namespace Musagetes.DataObjects
             public const string Tags = "Tags";
             public const string Tag = "Tag";
         }
+
     }
 }

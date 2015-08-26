@@ -75,6 +75,7 @@ namespace Musagetes.ViewModels
             {
                 return new RelayCommand(() =>
                 {
+                    Logger.Debug("Clearing queue selection index");
                     _oldQueueSelection = QueueSelectionIndex;
                     SelectedInQueue = null;
                 });
@@ -85,8 +86,11 @@ namespace Musagetes.ViewModels
             get { return _currentSongIndex; }
             private set
             {
+                Logger.Debug("Setting CurrentSongIndex to {0}", value);
+
                 if (MainPlayer == null || SongQueue == null)
                 {
+                    Logger.Warn("MainPlayer or SongQueue is null, so setting current index to -1");
                     _currentSongIndex = -1;
                     OnPropertyChanged();
                     return;
@@ -94,10 +98,13 @@ namespace Musagetes.ViewModels
 
                 if (value >= 0 && value < SongQueue.Count)
                 {
+                    Logger.Info("Setting main player song to CurrentSongIndex value of {0} ({1})",
+                        value, SongQueue.ElementAt(value).SongTitle);
                     MainPlayer.Song = SongQueue.ElementAt(value);
                 }
                 else
                 {
+                    Logger.Info("Setting CurrentSongIndex to -1, since value was outside of SongQueue bound");
                     value = -1;
                 }
 
@@ -108,6 +115,7 @@ namespace Musagetes.ViewModels
 
         public MainWindowVm()
         {
+            Logger.Info("Initializing MainWindow View Model");
             TagEditorVm = new TagEditorVm();
             BpmCalc = new BpmTapper();
             CurrentSongIndex = 0;
@@ -119,6 +127,7 @@ namespace Musagetes.ViewModels
 
             MainPlayer.SongCompletedEvent += (sender, args) =>
             {
+                Logger.Info("Song completed; playing next song");
                 NextCmd.Execute(null);
             };
 
@@ -159,10 +168,12 @@ namespace Musagetes.ViewModels
             }
 
             SongQueue = new ObservableCollection<Song>();
+            Logger.Info("Done initializing MainWindow view model");
         }
 
         private void PreviewPlayerPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            Logger.Debug("PreviewPlayer property changed: {0}", e.PropertyName);
             switch (e.PropertyName)
             {
                 case "PlaybackState":
@@ -182,11 +193,15 @@ namespace Musagetes.ViewModels
                 _previewSong = value;
                 if (value == null)
                 {
+                    Logger.Debug("Stopping preview player and Bpm calculator");
                     PreviewPlayer.PlaybackState = MediaState.Stop;
                     BpmCalc.StopTapping.Execute(null);
                 }
                 else
+                {
+                    Logger.Debug("Setting preview player song to {0}", value.SongTitle);
                     PreviewPlayer.Song = value;
+                }
                 OnPropertyChanged();
             }
         }
@@ -195,6 +210,7 @@ namespace Musagetes.ViewModels
         {
             if (_restartMainPlayer)
             {
+                Logger.Info("Restarting the main player after preview");
                 MainPlayer.PlaybackState = MediaState.Play;
                 _restartMainPlayer = false;
             }
@@ -202,6 +218,7 @@ namespace Musagetes.ViewModels
                 && MainPlayer.DeviceNumber == PreviewPlayer.DeviceNumber
                 && MainPlayer.IsPlaying)
             {
+                Logger.Info("Pausing the main player for preivew");
                 MainPlayer.PlaybackState = MediaState.Pause;
                 _restartMainPlayer = true;
             }
@@ -209,8 +226,9 @@ namespace Musagetes.ViewModels
 
         private void MainPlayerPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName.Equals("Volume"))
-                App.Configuration.MainPlayerVolume = MainPlayer.Volume;
+            if (!e.PropertyName.Equals("Volume")) return;
+            Logger.Debug("Updating MainPlayer volume");
+            App.Configuration.MainPlayerVolume = MainPlayer.Volume;
         }
 
         #region Column Management
@@ -224,10 +242,11 @@ namespace Musagetes.ViewModels
             }
         }
 
-        private readonly SongToTagsConverter SttConverter = 
+        private readonly SongToTagsConverter SttConverter =
             new SongToTagsConverter(App.SongDb);
         private void AddColumn(GridColumn column)
         {
+            Logger.Debug("Adding column to column manager: {0}", column.Header);
             switch (column.ColumnType)
             {
                 case GridColumn.ColumnTypeEnum.BasicText:
@@ -243,7 +262,7 @@ namespace Musagetes.ViewModels
                         column.Category.CategoryName,
                         "Self",
                         column.IsVisible);
-                    catcol.Binding = new Binding("Self")
+                    catcol.Binding = new Binding(Constants.SongBinding)
                     {
                         Converter = SttConverter,
                         ConverterParameter = column.Category,
@@ -254,7 +273,7 @@ namespace Musagetes.ViewModels
                     {
                         if (args.PropertyName != "CategoryName") return;
                         catcol.Header = column.Category.CategoryName;
-                        catcol.Binding = new Binding("Self")
+                        catcol.Binding = new Binding(Constants.SongBinding)
                         {
                             Converter = SttConverter,
                             ConverterParameter = column.Category,
@@ -263,9 +282,9 @@ namespace Musagetes.ViewModels
                     };
                     break;
                 case GridColumn.ColumnTypeEnum.Tags:
-                    var col = ColumnManager.AddNewTextColumn(column.Header, 
+                    var col = ColumnManager.AddNewTextColumn(column.Header,
                         string.Empty, column.IsVisible);
-                    col.Binding = new Binding("Self")
+                    col.Binding = new Binding(Constants.SongBinding)
                     {
                         Converter = SttConverter,
                         ConverterParameter = null,
@@ -281,6 +300,7 @@ namespace Musagetes.ViewModels
             {
                 case NotifyCollectionChangedAction.Add:
                     if (e.NewItems == null) return;
+                    Logger.Debug("Adding new columns");
                     Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                     {
                         foreach (GridColumn col in e.NewItems) AddColumn(col);
@@ -288,6 +308,7 @@ namespace Musagetes.ViewModels
                     break;
                 case NotifyCollectionChangedAction.Remove:
                     if (e.OldItems == null) return;
+                    Logger.Debug("Removing columns");
                     Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                     {
                         foreach (GridColumn col in e.OldItems)
@@ -302,10 +323,11 @@ namespace Musagetes.ViewModels
             }
         }
 
-        private void GroupCategoriesCollectionChanged(object sender, 
+        private void GroupCategoriesCollectionChanged(object sender,
             NotifyCollectionChangedEventArgs e)
         {
             if (DisplayedSongs == null) return;
+            Logger.Debug("Updating group descriptions");
             lock (_displayedSongs)
                 if (DisplayedSongs.GroupDescriptions == null)
                     return;
@@ -344,6 +366,7 @@ namespace Musagetes.ViewModels
         {
             lock (_displayedSongs)
             {
+                Logger.Debug("Adding group descriptions");
                 if (DisplayedSongs == null
                     || DisplayedSongs.GroupDescriptions == null) return;
                 lock (_groupDescriptionDictionary)
@@ -356,7 +379,7 @@ namespace Musagetes.ViewModels
                         else
                         {
                             groupDesc = new PropertyGroupDescription(
-                                Constants.CategoryTagsBinding, 
+                                Constants.CategoryTagsBinding,
                                 new SongToTagsConverter(App.SongDb, cat));
                             _groupDescriptionDictionary.Add(cat, groupDesc);
                         }
@@ -372,6 +395,7 @@ namespace Musagetes.ViewModels
             get { return MainPlayer.DeviceNumber; }
             set
             {
+                Logger.Debug("Changing MainPlayer device number to {0}", value);
                 MainPlayer.DeviceNumber = value;
                 OnPropertyChanged();
             }
@@ -382,6 +406,7 @@ namespace Musagetes.ViewModels
             get { return PreviewPlayer.DeviceNumber; }
             set
             {
+                Logger.Debug("Changing PreviewPlayer device number to {0}", value);
                 PreviewPlayer.DeviceNumber = value;
                 OnPropertyChanged();
             }
@@ -396,6 +421,7 @@ namespace Musagetes.ViewModels
             {
                 if (value == _displayedSongs)
                     return;
+                Logger.Debug("Setting DisplayedSongs collection");
                 _displayedSongs = value;
                 OnPropertyChanged();
             }
@@ -410,6 +436,7 @@ namespace Musagetes.ViewModels
                 if (value == _songQueue)
                     return;
 
+                Logger.Debug("Setting SongQueue collection");
                 _songQueue = value;
                 OnPropertyChanged();
             }
@@ -420,7 +447,11 @@ namespace Musagetes.ViewModels
         {
             get
             {
-                return new RelayCommand(() => Environment.Exit(0));
+                return new RelayCommand(() =>
+                {
+                    Logger.Info("Shutting down Musagetes from QuitCmd");
+                    Environment.Exit(0);
+                });
             }
         }
 
@@ -430,6 +461,7 @@ namespace Musagetes.ViewModels
             {
                 return new RelayCommand(() =>
                 {
+                    Logger.Debug("Openning folder browser dialog");
                     var fbd = new Forms.FolderBrowserDialog
                     {
                         ShowNewFolderButton = false,
@@ -448,6 +480,7 @@ namespace Musagetes.ViewModels
             {
                 return new RelayCommand(() =>
                 {
+                    Logger.Debug("Openning CategoryOptions");
                     var categoryOptions = new CategoryDisplayOptions();
                     var categoryOptionsVm = new OptionsVm(ColumnManager.Columns,
                         App.SongDb.Categories, App.SongDb.GroupCategories)
@@ -508,6 +541,7 @@ namespace Musagetes.ViewModels
             {
                 return new RelayCommand(() =>
                 {
+                    Logger.Debug("Enqueing song");
                     if (SelectedInGrid != null)
                         SongQueue.Add(SelectedInGrid);
                 });
@@ -520,6 +554,7 @@ namespace Musagetes.ViewModels
             {
                 return new RelayCommand(() =>
                 {
+                    Logger.Debug("Removing song from queue");
                     var tempSelect = QueueSelectionIndex;
                     if (QueueSelectionIndex >= 0
                         && QueueSelectionIndex < SongQueue.Count)
@@ -538,10 +573,14 @@ namespace Musagetes.ViewModels
 
         private void PlaySongAtIndex(int index)
         {
+            Logger.Debug("Playing song at index {0}; CurrentSongIndex is {1}", 
+                index, CurrentSongIndex);
+            Logger.Debug("Stopping current playback, if any");
             MainPlayer.PlaybackState = MediaState.Stop;
 
             if (index == -1 || index >= SongQueue.Count || index < -2)
             {
+                Logger.Debug("index is outside of range, so setting CurrentSongIndex to -1 and returning");
                 CurrentSongIndex = -1;
                 return;
             }
@@ -550,9 +589,18 @@ namespace Musagetes.ViewModels
             {
                 if (index >= 0) CurrentSongIndex = 0;
                 else CurrentSongIndex = SongQueue.Count - 1;
+                Logger.Debug("CurrentSongIndex is outside of SongQueue range, so setting it to {0}", CurrentSongIndex);
             }
-            else CurrentSongIndex = index;
+            else
+            {
+                Logger.Debug("Setting CurrentSongIndex to our index of {0}", index);
+                CurrentSongIndex = index;
+            }
+
+            Logger.Debug("Starting playback of our new song");
             MainPlayer.PlaybackState = MediaState.Play;
+            if(MainPlayer.PlaybackState != MediaState.Play) 
+                NextCmd.Execute(null);
         }
 
         #region Playback Commands
@@ -566,15 +614,18 @@ namespace Musagetes.ViewModels
 
                     if (MainPlayer.PlaybackState == MediaState.Stop)
                     {
+                        Logger.Debug("Toggling playback from stopped state");
                         if (_oldQueueSelection >= 0
                             && _oldQueueSelection < SongQueue.Count)
                             CurrentSongIndex = _oldQueueSelection;
                         else
                             CurrentSongIndex = 0;
+                        Logger.Debug("Updated CurrentSongIndex to {0}", CurrentSongIndex);
                         MainPlayer.PlaybackState = MediaState.Play;
                         return;
                     }
 
+                    Logger.Debug("Toggling playback from {0}", MainPlayer.PlaybackState);
                     MainPlayer.PlaybackState =
                         MainPlayer.IsPlaying
                             ? MediaState.Pause
@@ -589,6 +640,7 @@ namespace Musagetes.ViewModels
             {
                 return new RelayCommand(() =>
                 {
+                    Logger.Debug("Stopping media playback and setting CurrentSongIndex to -1");
                     MainPlayer.PlaybackState = MediaState.Stop;
                     CurrentSongIndex = -1;
                 });
@@ -611,6 +663,7 @@ namespace Musagetes.ViewModels
                     if (PreviewPlayer.Song == null)
                         PreviewPlayer.Song = PreviewSong;
 
+                    Logger.Debug("Toggling preview playback");
                     PreviewPlayer.PlaybackState =
                         PreviewPlayer.IsPlaying
                             ? MediaState.Pause
@@ -625,6 +678,7 @@ namespace Musagetes.ViewModels
             {
                 return new RelayCommand(() =>
                 {
+                    Logger.Info("Playing next song at index {0}", CurrentSongIndex+1);
                     PlaySongAtIndex(CurrentSongIndex + 1);
                 });
             }
@@ -636,6 +690,7 @@ namespace Musagetes.ViewModels
             {
                 return new RelayCommand(() =>
                 {
+                    Logger.Info("Playing previous song at index {0}", CurrentSongIndex-1);
                     PlaySongAtIndex(CurrentSongIndex - 1);
                 });
             }
@@ -648,8 +703,11 @@ namespace Musagetes.ViewModels
                 return new RelayCommand(() =>
                 {
                     if (CurrentSongIndex == QueueSelectionIndex) return;
+                    Logger.Info("Switching playback to queue selection at {0}", QueueSelectionIndex);
+                    Logger.Debug("Stopping playback of current song, if any");
                     MainPlayer.PlaybackState = MediaState.Stop;
                     CurrentSongIndex = QueueSelectionIndex;
+                    Logger.Debug("Starting playback of new song");
                     MainPlayer.PlaybackState = MediaState.Play;
                 });
             }
@@ -663,6 +721,7 @@ namespace Musagetes.ViewModels
             {
                 return new RelayCommand(() =>
                 {
+                    Logger.Info("Updating BPM to newly calculated value of {0}", (int)BpmCalc.Value);
                     PreviewSong.Bpm.Value = (int)BpmCalc.Value;
                     PreviewSong.Bpm.Guess = false;
                     BpmCalc.StopTapping.Execute(null);
@@ -675,6 +734,7 @@ namespace Musagetes.ViewModels
             get { return _queueSelectionIndex; }
             set
             {
+                Logger.Debug("Changing queue selection index to {0}", value);
                 _queueSelectionIndex = value;
                 OnPropertyChanged();
             }
@@ -685,6 +745,7 @@ namespace Musagetes.ViewModels
             get { return _selectedSongs; }
             set
             {
+                Logger.Debug("SelectedSongs changed");
                 _selectedSongs = value;
                 OnPropertyChanged();
             }
@@ -695,6 +756,7 @@ namespace Musagetes.ViewModels
             get { return _tagEditorVm; }
             set
             {
+                Logger.Debug("TagEditorVm changed");
                 _tagEditorVm = value;
                 OnPropertyChanged();
             }
@@ -705,6 +767,7 @@ namespace Musagetes.ViewModels
             get { return _selectedInGrid; }
             set
             {
+                Logger.Debug("SelectedInGrid changed");
                 _selectedInGrid = value;
                 OnPropertyChanged();
             }
@@ -715,6 +778,7 @@ namespace Musagetes.ViewModels
             get { return _selectedInQueue; }
             set
             {
+                Logger.Debug("SelectedInQueue changed to {0}", value);
                 _selectedInQueue = value;
                 OnPropertyChanged();
             }
@@ -727,8 +791,9 @@ namespace Musagetes.ViewModels
                 return new RelayCommand(() =>
                 {
                     if (PreviewSong == null
-                        || PreviewSong.PlayCount == UInt32.MaxValue) 
+                        || PreviewSong.PlayCount == UInt32.MaxValue)
                         return;
+                    Logger.Debug("Incrementing preview play count");
                     PreviewSong.PlayCount++;
                 });
             }
@@ -741,8 +806,9 @@ namespace Musagetes.ViewModels
                 return new RelayCommand(() =>
                 {
                     if (PreviewSong == null
-                        || PreviewSong.PlayCount == 0) 
+                        || PreviewSong.PlayCount == 0)
                         return;
+                    Logger.Debug("Decrementing preview play count");
                     PreviewSong.PlayCount--;
                 });
             }
@@ -757,6 +823,7 @@ namespace Musagetes.ViewModels
                 {
                     if (_allTagEditor == null)
                     {
+                        Logger.Debug("Openning the tag editor");
                         _allTagEditor = new AllTagEditor
                         {
                             DataContext = new CategoryTagEditorVm(App.SongDb)
@@ -766,6 +833,7 @@ namespace Musagetes.ViewModels
                     }
                     else
                     {
+                        Logger.Debug("Focusing on the tag editor");
                         _allTagEditor.Focus();
                     }
                 });
@@ -774,16 +842,17 @@ namespace Musagetes.ViewModels
 
         private async Task AddDirAndFiles(string dir)
         {
-            Console.WriteLine(dir);
+            Logger.Debug("Adding directory and files from {0}", dir);
             foreach (var filename in Directory.GetFiles(dir)
                 .Where(filename => App.SongDb.IsFiletypeSupported(filename)))
             {
-                Console.WriteLine(filename);
+                Logger.Debug("Inserting file {0}", filename);
                 App.SongDb.InsertFromFile(filename);
             }
 
             foreach (var subdir in Directory.EnumerateDirectories(dir))
             {
+                Logger.Debug("Recursively adding directory and files in {0}", subdir);
                 await AddDirAndFiles(subdir);
             }
         }

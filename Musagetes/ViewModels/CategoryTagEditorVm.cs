@@ -291,12 +291,10 @@ namespace Musagetes.ViewModels
 
         private void MergeCategories(Category target, Category source)
         {
-            var defaultCat = App.SongDb.IsDefaultCategory(target) ? target
-                : App.SongDb.IsDefaultCategory(source) ? source : null;
-            if (defaultCat != null)
+            if (App.SongDb.IsDefaultCategory(source))
             {
-                MessageBox.Show(string.Format("Cannot merge default category {0}", defaultCat.CategoryName),
-                    "Merge Categories", MessageBoxButton.OK);
+                MessageBox.Show(string.Format("Cannot merge default category {0}", 
+                    source.CategoryName), "Merge Categories", MessageBoxButton.OK);
                 return;
             }
 

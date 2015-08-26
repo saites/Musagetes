@@ -150,7 +150,7 @@ namespace Musagetes.DataObjects
         {
             get
             {
-                return TimeSpan.FromMilliseconds(Milliseconds).ToString(@"mm\:ss");
+                return TimeSpan.FromMilliseconds(Milliseconds).ToString(Constants.TimeString);
             }
         }
 
