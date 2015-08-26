@@ -1,6 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using Musagetes.Annotations;
@@ -59,7 +62,7 @@ namespace Musagetes.Toolkit
         {
             get
             {
-                return TimeSpan.FromSeconds(ChannelLength).ToString(@"mm\:ss");
+                return TimeSpan.FromSeconds(ChannelLength).ToString(Constants.TimeString);
             }
         }
 
@@ -67,7 +70,7 @@ namespace Musagetes.Toolkit
         {
             get
             {
-                return TimeSpan.FromSeconds(ChannelPosition).ToString(@"mm\:ss");
+                return TimeSpan.FromSeconds(ChannelPosition).ToString(Constants.TimeString);
             }
         }
 
@@ -85,23 +88,38 @@ namespace Musagetes.Toolkit
             }
         }
 
+        private readonly object _playbackStateLock = new object();
+        private bool _changingPlaybackState; //need to prevent reentrance
         public MediaState PlaybackState
         {
             get { return _playbackState; }
             set
             {
-                _playbackState = MediaState.Stop;
-                switch (value)
+                lock (_playbackStateLock)
                 {
-                    case MediaState.Play:
-                        StartPlayback();
-                        break;
-                    case MediaState.Pause:
-                        PausePlayback();
-                        break;
-                    case MediaState.Stop:
-                        StopPlayback();
-                        break;
+                    var tempplaybackstate = _playbackState;
+                    if (_changingPlaybackState)
+                    {
+                        Logger.Warn("Attempt to change playback state to {0} " +
+                                    "while already changing playback state to {1}",
+                                    value, tempplaybackstate);
+                        return;
+                    }
+                    _changingPlaybackState = true;
+                    _playbackState = MediaState.Stop;
+                    switch (value)
+                    {
+                        case MediaState.Play:
+                            StartPlayback();
+                            break;
+                        case MediaState.Pause:
+                            PausePlayback();
+                            break;
+                        case MediaState.Stop:
+                            StopPlayback();
+                            break;
+                    }
+                    _changingPlaybackState = false;
                 }
 
                 OnPropertyChanged();
@@ -132,10 +150,10 @@ namespace Musagetes.Toolkit
                     Song.SongTitle));
                 _waveOutDevice.Stop();
                 _waveOutDevice.Dispose();
+                _waveOutDevice = null;
             }
 
             _song = null;
-            _waveOutDevice = null;
             _playbackState = MediaState.Stop;
             _positionTimer.Stop();
             ChannelPosition = 0;
@@ -169,7 +187,7 @@ namespace Musagetes.Toolkit
                 _waveOutDevice.PlaybackStopped += (sender, args) =>
                 {
                     PlaybackState = MediaState.Stop;
-                    if(SongCompletedEvent != null)
+                    if (SongCompletedEvent != null)
                         SongCompletedEvent(this, args);
                 };
                 _playbackState = MediaState.Play;
@@ -179,8 +197,8 @@ namespace Musagetes.Toolkit
             }
             catch (Exception e)
             {
-                Logger.ErrorException(
-                    string.Format("Unable to start playback of {0}", Song.SongTitle), e);
+                Logger.Error("Unable to start playback of {0}: {1}",
+                    Song.SongTitle, e.Message);
                 _playbackState = MediaState.Stop;
                 if (_audioFileReader != null)
                     _audioFileReader.Dispose();
@@ -195,6 +213,13 @@ namespace Musagetes.Toolkit
         private bool AudioRead { get { return _audioFileReader != null; } }
         private void LoadAudio()
         {
+            if (!File.Exists(Song.Location))
+            {
+                var error = string.Format("Cannot find file {0}", Song.Location);
+                Song.IsBadSong = true;
+                throw new Exception(error);
+            }
+
             _audioFileReader = new AudioFileReader(Song.Location);
             ChannelLength = _audioFileReader.TotalTime.TotalSeconds;
             Song.Milliseconds = (int)_audioFileReader.TotalTime.TotalMilliseconds;
