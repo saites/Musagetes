@@ -20,7 +20,7 @@ namespace Musagetes.DataObjects
         public ReadOnlyDictionary<uint, Tag> TagIds { get { return _tagIdsReadOnly; } }
         public ManualResetEvent CategoriesRead { get; private set; }
 
-        public Dictionary<Song, HashSet<Tag>> SongTagDictionary 
+        public Dictionary<Song, HashSet<Tag>> SongTagDictionary
             = new Dictionary<Song, HashSet<Tag>>();
 
         public Dictionary<Tag, HashSet<Song>> TagSongDictionary
@@ -99,6 +99,13 @@ namespace Musagetes.DataObjects
             }
 
             //TODO: add a Column for this category here
+            lock (((ICollection)Columns).SyncRoot)
+            {
+                Columns.Add(new GridColumn(
+                    GridColumn.ColumnTypeEnum.Category, cat,
+                    isVisible: false));
+            }
+
             return true;
         }
 
@@ -116,7 +123,7 @@ namespace Musagetes.DataObjects
             {
                 Columns.Remove(Columns.First(c => c.Category == cat));
             }
-            lock (((ICollection) GroupCategories).SyncRoot)
+            lock (((ICollection)GroupCategories).SyncRoot)
             {
                 if (GroupCategories.Contains(cat)) GroupCategories.Remove(cat);
             }
@@ -137,7 +144,7 @@ namespace Musagetes.DataObjects
         {
             if (tag == null || !_tagIds.ContainsKey(tag.Id))
                 return;
-            
+
             lock ((_tagIds as ICollection).SyncRoot)
                 _tagIds.Remove(tag.Id);
             lock ((TagSongDictionary as ICollection).SyncRoot)
@@ -193,25 +200,10 @@ namespace Musagetes.DataObjects
         public void AddDefaultCategories()
         {
             CategoriesRead.WaitOne();
-            lock (((ICollection) Columns).SyncRoot)
-            {
-                if (AddCategory(new Category(Constants.Artist)))
-                    Columns.Add(new GridColumn(
-                        GridColumn.ColumnTypeEnum.Category, ArtistCategory, 
-                        isVisible: false));
-                if (AddCategory(new Category(Constants.Album)))
-                    Columns.Add(new GridColumn(
-                        GridColumn.ColumnTypeEnum.Category, AlbumCategory, 
-                        isVisible: false));
-                if (AddCategory(new Category(Constants.Genre)))
-                    Columns.Add(new GridColumn(
-                        GridColumn.ColumnTypeEnum.Category, GenreCategory, 
-                        isVisible: false));
-                if (AddCategory(new Category(Constants.Uncategorized)))
-                    Columns.Add(new GridColumn(
-                        GridColumn.ColumnTypeEnum.Category, UncategorizedCategory, 
-                        isVisible: false));
-            }
+            AddCategory(new Category(Constants.Artist));
+            AddCategory(new Category(Constants.Album));
+            AddCategory(new Category(Constants.Genre));
+            AddCategory(new Category(Constants.Uncategorized));
         }
 
         public void InsertFromFile(string filename)
@@ -235,10 +227,10 @@ namespace Musagetes.DataObjects
                     if (file.Tag.Album != null)
                     {
                         var albumTag = AlbumCategory[file.Tag.Album]
-                               ?? new Tag(file.Tag.Album, AlbumCategory); 
+                               ?? new Tag(file.Tag.Album, AlbumCategory);
                         TagSong(song, albumTag);
                     }
-                    if(file.Tag.BeatsPerMinute > 0 && file.Tag.BeatsPerMinute < int.MaxValue)
+                    if (file.Tag.BeatsPerMinute > 0 && file.Tag.BeatsPerMinute < int.MaxValue)
                         song.Bpm = new Bpm((int)file.Tag.BeatsPerMinute, false);
                     AddSong(song);
                     //SaveChanges();

@@ -213,17 +213,28 @@ namespace Musagetes.Toolkit
         private bool AudioRead { get { return _audioFileReader != null; } }
         private void LoadAudio()
         {
-            if (!File.Exists(Song.Location))
+            try
             {
-                var error = string.Format("Cannot find file {0}", Song.Location);
-                Song.IsBadSong = true;
-                throw new Exception(error);
-            }
+                if (!File.Exists(Song.Location))
+                {
+                    var error = string.Format("Cannot find file {0}", Song.Location);
+                    throw new Exception(error);
+                }
 
-            _audioFileReader = new AudioFileReader(Song.Location);
-            ChannelLength = _audioFileReader.TotalTime.TotalSeconds;
-            Song.Milliseconds = (int)_audioFileReader.TotalTime.TotalMilliseconds;
-            ChannelPosition = 0;
+                _audioFileReader = new AudioFileReader(Song.Location);
+                ChannelLength = _audioFileReader.TotalTime.TotalSeconds;
+                Song.Milliseconds = (int) _audioFileReader.TotalTime.TotalMilliseconds;
+                ChannelPosition = 0;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Unable to load audio for {0}: {1}",
+                        Song.SongTitle, e.Message);
+                if (_audioFileReader != null)
+                    _audioFileReader.Dispose();
+                _audioFileReader = null;
+                Song.IsBadSong = true;
+            }
         }
 
         private void UnloadAudio()

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using Microsoft.Win32;
 using Musagetes.Annotations;
 using Musagetes.DataObjects;
 using Musagetes.Toolkit;
@@ -294,6 +295,8 @@ namespace Musagetes.ViewModels
             }
         }
 
+        
+
         public void OnColumnsChange(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
@@ -379,7 +382,7 @@ namespace Musagetes.ViewModels
                         else
                         {
                             groupDesc = new PropertyGroupDescription(
-                                Constants.CategoryTagsBinding,
+                                Constants.SongBinding,
                                 new SongToTagsConverter(App.SongDb, cat));
                             _groupDescriptionDictionary.Add(cat, groupDesc);
                         }
@@ -810,6 +813,29 @@ namespace Musagetes.ViewModels
                         return;
                     Logger.Debug("Decrementing preview play count");
                     PreviewSong.PlayCount--;
+                });
+            }
+        }
+
+        public ICommand FixBrokenLinkCmd
+        {
+            get
+            {
+                return new RelayCommand(() =>
+                {
+                    var song = PreviewSong;
+                    if (song == null) return;
+                    var fld = new OpenFileDialog
+                    {
+                        Title = "Find file"
+                    };
+
+                    var dirName = Path.GetDirectoryName(song.Location);
+                    fld.InitialDirectory = dirName != null && Directory.Exists(dirName) 
+                        ? dirName : Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+
+                    if (fld.ShowDialog() != true) return;
+                    song.Location = fld.FileName;
                 });
             }
         }

@@ -200,6 +200,21 @@
                                             <Setter Property="TextWrapping" Value="Wrap"/>
                                         </Style>
                                     </StackPanel.Resources>
+                                    <Button Content="Fix Broken Link..."
+                                            Command="{Binding Data.FixBrokenLinkCmd, 
+                                            Source={StaticResource DataGridProxy}}">
+                                        <Button.Style>
+                                            <Style TargetType="{x:Type Button}">
+                                                <Setter Property="Visibility" Value="Hidden" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsBadSong}"
+                                                                 Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
                                     <TextBox Text="{Binding SongTitle,
                                         UpdateSourceTrigger=PropertyChanged}" />
                                     <StackPanel Orientation="Horizontal">

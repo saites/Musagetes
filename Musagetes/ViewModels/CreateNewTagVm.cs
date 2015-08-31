@@ -58,12 +58,15 @@ namespace Musagetes.ViewModels
         {
             AssignedCategory = new Category(CategoryName.Trim());
             App.SongDb.AddCategory(AssignedCategory);
+            /*
+             TODO: Remove this after testing
             lock (((ICollection) App.SongDb.Columns).SyncRoot)
             {
                 App.SongDb.Columns.Add(
                     new GridColumn(GridColumn.ColumnTypeEnum.Category,
                         AssignedCategory, isVisible: false));
             }
+            */
         }
 
         public bool CanCreateNewTag { get; set; }

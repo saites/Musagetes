@@ -60,6 +60,7 @@ namespace Musagetes.DataObjects
             set
             {
                 _location = value;
+                CheckSongLocation();
                 OnPropertyChanged("Location");
                 OnPropertyChanged("Art");
             }
@@ -130,7 +131,16 @@ namespace Musagetes.DataObjects
             IsBadSong = false;
             SongError = string.Empty;
 
-            if (File.Exists(Location)) return;
+            CheckSongLocation();
+        }
+
+        private void CheckSongLocation()
+        {
+            if (File.Exists(Location))
+            {
+                IsBadSong = false;
+                return;
+            }
 
             SongError = string.Format("Cannot find file {0}", Location);
             Logger.Error(SongError);
